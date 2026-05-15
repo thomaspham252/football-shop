@@ -77,7 +77,6 @@
 
 /* ── MAIN BAR ── */
 .navbar__main {
-  border-bottom: 1px solid var(--border);
   background: #fff;
 }
 

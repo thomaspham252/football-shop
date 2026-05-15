@@ -1,5 +1,5 @@
-import SectionTitle from './SectionTitle';
-import ProductCard from './ProductCard';
+import SectionTitle from '../common/SectionTitle';
+import ProductCard from '../common/ProductCard';
 import './NewProducts.css';
 
 const newProducts = [

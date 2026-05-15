@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import ProductCard from '../components/ProductCard';
+import Navbar from '../../components/layout/Navbar';
+import Footer from '../../components/layout/Footer';
+import ProductCard from '../../components/common/ProductCard';
 import {
   ChevronRight, Heart, ShoppingCart, Zap,
   Star, StarHalf, ChevronLeft, ChevronDown, ChevronUp,
