@@ -3,6 +3,7 @@ import './App.css';
 import HomePage from './pages/home/HomePage';
 import ProductsPage from './pages/products/ProductsPage';
 import ProductDetail from './pages/product/ProductDetail';
+import CartPage from './pages/cart/CartPage';
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/san-pham" element={<ProductsPage />} />
         <Route path="/san-pham/:id" element={<ProductDetail />} />
+        <Route path="/gio-hang" element={<CartPage />} />
       </Routes>
     </BrowserRouter>
   );
