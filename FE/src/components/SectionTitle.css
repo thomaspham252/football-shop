@@ -1,0 +1,27 @@
+.section-title {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.section-title__text {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.section-title__dash {
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+.section-title__sub {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-top: 6px;
+}
