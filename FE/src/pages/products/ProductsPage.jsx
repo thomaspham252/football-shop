@@ -12,7 +12,7 @@ import './ProductsPage.css';
 const ALL_PRODUCTS = [
   { id: 1,  name: 'Giày Đá Bóng Nike Mercurial Vapor 16 Elite FG', brand: 'Nike',   price: 5800000, originalPrice: 7200000, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80', badge: { type: 'sale', label: 'SALE' }, colors: ['#f5a623','#000'], category: 'Giày FG', sizes: ['39','40','41','42','43'] },
   { id: 2,  name: 'Giày Đá Bóng Adidas Predator Elite FG', brand: 'Adidas', price: 5200000, originalPrice: 6500000, image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&q=80', badge: { type: 'hot', label: 'HOT' },  colors: ['#000','#e53935'], category: 'Giày FG', sizes: ['38','39','40','41','42'] },
-  { id: 3,  name: 'Giày Đá Bóng Puma Future 7 Ultimate FG/AG', brand: 'Puma',   price: 4900000, originalPrice: 6000000, image: 'https://images.unsplash.com/photo-1556906781-9a412961a28c?w=400&q=80', badge: { type: 'new', label: 'MỚI' },  colors: ['#9c27b0','#fff'], category: 'Giày FG', sizes: ['39','40','41','42','43','44'] },
+  { id: 3,  name: 'Giày Đá Bóng Puma Future 7 Ultimate FG/AG', brand: 'Puma',   price: 4900000, originalPrice: 6000000, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80', badge: { type: 'new', label: 'MỚI' },  colors: ['#9c27b0','#fff'], category: 'Giày FG', sizes: ['39','40','41','42','43','44'] },
   { id: 4,  name: 'Giày Đá Bóng Nike Phantom GX 2 Elite FG', brand: 'Nike',   price: 5500000, originalPrice: 6800000, image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80', badge: { type: 'sale', label: 'SALE' }, colors: ['#1565c0','#fff'], category: 'Giày FG', sizes: ['40','41','42','43'] },
   { id: 5,  name: 'Giày Đá Bóng Adidas X Crazyfast Elite FG', brand: 'Adidas', price: 5100000, originalPrice: null,    image: 'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=400&q=80', badge: { type: 'new', label: 'MỚI' },  colors: ['#ffeb3b','#000'], category: 'Giày FG', sizes: ['38','39','40','41'] },
   { id: 6,  name: 'Giày Đá Bóng Nike Tiempo Legend 10 Elite FG', brand: 'Nike',   price: 4800000, originalPrice: 5800000, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80', badge: { type: 'sale', label: 'SALE' }, colors: ['#fff','#c9a96e'], category: 'Giày FG', sizes: ['39','40','41','42','43','44'] },
@@ -159,14 +159,13 @@ export default function ProductsPage() {
         {/* Active tags */}
         {activeFilterCount > 0 && (
           <div className="filter-tags">
-            {[...selectedBrands, ...selectedCategories, ...selectedPrices, ...selectedSizes, ...selectedColors].map(tag => (
+            {[...selectedBrands, ...selectedCategories, ...selectedPrices, ...selectedSizes].map(tag => (
               <span key={tag} className="filter-tag">
                 {tag}
                 <button onClick={() => {
-                  if (selectedBrands.includes(tag))          handleFilterChange(() => setSelectedBrands(selectedBrands.filter(v => v !== tag)));
+                  if (selectedBrands.includes(tag))     handleFilterChange(() => setSelectedBrands(selectedBrands.filter(v => v !== tag)));
                   else if (selectedCategories.includes(tag)) handleFilterChange(() => setSelectedCategories(selectedCategories.filter(v => v !== tag)));
                   else if (selectedPrices.includes(tag))     handleFilterChange(() => setSelectedPrices(selectedPrices.filter(v => v !== tag)));
-                  else if (selectedColors.includes(tag))     handleFilterChange(() => setSelectedColors(selectedColors.filter(v => v !== tag)));
                   else handleFilterChange(() => setSelectedSizes(selectedSizes.filter(v => v !== tag)));
                 }}>
                   <X size={10} />
@@ -176,7 +175,7 @@ export default function ProductsPage() {
           </div>
         )}
 
-        <FilterGroup title="DANH MỤC" defaultOpen={false}>
+        <FilterGroup title="DANH MỤC">
           {CATEGORIES.map(cat => (
             <label key={cat} className="filter-checkbox">
               <input
@@ -189,7 +188,7 @@ export default function ProductsPage() {
           ))}
         </FilterGroup>
 
-        <FilterGroup title="THƯƠNG HIỆU" defaultOpen={false}>
+        <FilterGroup title="THƯƠNG HIỆU">
           {BRANDS.map(b => (
             <label key={b} className="filter-checkbox">
               <input
@@ -202,7 +201,7 @@ export default function ProductsPage() {
           ))}
         </FilterGroup>
 
-        <FilterGroup title="GIÁ" defaultOpen={false}>
+        <FilterGroup title="GIÁ">
           {PRICE_RANGES.map(r => (
             <label key={r.label} className="filter-checkbox">
               <input
@@ -213,25 +212,6 @@ export default function ProductsPage() {
               <span>{r.label}</span>
             </label>
           ))}
-        </FilterGroup>
-
-        <FilterGroup title="MÀU SẮC" defaultOpen={false}>
-          <div className="filter-colors">
-            {ALL_COLORS.map(c => (
-              <button
-                key={c.hex}
-                className={`filter-color-btn ${selectedColors.includes(c.hex) ? 'filter-color-btn--active' : ''}`}
-                style={{ background: c.hex }}
-                onClick={() => handleFilterChange(() => toggle(selectedColors, setSelectedColors, c.hex))}
-                title={c.name}
-                aria-label={c.name}
-              >
-                {selectedColors.includes(c.hex) && (
-                  <span className="filter-color-btn__check" style={{ color: c.hex === '#ffffff' || c.hex === '#cddc39' ? '#333' : '#fff' }}>✓</span>
-                )}
-              </button>
-            ))}
-          </div>
         </FilterGroup>
 
         <FilterGroup title="SIZE" defaultOpen={false}>

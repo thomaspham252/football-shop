@@ -44,10 +44,12 @@ const SUGGESTED = [
 
 export default function CartPage() {
   const [cart, setCart] = useState(INIT_CART);
+  const [street, setStreet] = useState('');
 
   const {
     provinces, districts, wards,
     province, district, ward,
+    provinceName, districtName, wardName,
     setProvince, setDistrict, setWard,
     loadingProvinces, loadingDistricts, loadingWards,
   } = useVietnamAddress();
@@ -270,12 +272,22 @@ export default function CartPage() {
                         type="text"
                         placeholder="VD: 123 Nguyễn Huệ..."
                         className="cart-shipping__input"
+                        value={street}
+                        onChange={e => setStreet(e.target.value)}
                       />
                     </div>
                   </div>
                 </div>
 
-                <button className="cart-summary__checkout">
+                <button className="cart-summary__checkout" onClick={() => {
+                  localStorage.setItem('shippingAddress', JSON.stringify({
+                    province, provinceName,
+                    district, districtName,
+                    ward, wardName,
+                    street,
+                  }));
+                  window.location.href = '/thanh-toan';
+                }}>
                   🔒 THANH TOÁN
                 </button>
               </div>
