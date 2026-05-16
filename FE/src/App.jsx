@@ -6,6 +6,8 @@ import ProductDetail from './pages/product/ProductDetail';
 import CartPage from './pages/cart/CartPage';
 import PaymentPage from './pages/payment/PaymentPage';
 import OrderSuccess from './pages/payment/OrderSuccess';
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
         <Route path="/gio-hang" element={<CartPage />} />
         <Route path="/thanh-toan" element={<PaymentPage />} />
         <Route path="/dat-hang-thanh-cong" element={<OrderSuccess />} />
+        <Route path="/dang-nhap" element={<LoginPage />} />
+        <Route path="/dang-ky" element={<RegisterPage />} />
       </Routes>
     </BrowserRouter>
   );

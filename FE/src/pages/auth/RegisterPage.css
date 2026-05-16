@@ -1,0 +1,87 @@
+/* Input with leading icon */
+.reg-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.reg-input-icon {
+  position: absolute;
+  left: 13px;
+  color: #bbb;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.reg-input-with-icon {
+  padding-left: 38px !important;
+}
+
+/* Perks list */
+.login-card__perks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.login-card__perk {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+}
+
+.login-card__perk-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(201,169,110,0.2);
+  color: #c9a96e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Social on top */
+.reg-social {
+  margin-bottom: 0;
+}
+
+/* Agree checkbox */
+.reg-agree {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reg-agree__label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-light);
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.reg-agree__label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #1a1a1a;
+  flex-shrink: 0;
+  margin-top: 1px;
+  cursor: pointer;
+}
+
+.reg-agree__label a {
+  color: #c9a96e;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.reg-agree__label a:hover { opacity: 0.75; }
