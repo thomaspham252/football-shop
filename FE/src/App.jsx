@@ -8,6 +8,8 @@ import PaymentPage from './pages/payment/PaymentPage';
 import OrderSuccess from './pages/payment/OrderSuccess';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import ProfilePage from './pages/profile/ProfilePage';
+import OrderDetailPage from './pages/profile/OrderDetailPage';
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
         <Route path="/dat-hang-thanh-cong" element={<OrderSuccess />} />
         <Route path="/dang-nhap" element={<LoginPage />} />
         <Route path="/dang-ky" element={<RegisterPage />} />
+        <Route path="/tai-khoan" element={<ProfilePage />} />
+        <Route path="/don-hang/:id" element={<OrderDetailPage />} />
       </Routes>
     </BrowserRouter>
   );
