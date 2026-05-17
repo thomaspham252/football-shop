@@ -1,14 +1,14 @@
 import './BrandLogos.css';
 
 const brands = [
-  { name: 'Nike', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg' },
-  { name: 'Adidas', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg' },
-  { name: 'Puma', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Puma_logo.svg' },
+  { name: 'Nike',         logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg' },
+  { name: 'Adidas',       logo: 'https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg' },
+  { name: 'Puma',         logo: 'https://e7.pngegg.com/pngimages/865/75/png-clipart-puma-sneakers-logo-blue-adidas-blue-cat-like-mammal-thumbnail.png' },
   { name: 'Under Armour', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/44/Under_armour_logo.svg' },
-  { name: 'New Balance', logo: 'https://upload.wikimedia.org/wikipedia/commons/e/ea/New_Balance_logo.svg' },
-  { name: 'Asics', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Asics_Logo.svg' },
-  { name: 'Reebok', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/0f/Reebok_2019_logo.svg' },
-  { name: 'Wilson', logo: 'https://upload.wikimedia.org/wikipedia/commons/6/6e/Wilson_Sporting_Goods_logo.svg' },
+  { name: 'New Balance',  logo: 'https://authentic-shoes.com/wp-content/uploads/2023/05/new-balance-logo_445e7ebbd48345278dadd7c0853fbd82_2048x2048.jpg' },
+  { name: 'Asics',        logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Asics_Logo.svg' },
+  { name: 'Reebok',       logo: 'https://www.monks.com/data/2023-04/logo-Reebok.png?VersionId=6K8C5HMTeEij3thcsvOY6.zPpN4HG_wF' },
+  { name: 'Mizuno',       logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRs8Y_PIuTjuw1pjNU4XGL8lGMMx5jNYIWkfg&s' },
 ];
 
 export default function BrandLogos() {

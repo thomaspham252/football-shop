@@ -81,7 +81,7 @@ export default function Overview({ onNavigate }) {
               </div>
             </div>
             <div>
-              <p className="profile-details__label">ĐỊA CHỈ GIAO HÀNG</p>
+              <p className="profile-details__label">ĐỊA CHỈ</p>
               <p className="profile-details__value">{USER.address}</p>
             </div>
           </div>

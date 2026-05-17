@@ -303,3 +303,205 @@
     font-size: 20px;
   }
 }
+
+/* ── Mega Dropdown ── */
+.navbar__nav-item {
+  position: static;
+}
+
+.navbar__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-top: 2px solid #c9a96e;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  z-index: 200;
+  animation: dropdownFade 0.18s ease;
+}
+
+@keyframes dropdownFade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.navbar__dropdown-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 20px;
+  display: flex;
+  gap: 48px;
+}
+
+.navbar__dropdown-col {
+  min-width: 160px;
+}
+
+.navbar__dropdown-heading {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.navbar__dropdown-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navbar__dropdown-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  font-size: 13.5px;
+  color: var(--text);
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.navbar__dropdown-link:hover {
+  background: #f5f0e8;
+  color: #1a1a1a;
+}
+
+.navbar__dropdown-brand-logo {
+  height: 18px;
+  width: auto;
+  max-width: 60px;
+  object-fit: contain;
+  filter: grayscale(100%);
+  opacity: 0.7;
+  transition: filter 0.2s, opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.navbar__dropdown-link:hover .navbar__dropdown-brand-logo {
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
+.navbar__dropdown-icon {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+}
+
+/* Nav item needs relative for dropdown positioning */
+.navbar__nav {
+  position: relative;
+}
+
+/* Dropdown col image (quần áo) */
+.navbar__dropdown-col-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  opacity: 0.88;
+  transition: opacity 0.2s;
+}
+
+.navbar__dropdown-col:hover .navbar__dropdown-col-img {
+  opacity: 1;
+}
+
+/* Logo-only items (CLB, đội tuyển) */
+.navbar__dropdown-list:has(.navbar__dropdown-link--logo-only) {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.navbar__dropdown-link--logo-only {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.navbar__dropdown-link--logo-only:hover {
+  border-color: #c9a96e;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #fff;
+}
+
+.navbar__dropdown-item-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+/* Heading dạng link (giày, phụ kiện) */
+.navbar__dropdown-heading--link {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.navbar__dropdown-heading--link:hover {
+  color: #c9a96e;
+}
+
+/* Dropdown shoes & accessories: 1 dòng flex */
+.navbar__dropdown--grid-rows .navbar__dropdown-inner {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
+  padding: 16px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.navbar__dropdown--grid-rows .navbar__dropdown-col {
+  min-width: unset;
+  flex: 1;
+  max-width: 160px;
+}
+
+.navbar__dropdown--grid-rows .navbar__dropdown-col-img {
+  height: 150px;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.navbar__dropdown--grid-rows .navbar__dropdown-col-img:hover {
+  transform: scale(1.05);
+  opacity: 1;
+}
+
+.navbar__dropdown--grid-rows .navbar__dropdown-heading--link {
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  text-align: center;
+}

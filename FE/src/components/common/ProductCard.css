@@ -138,6 +138,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: calc(13px * 1.4 * 2);
 }
 
 .product-card__price-row {

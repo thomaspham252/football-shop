@@ -32,7 +32,7 @@ export default function PersonalInfo() {
           </div>
         </div>
         <div className="profile-info-form__field">
-          <label>Địa Chỉ Giao Hàng</label>
+          <label>Địa Chỉ </label>
           <input type="text" value={form.address} onChange={set('address')} />
         </div>
         <div className="profile-info-form__actions">
