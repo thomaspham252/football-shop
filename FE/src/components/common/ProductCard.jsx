@@ -9,7 +9,7 @@ export default function ProductCard({ product }) {
 
   return (
     <div className="product-card">
-      <div className="product-card__image-wrap">
+      <a href={`/san-pham/${product.id}`} className="product-card__image-wrap">
         {badge && (
           <span className={`product-card__badge product-card__badge--${badge.type}`}>
             {badge.label}
@@ -30,7 +30,7 @@ export default function ProductCard({ product }) {
             Thêm vào giỏ
           </button>
         </div>
-      </div>
+      </a>
 
       <div className="product-card__info">
         {brand && <p className="product-card__brand">{brand}</p>}
@@ -57,7 +57,7 @@ export default function ProductCard({ product }) {
             ))}
           </div>
         )}
-        <a href="/san-pham" className="product-card__btn">Mua Ngay</a>
+        <a href={`/san-pham/${product.id}`} className="product-card__btn">Mua Ngay</a>
       </div>
     </div>
   );

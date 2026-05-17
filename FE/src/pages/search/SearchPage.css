@@ -1,0 +1,117 @@
+.sp-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.sp-main { flex: 1; padding: 32px 0 60px; }
+
+.sp-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Search bar */
+.sp-searchbar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #fff;
+  border: 2px solid #1a1a1a;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 32px;
+  padding-left: 16px;
+}
+
+.sp-searchbar__icon { color: #bbb; flex-shrink: 0; }
+
+.sp-searchbar__input {
+  flex: 1;
+  padding: 14px 12px;
+  border: none;
+  font-size: 15px;
+  font-family: var(--sans);
+  color: #1a1a1a;
+  outline: none;
+  background: transparent;
+}
+
+.sp-searchbar__input::placeholder { color: #bbb; }
+
+.sp-searchbar__clear {
+  background: none;
+  border: none;
+  color: #bbb;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.sp-searchbar__clear:hover { color: #1a1a1a; }
+
+.sp-searchbar__btn {
+  padding: 0 24px;
+  height: 52px;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.sp-searchbar__btn:hover { background: #333; }
+
+/* Results header */
+.sp-results-header { margin-bottom: 20px; }
+
+.sp-results-count {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Grid */
+.sp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* Empty state */
+.sp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 80px 20px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.sp-empty p { font-size: 16px; margin: 0; color: #1a1a1a; }
+.sp-empty span { font-size: 13.5px; color: var(--text-muted); }
+
+.sp-browse-btn {
+  margin-top: 8px;
+  padding: 11px 28px;
+  background: #1a1a1a;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: background 0.2s;
+}
+
+.sp-browse-btn:hover { background: #333; }
+
+@media (max-width: 1024px) { .sp-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px)  { .sp-grid { grid-template-columns: repeat(2, 1fr); } }
