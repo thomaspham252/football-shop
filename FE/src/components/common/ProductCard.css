@@ -69,6 +69,10 @@
   z-index: 3;
 }
 
+.product-card__badge--sale ~ .product-card__wishlist {
+  top: 38px;
+}
+
 .product-card__wishlist:hover {
   color: var(--red);
   background: #fff;

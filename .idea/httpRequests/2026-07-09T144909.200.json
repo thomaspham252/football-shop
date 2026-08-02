@@ -1,0 +1,107 @@
+[
+  {
+    "productId": 1,
+    "productName": "Nike Phantom GT 2 FG",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzw9ZtBwpNbcJKqoni5ysoC0BGmXiLRFsACgRQyR3r4w&s=10",
+    "basePrice": 2500000.00,
+    "salePrice": 2250000.00,
+    "discountPercentage": 10,
+    "colors": [
+      "Đen",
+      "Đỏ",
+      "Trắng"
+    ],
+    "brandName": "Nike"
+  },
+  {
+    "productId": 2,
+    "productName": "Adidas Predator Freak AG",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSC43OUhJHfwdfLsFoFSMI4_DvbrYK4YBbx1bRWmiRlRQ&s=10",
+    "basePrice": 2300000.00,
+    "salePrice": 2185000.00,
+    "discountPercentage": 5,
+    "colors": [
+      "Đỏ",
+      "Xanh"
+    ],
+    "brandName": "Adidas"
+  },
+  {
+    "productId": 3,
+    "productName": "Puma Future Z FG",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6wviFL18EueiP__-tO7tbAVR6g37r5Fe8Wwrf6nl2VP816hIVdqKL_zY&s=10",
+    "basePrice": 2200000.00,
+    "salePrice": 2024000.00,
+    "discountPercentage": 8,
+    "colors": [
+      "Vàng",
+      "Đen"
+    ],
+    "brandName": "Puma"
+  },
+  {
+    "productId": 4,
+    "productName": "Băng cố chân Adidas Ankle Support",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6wviFL18EueiP__-tO7tbAVR6g37r5Fe8Wwrf6nl2VP816hIVdqKL_zY&s=10",
+    "basePrice": 200000.00,
+    "salePrice": 200000.00,
+    "discountPercentage": 0,
+    "colors": [
+      "Trắng",
+      "Xanh",
+      "Đen"
+    ],
+    "brandName": "Adidas"
+  },
+  {
+    "productId": 5,
+    "productName": "Tất Nike Strike Lightweight",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6wviFL18EueiP__-tO7tbAVR6g37r5Fe8Wwrf6nl2VP816hIVdqKL_zY&s=10",
+    "basePrice": 150000.00,
+    "salePrice": 150000.00,
+    "discountPercentage": 0,
+    "colors": [
+      "Trắng",
+      "Xanh",
+      "Đen"
+    ],
+    "brandName": "Nike"
+  },
+  {
+    "productId": 6,
+    "productName": "Găng tay Adidas Predator Pro",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6wviFL18EueiP__-tO7tbAVR6g37r5Fe8Wwrf6nl2VP816hIVdqKL_zY&s=10",
+    "basePrice": 800000.00,
+    "salePrice": 760000.00,
+    "discountPercentage": 5,
+    "colors": [
+      "Xanh",
+      "Đỏ Đen"
+    ],
+    "brandName": "Adidas"
+  },
+  {
+    "productId": 7,
+    "productName": "Quả bóng Adidas Telstar 18",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6wviFL18EueiP__-tO7tbAVR6g37r5Fe8Wwrf6nl2VP816hIVdqKL_zY&s=10",
+    "basePrice": 1500000.00,
+    "salePrice": 1350000.00,
+    "discountPercentage": 10,
+    "colors": [
+      "Trắng Đen"
+    ],
+    "brandName": "Adidas"
+  },
+  {
+    "productId": 8,
+    "productName": "Áo Bayern Munich 2024-2025 (Trang chủ)",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6wviFL18EueiP__-tO7tbAVR6g37r5Fe8Wwrf6nl2VP816hIVdqKL_zY&s=10",
+    "basePrice": 1200000.00,
+    "salePrice": 1020000.00,
+    "discountPercentage": 15,
+    "colors": [
+      "Đỏ"
+    ],
+    "brandName": "Adidas"
+  }
+]

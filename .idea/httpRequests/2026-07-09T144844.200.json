@@ -1,0 +1,56 @@
+[
+  {
+    "productId": 2,
+    "productName": "Adidas Predator Freak AG",
+    "imageUrl": null,
+    "basePrice": 2300000.00,
+    "salePrice": 2185000.00,
+    "discountPercentage": 5,
+    "colors": [
+      "Đỏ",
+      "Xanh"
+    ],
+    "brandName": "Adidas"
+  },
+  {
+    "productId": 3,
+    "productName": "Puma Future Z FG",
+    "imageUrl": null,
+    "basePrice": 2200000.00,
+    "salePrice": 2024000.00,
+    "discountPercentage": 8,
+    "colors": [
+      "Vàng",
+      "Đen"
+    ],
+    "brandName": "Puma"
+  },
+  {
+    "productId": 4,
+    "productName": "Băng cố chân Adidas Ankle Support",
+    "imageUrl": null,
+    "basePrice": 200000.00,
+    "salePrice": 200000.00,
+    "discountPercentage": 0,
+    "colors": [
+      "Trắng",
+      "Xanh",
+      "Đen"
+    ],
+    "brandName": "Adidas"
+  },
+  {
+    "productId": 1,
+    "productName": "Nike Phantom GT 2 FG",
+    "imageUrl": null,
+    "basePrice": 2500000.00,
+    "salePrice": 2250000.00,
+    "discountPercentage": 10,
+    "colors": [
+      "Đen",
+      "Đỏ",
+      "Trắng"
+    ],
+    "brandName": "Nike"
+  }
+]
