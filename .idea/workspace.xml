@@ -1,30 +1,126 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="5c064fff-bd4c-4565-ac17-1f911a404c52" name="Changes" comment="" />
+    <list default="true" id="5c064fff-bd4c-4565-ac17-1f911a404c52" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/football-shop.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/components/common/ProductCard.css" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/common/ProductCard.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/components/common/ProductCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/common/ProductCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/components/home/BestSellers.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/home/BestSellers.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/components/home/NewProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/home/NewProducts.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/components/home/SportCategories.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/components/home/SportCategories.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/components/layout/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/layout/Navbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/pages/home/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/home/HomePage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/pages/product/ProductDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/product/ProductDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/pages/products/ProductsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/products/ProductsPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/vercel.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vercel.json" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 4
-}]]></component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="JavaScript File" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;thomaspham252&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/thomaspham252/football-shop.git&quot;,
+    &quot;accountId&quot;: &quot;dcb015ae-cba4-4cf5-a056-f958cc4f0d6e&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 4
+}</component>
   <component name="ProjectId" id="3DmyB4VG70S37vcLRCQabJ1OQmw" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "HTTP Request.product | #2.executor": "Run",
+    "HTTP Request.product | Lấy sản phẩm mới.executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.BackendApplication.executor": "Run",
+    "git-widget-placeholder": "feature/product-api",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/NMAI",
+    "last_opened_file_path": "D:/football-shop/BE/src/main/resources",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "ts.external.directory.path": "D:\\Intejj\\IntelliJ IDEA 2024.2.4\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\football-shop\BE\src\main\resources" />
+      <recent name="D:\football-shop\BE\src\main\java\com\footballstore\backend\modules\brand\controllers" />
+      <recent name="D:\football-shop\BE\src\main\java\com\footballstore\backend\modules\brand" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\football-shop\FE\src\api" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Spring Boot.BackendApplication">
+    <configuration name="product | Lấy sản phẩm mới" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/BE/product.http" requestIdentifier="Lấy sản phẩm mới" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="product | #2" type="HttpClient.HttpRequestRunConfigurationType" factoryName="HTTP Request" temporary="true" nameIsGenerated="true" path="$PROJECT_DIR$/BE/product.http" index="2" requestIdentifier="#2" runType="Run single request">
+      <method v="2" />
+    </configuration>
+    <configuration name="BackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="backend" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.footballstore.backend.BackendApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="HTTP Request.product | Lấy sản phẩm mới" />
+        <item itemvalue="HTTP Request.product | #2" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -42,10 +138,20 @@
       <option name="presentableId" value="Default" />
       <updated>1778901404321</updated>
       <workItem from="1778901405313" duration="58000" />
+      <workItem from="1782458705814" duration="3182000" />
+      <workItem from="1782464073535" duration="4047000" />
+      <workItem from="1783137136895" duration="224000" />
+      <workItem from="1783576693608" duration="23531000" />
+      <workItem from="1784109899351" duration="3203000" />
+      <workItem from="1785692421423" duration="4622000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

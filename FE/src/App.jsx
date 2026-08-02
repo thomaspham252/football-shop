@@ -3,6 +3,7 @@ import './App.css';
 import HomePage from './pages/home/HomePage';
 import ProductsPage from './pages/products/ProductsPage';
 import ProductDetail from './pages/product/ProductDetail';
+import SizeGuidePage from './pages/size-guide/SizeGuidePage';
 import CartPage from './pages/cart/CartPage';
 import PaymentPage from './pages/payment/PaymentPage';
 import OrderSuccess from './pages/payment/OrderSuccess';
@@ -21,6 +22,7 @@ function App() {
         <Route path="/"                      element={<HomePage />} />
         <Route path="/san-pham"              element={<ProductsPage />} />
         <Route path="/san-pham/:id"          element={<ProductDetail />} />
+        <Route path="/huong-dan-chon-size"   element={<SizeGuidePage />} />
         <Route path="/gio-hang"              element={<CartPage />} />
         <Route path="/thanh-toan"            element={<PaymentPage />} />
         <Route path="/dat-hang-thanh-cong"   element={<OrderSuccess />} />
@@ -37,3 +39,4 @@ function App() {
 }
 
 export default App;
+

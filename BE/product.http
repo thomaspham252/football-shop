@@ -1,0 +1,6 @@
+### Lấy sản phẩm mới
+GET http://localhost:8080/api/home/new-products
+
+###
+
+GET http://localhost:8080/api/home/new-products?limit=8

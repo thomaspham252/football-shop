@@ -1,0 +1,63 @@
+GET http://localhost:8080/api/home/new-products
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.2.5
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=FAF350043BC809D696BCECDA76C3B052
+content-length: 0
+
+<> 2026-07-09T144919.200.json
+
+###
+
+GET http://localhost:8080/api/home/new-products?limit=8
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.2.5
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=FAF350043BC809D696BCECDA76C3B052
+content-length: 0
+
+<> 2026-07-09T144909.200.json
+
+###
+
+GET http://localhost:8080/api/home/new-products
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.2.5
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=FAF350043BC809D696BCECDA76C3B052
+content-length: 0
+
+<> 2026-07-09T144858.200.json
+
+###
+
+GET http://localhost:8080/api/home/new-products
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.2.5
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=FAF350043BC809D696BCECDA76C3B052
+content-length: 0
+
+<> 2026-07-09T144844.200.json
+
+###
+
+GET http://localhost:8080/api/home/new-products
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.2.5
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+Cookie: JSESSIONID=FAF350043BC809D696BCECDA76C3B052
+content-length: 0
+
+<> 2026-07-09T144617.200.json
+
+###
+
+GET http://localhost:8080/api/home/new-products
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.2.5
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+content-length: 0
+
+###
+

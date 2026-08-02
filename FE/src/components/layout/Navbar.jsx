@@ -4,6 +4,7 @@ import './Navbar.css';
 
 const navLinks = [
   { label: 'TRANG CHỦ',        href: '/' },
+  {label: 'SẢN PHẨM',href: '/san-pham' },
   { label: 'THƯƠNG HIỆU',      href: '/thuong-hieu',   hasDropdown: true, key: 'brand' },
   { label: 'GIÀY ĐÁ BÓNG',    href: '/giay-the-thao', hasDropdown: true, key: 'shoes' },
   { label: 'QUẦN ÁO',          href: '/quan-ao',        hasDropdown: true, key: 'clothes' },

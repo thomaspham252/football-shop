@@ -1,89 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import ProductCard from '../../components/common/ProductCard';
+import productApi from '../../api/productApi';
+import homeApi from '../../api/homeApi';
 import {
   ChevronRight, Heart, ShoppingCart, Zap,
-  Star, StarHalf, ChevronLeft, ChevronDown, ChevronUp,
+  Star, StarHalf, ChevronLeft,
   RotateCcw, Truck, Shield, Share2, Minus, Plus
 } from 'lucide-react';
 import './ProductDetail.css';
-
-/* ── Mock data ── */
-const product = {
-  id: 1,
-  name: 'Giày Thể Thao Quần Vợt Pickleball Hummer M 700M Vapor Pro 3 HC',
-  brand: 'Nike',
-  sku: 'NK-VP3-HC-001',
-  price: 3200000,
-  originalPrice: 4500000,
-  rating: 4.5,
-  reviewCount: 128,
-  sold: 342,
-  inStock: true,
-  description: `Giày Nike Zoom Vapor Pro 3 HC được thiết kế dành riêng cho các sân cứng (Hard Court), mang lại sự ổn định và độ bền vượt trội. Đế ngoài XDR chịu mài mòn cao, đệm Zoom Air phản hồi nhanh giúp bạn di chuyển linh hoạt trong từng pha bóng.`,
-  images: [
-    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
-    'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600&q=80',
-    'https://images.unsplash.com/photo-1556906781-9a412961a28c?w=600&q=80',
-    'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',
-    'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=600&q=80',
-  ],
-  colors: [
-    { name: 'Trắng/Đỏ', hex: '#fff', border: '#ddd' },
-    { name: 'Đen/Trắng', hex: '#1a1a1a', border: '#1a1a1a' },
-    { name: 'Xanh Navy', hex: '#1565c0', border: '#1565c0' },
-    { name: 'Xám', hex: '#9e9e9e', border: '#9e9e9e' },
-  ],
-  sizes: [
-    { label: '38', available: true },
-    { label: '38.5', available: true },
-    { label: '39', available: true },
-    { label: '39.5', available: false },
-    { label: '40', available: true },
-    { label: '40.5', available: true },
-    { label: '41', available: true },
-    { label: '41.5', available: true },
-    { label: '42', available: true },
-    { label: '42.5', available: false },
-    { label: '43', available: true },
-    { label: '44', available: true },
-  ],
-  features: [
-    'Đế ngoài XDR chịu mài mòn cao',
-    'Đệm Zoom Air phản hồi nhanh',
-    'Phần trên lưới thoáng khí',
-    'Hệ thống dây buộc Dynamic Fit',
-    'Phù hợp sân cứng (Hard Court)',
-  ],
-  sizeChart: [
-    { us: '6.5', cm: '24.5', eu: '38', uk: '6' },
-    { us: '7', cm: '25', eu: '40', uk: '6' },
-    { us: '7.5', cm: '25.5', eu: '40.5', uk: '6.5' },
-    { us: '8', cm: '26', eu: '41', uk: '7' },
-    { us: '8.5', cm: '26.5', eu: '42', uk: '7.5' },
-    { us: '9', cm: '27', eu: '42.5', uk: '8' },
-    { us: '9.5', cm: '27.5', eu: '43', uk: '8.5' },
-    { us: '10', cm: '28', eu: '44', uk: '9' },
-    { us: '10.5', cm: '28.5', eu: '44.5', uk: '9.5' },
-    { us: '11', cm: '29', eu: '45', uk: '10' },
-    { us: '11.5', cm: '30', eu: '45.5', uk: '10.5' },
-  ],
-};
-
-const relatedProducts = [
-  { id: 2, name: 'Giày Quần Vợt Ultrashot 4', brand: 'K-Swiss', price: 2800000, originalPrice: 3600000, image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&q=80', colors: ['#f5a623', '#fff'] },
-  { id: 3, name: 'Giày Tennis Court Zoom NXT', brand: 'Nike', price: 3200000, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80', colors: ['#fff', '#000'] },
-  { id: 4, name: 'Giày Thể Thao Cloud 5', brand: 'On', price: 4200000, originalPrice: 5500000, image: 'https://images.unsplash.com/photo-1556906781-9a412961a28c?w=400&q=80', colors: ['#fff', '#e8d5b7'] },
-  { id: 5, name: 'Giày Chạy Bộ Ultraboost 22', brand: 'Adidas', price: 4100000, image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80', colors: ['#000', '#fff'] },
-  { id: 6, name: 'Giày Trail Running Wildhorse 8', brand: 'Nike', price: 2900000, originalPrice: 3800000, image: 'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=400&q=80', colors: ['#795548', '#000'] },
-];
-
-const reviews = [
-  { id: 1, name: 'Nguyễn Văn A', rating: 5, date: '12/05/2025', comment: 'Giày rất tốt, đi êm chân, đúng size. Giao hàng nhanh, đóng gói cẩn thận. Sẽ ủng hộ shop lần sau!', verified: true },
-  { id: 2, name: 'Trần Thị B', rating: 4, date: '08/05/2025', comment: 'Chất lượng ổn, màu sắc đẹp như hình. Chỉ hơi tiếc là không có size 39.5 màu đen.', verified: true },
-  { id: 3, name: 'Lê Minh C', rating: 5, date: '01/05/2025', comment: 'Mua lần thứ 3 rồi, lần nào cũng hài lòng. Giày chính hãng, giá tốt hơn các nơi khác.', verified: true },
-];
 
 /* ── Star rating component ── */
 function StarRating({ rating, size = 16 }) {
@@ -102,32 +29,279 @@ function StarRating({ rating, size = 16 }) {
   );
 }
 
-/* ── Main component ── */
+const defaultSizeChart = [
+  { us: '6.5', cm: '24.5', eu: '38', uk: '6' },
+  { us: '7', cm: '25', eu: '40', uk: '6' },
+  { us: '7.5', cm: '25.5', eu: '40.5', uk: '6.5' },
+  { us: '8', cm: '26', eu: '41', uk: '7' },
+  { us: '8.5', cm: '26.5', eu: '42', uk: '7.5' },
+  { us: '9', cm: '27', eu: '42.5', uk: '8' },
+  { us: '9.5', cm: '27.5', eu: '43', uk: '8.5' },
+  { us: '10', cm: '28', eu: '44', uk: '9' },
+  { us: '10.5', cm: '28.5', eu: '44.5', uk: '9.5' },
+  { us: '11', cm: '29', eu: '45', uk: '10' },
+  { us: '11.5', cm: '30', eu: '45.5', uk: '10.5' },
+];
+
+const mockReviews = [
+  { id: 1, name: 'Nguyễn Văn A', rating: 5, date: '12/05/2025', comment: 'Giày rất tốt, đi êm chân, đúng size. Giao hàng nhanh, đóng gói cẩn thận. Sẽ ủng hộ shop lần sau!', verified: true },
+  { id: 2, name: 'Trần Thị B', rating: 4, date: '08/05/2025', comment: 'Chất lượng ổn, màu sắc đẹp như hình. Chỉ hơi tiếc là không có size 39.5 màu đen.', verified: true },
+  { id: 3, name: 'Lê Minh C', rating: 5, date: '01/05/2025', comment: 'Mua lần thứ 3 rồi, lần nào cũng hài lòng. Giày chính hãng, giá tốt hơn các nơi khác.', verified: true },
+];
+
+const colorMap = {
+  'Trắng': '#ffffff',
+  'Đen': '#1a1a1a',
+  'Đỏ': '#d32f2f',
+  'Xanh': '#1976d2',
+  'Xanh Navy': '#0d47a1',
+  'Xám': '#9e9e9e',
+  'Vàng': '#ffeb3b',
+  'Cam': '#ff9800',
+  'Hồng': '#e91e63',
+  'Xanh Lá': '#4caf50',
+  'Trắng/Đỏ': '#ffffff',
+  'Đen/Trắng': '#1a1a1a'
+};
+
+function getColorHex(name) {
+  if (!name) return '#9e9e9e';
+  const clean = name.toLowerCase().trim();
+  if (clean.includes('trắng') || clean.includes('white')) return '#ffffff';
+  if (clean.includes('đen') || clean.includes('black')) return '#1a1a1a';
+  if (clean.includes('navy')) return '#0d47a1';
+  if (clean.includes('xanh dương') || clean.includes('blue') || clean.includes('xanh biển')) return '#1976d2';
+  if (clean.includes('xanh lá') || clean.includes('green')) return '#4caf50';
+  if (clean.includes('đỏ') || clean.includes('red')) return '#d32f2f';
+  if (clean.includes('vàng') || clean.includes('yellow')) return '#ffeb3b';
+  if (clean.includes('cam') || clean.includes('orange')) return '#ff9800';
+  if (clean.includes('hồng') || clean.includes('pink')) return '#e91e63';
+  if (clean.includes('xám') || clean.includes('grey') || clean.includes('gray')) return '#9e9e9e';
+  return '#9e9e9e';
+}
+
 export default function ProductDetail() {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [activeImg, setActiveImg] = useState(0);
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedSize, setSelectedSize] = useState(null);
   const [qty, setQty] = useState(1);
-  const [activeTab, setActiveTab] = useState('size');
+  const [activeTab, setActiveTab] = useState('desc');
   const [wishlisted, setWishlisted] = useState(false);
   const [sizeError, setSizeError] = useState(false);
+  const [relatedProducts, setRelatedProducts] = useState([]);
 
-  const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+  // Fetch product detail
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    productApi.getProductDetail(id)
+      .then(res => {
+        const prodData = res.data;
+        setProduct(prodData);
+        setLoading(false);
+        setActiveImg(0);
+        setSelectedColor(0);
+
+        // Auto-select size and image of the first variant if available
+        const firstVariant = prodData.variants?.[0];
+        if (firstVariant) {
+          setSelectedSize(firstVariant.size);
+        } else {
+          setSelectedSize(null);
+        }
+        setQty(1);
+      })
+      .catch(err => {
+        console.error("Lỗi lấy chi tiết sản phẩm:", err);
+        setError("Không thể tải thông tin sản phẩm. Vui lòng thử lại sau.");
+        setLoading(false);
+      });
+  }, [id]);
+
+  // Fetch related products
+  useEffect(() => {
+    homeApi.getNewProducts(8)
+      .then(res => {
+        const list = res.data.filter(p => p.productId !== Number(id)).slice(0, 5);
+        setRelatedProducts(list);
+      })
+      .catch(err => {
+        console.error("Lỗi lấy sản phẩm liên quan:", err);
+      });
+  }, [id]);
+
+  // Derive images (null-safe, runs on every render above early returns)
+  const images = [];
+  if (product) {
+    if (product.imageUrl) images.push(product.imageUrl);
+    if (product.galleryImages && Array.isArray(product.galleryImages)) {
+      product.galleryImages.forEach(img => {
+        if (img && img !== product.imageUrl) {
+          images.push(img);
+        }
+      });
+    }
+    if (product.variants) {
+      product.variants.forEach(v => {
+        if (v.imageUrl && !images.includes(v.imageUrl)) {
+          images.push(v.imageUrl);
+        }
+      });
+    }
+  }
+  if (images.length === 0) {
+    images.push('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80');
+  }
+
+  // Extract unique colors from variants (null-safe)
+  const colors = [];
+  const seenColors = new Set();
+  if (product && product.variants && product.variants.length > 0) {
+    product.variants.forEach(v => {
+      if (v.color && !seenColors.has(v.color)) {
+        seenColors.add(v.color);
+        const hex = colorMap[v.color] || getColorHex(v.color);
+        colors.push({
+          name: v.color,
+          hex: hex,
+          border: hex === '#ffffff' ? '#ddd' : hex
+        });
+      }
+    });
+  }
+  if (colors.length === 0) {
+    colors.push({ name: 'Mặc định', hex: '#1a1a1a', border: '#1a1a1a' });
+  }
+
+  // Sync image when color selection changes (above early returns)
+  useEffect(() => {
+    if (product && colors[selectedColor]) {
+      const colName = colors[selectedColor].name;
+      const vWithImg = product.variants?.find(v => v.color === colName && v.imageUrl);
+      if (vWithImg) {
+        const idx = images.indexOf(vWithImg.imageUrl);
+        if (idx !== -1) {
+          setActiveImg(idx);
+        }
+      }
+    }
+  }, [selectedColor, product, colors, images]);
+
+  // Loading and Error handlers (early returns)
+  if (loading) {
+    return (
+      <div className="pd-page">
+        <Navbar />
+        <main className="pd-main" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+          <div className="loading-spinner" style={{ fontSize: '1.2rem', color: '#1a1a1a', fontWeight: '500' }}>
+            Đang tải thông tin sản phẩm...
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="pd-page">
+        <Navbar />
+        <main className="pd-main" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', gap: '1.5rem' }}>
+          <div className="error-message" style={{ color: '#d32f2f', fontSize: '1.3rem', fontWeight: 'bold' }}>
+            {error || "Sản phẩm không tồn tại!"}
+          </div>
+          <a href="/" style={{ display: 'inline-flex', alignItems: 'center', color: '#0d47a1', fontWeight: '500', textDecoration: 'underline' }}>
+            Quay lại trang chủ
+          </a>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Extract unique sizes from variants
+  const allSizes = [];
+  const seenSizes = new Set();
+  if (product.variants) {
+    product.variants.forEach(v => {
+      if (v.size && !seenSizes.has(v.size)) {
+        seenSizes.add(v.size);
+        allSizes.push(v.size);
+      }
+    });
+  }
+  allSizes.sort((a, b) => {
+    const numA = parseFloat(a);
+    const numB = parseFloat(b);
+    if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+    return a.localeCompare(b);
+  });
+
+  const selectedColorName = colors[selectedColor]?.name;
+  
+  // Format sizes availability for selected color (only keeping available/in-stock sizes)
+  const sizes = allSizes.map(sz => {
+    const match = product.variants?.find(v => v.color === selectedColorName && v.size === sz);
+    return {
+      label: sz,
+      available: match ? (match.variantStock > 0) : false,
+      variantId: match?.variantId,
+      variantStock: match?.variantStock ?? 0,
+      price: match?.variantPrice
+    };
+  }).filter(s => s.available);
+
+  // Get selected variant
+  const currentVariant = product.variants?.find(
+    v => v.color === selectedColorName && v.size === selectedSize
+  );
+
+  // Price calculations
+  const displayPrice = currentVariant?.variantPrice || product.salePrice || product.basePrice || 0;
+  const displayOriginalPrice = product.basePrice || 0;
+  const discount = displayOriginalPrice > displayPrice
+    ? Math.round(((displayOriginalPrice - displayPrice) / displayOriginalPrice) * 100)
+    : 0;
+
+  // Determine stock
+  const currentStock = currentVariant
+    ? currentVariant.variantStock
+    : (product.variants?.filter(v => v.color === selectedColorName).reduce((sum, v) => sum + v.variantStock, 0) || product.stockQuantity || 0);
+
+  const inStock = currentStock > 0;
+
+  // Handler for changing colors (automatically select first size available for that color)
+  const handleColorChange = (index) => {
+    setSelectedColor(index);
+    const targetColorName = colors[index]?.name;
+    const variantsOfColor = product.variants?.filter(v => v.color === targetColorName) || [];
+    const firstAvailableVar = variantsOfColor.find(v => v.variantStock > 0) || variantsOfColor[0];
+    if (firstAvailableVar) {
+      setSelectedSize(firstAvailableVar.size);
+    } else {
+      setSelectedSize(null);
+    }
+  };
 
   const handleAddToCart = () => {
     if (!selectedSize) { setSizeError(true); return; }
     setSizeError(false);
-    alert(`Đã thêm vào giỏ: ${product.name} - Size ${selectedSize}`);
+    alert(`Đã thêm vào giỏ: ${product.productName} - Màu ${selectedColorName} - Size ${selectedSize} - Số lượng ${qty}`);
   };
 
   const handleBuyNow = () => {
     if (!selectedSize) { setSizeError(true); return; }
     setSizeError(false);
-    alert(`Mua ngay: ${product.name} - Size ${selectedSize}`);
+    alert(`Mua ngay: ${product.productName} - Màu ${selectedColorName} - Size ${selectedSize} - Số lượng ${qty}`);
   };
 
-  const prevImg = () => setActiveImg((p) => (p - 1 + product.images.length) % product.images.length);
-  const nextImg = () => setActiveImg((p) => (p + 1) % product.images.length);
+  const prevImg = () => setActiveImg((p) => (p - 1 + images.length) % images.length);
+  const nextImg = () => setActiveImg((p) => (p + 1) % images.length);
 
   return (
     <div className="pd-page">
@@ -139,11 +313,9 @@ export default function ProductDetail() {
           <div className="pd-container">
             <a href="/">Trang chủ</a>
             <ChevronRight size={13} />
-            <a href="/giay-the-thao">Giày thể thao</a>
+            <a href="/san-pham">Sản phẩm</a>
             <ChevronRight size={13} />
-            <a href="/giay-the-thao/tennis">Tennis</a>
-            <ChevronRight size={13} />
-            <span>{product.name}</span>
+            <span>{product.productName}</span>
           </div>
         </div>
 
@@ -158,17 +330,17 @@ export default function ProductDetail() {
                   <ChevronLeft size={20} />
                 </button>
                 <img
-                  src={product.images[activeImg]}
-                  alt={product.name}
+                  src={images[activeImg]}
+                  alt={product.productName}
                   className="pd-gallery__img"
                 />
                 <button className="pd-gallery__arrow pd-gallery__arrow--right" onClick={nextImg} aria-label="Ảnh sau">
                   <ChevronRight size={20} />
                 </button>
-                <span className="pd-gallery__counter">{activeImg + 1} / {product.images.length}</span>
+                <span className="pd-gallery__counter">{activeImg + 1} / {images.length}</span>
               </div>
               <div className="pd-gallery__thumbs">
-                {product.images.map((img, i) => (
+                {images.map((img, i) => (
                   <button
                     key={i}
                     className={`pd-gallery__thumb ${i === activeImg ? 'pd-gallery__thumb--active' : ''}`}
@@ -183,70 +355,74 @@ export default function ProductDetail() {
 
             {/* ── Info ── */}
             <div className="pd-info">
-              <p className="pd-info__brand">{product.brand}</p>
-              <h1 className="pd-info__name">{product.name}</h1>
+              <p className="pd-info__brand">{product.brandName || 'Football Store'}</p>
+              <h1 className="pd-info__name">{product.productName}</h1>
 
               <div className="pd-info__meta">
-                <StarRating rating={product.rating} />
-                <span className="pd-info__rating-num">{product.rating}</span>
+                <StarRating rating={product.rating || 5.0} />
+                <span className="pd-info__rating-num">{product.rating || 5.0}</span>
                 <span className="pd-info__divider">|</span>
-                <span className="pd-info__reviews">{product.reviewCount} đánh giá</span>
+                <span className="pd-info__reviews">{product.totalReviews || 0} đánh giá</span>
                 <span className="pd-info__divider">|</span>
-                <span className="pd-info__sold">Đã bán {product.sold}</span>
+                <span className="pd-info__sold">Đã bán {product.soldCount || 0}</span>
               </div>
 
               <div className="pd-info__price-row">
-                <span className="pd-info__price">{product.price.toLocaleString('vi-VN')}đ</span>
-                <span className="pd-info__original">{product.originalPrice.toLocaleString('vi-VN')}đ</span>
-                <span className="pd-info__discount">-{discount}%</span>
+                <span className="pd-info__price">{displayPrice.toLocaleString('vi-VN')}đ</span>
+                {displayOriginalPrice > displayPrice && (
+                  <>
+                    <span className="pd-info__original">{displayOriginalPrice.toLocaleString('vi-VN')}đ</span>
+                    <span className="pd-info__discount">-{discount}%</span>
+                  </>
+                )}
               </div>
 
               {/* Color */}
-              <div className="pd-info__option">
-                <p className="pd-info__option-label">
-                  Màu sắc: <strong>{product.colors[selectedColor].name}</strong>
-                </p>
-                <div className="pd-info__colors">
-                  {product.colors.map((c, i) => (
-                    <button
-                      key={i}
-                      className={`pd-info__color-btn ${i === selectedColor ? 'pd-info__color-btn--active' : ''}`}
-                      style={{ background: c.hex, borderColor: c.border }}
-                      onClick={() => setSelectedColor(i)}
-                      aria-label={c.name}
-                      title={c.name}
-                    />
-                  ))}
+              {colors.length > 0 && colors[0].name !== 'Mặc định' && (
+                <div className="pd-info__option">
+                  <p className="pd-info__option-label">
+                    Màu sắc: <strong>{colors[selectedColor]?.name}</strong>
+                  </p>
+                  <div className="pd-info__colors">
+                    {colors.map((c, i) => (
+                      <button
+                        key={i}
+                        className={`pd-info__color-btn ${i === selectedColor ? 'pd-info__color-btn--active' : ''}`}
+                        style={{ background: c.hex, borderColor: c.border }}
+                        onClick={() => handleColorChange(i)}
+                        aria-label={c.name}
+                        title={c.name}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Size */}
-              <div className="pd-info__option">
-                <div className="pd-info__size-header">
-                  <p className="pd-info__option-label">
-                    Size: {selectedSize && <strong>{selectedSize}</strong>}
-                  </p>
-                  <button className="pd-info__size-guide" onClick={() => setActiveTab('size')}>
-                    Hướng dẫn chọn size
-                  </button>
+              {sizes.length > 0 && (
+                <div className="pd-info__option">
+                  <div className="pd-info__size-header">
+                    <p className="pd-info__option-label">
+                      Size: {selectedSize && <strong>{selectedSize}</strong>}
+                    </p>
+                    <a href="/huong-dan-chon-size" target="_blank" rel="noopener noreferrer" className="pd-info__size-guide">
+                      Hướng dẫn chọn size
+                    </a>
+                  </div>
+                  <div className="pd-info__sizes">
+                    {sizes.map((s) => (
+                      <button
+                        key={s.label}
+                        className={`pd-info__size-btn ${selectedSize === s.label ? 'pd-info__size-btn--active' : ''}`}
+                        onClick={() => { setSelectedSize(s.label); setSizeError(false); }}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                  {sizeError && <p className="pd-info__size-error">Vui lòng chọn size trước khi mua</p>}
                 </div>
-                <div className="pd-info__sizes">
-                  {product.sizes.map((s) => (
-                    <button
-                      key={s.label}
-                      className={`pd-info__size-btn
-                        ${!s.available ? 'pd-info__size-btn--disabled' : ''}
-                        ${selectedSize === s.label ? 'pd-info__size-btn--active' : ''}
-                      `}
-                      disabled={!s.available}
-                      onClick={() => { setSelectedSize(s.label); setSizeError(false); }}
-                    >
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-                {sizeError && <p className="pd-info__size-error">Vui lòng chọn size trước khi mua</p>}
-              </div>
+              )}
 
               {/* Quantity */}
               <div className="pd-info__option">
@@ -256,28 +432,40 @@ export default function ProductDetail() {
                     className="pd-info__qty-btn"
                     onClick={() => setQty((q) => Math.max(1, q - 1))}
                     aria-label="Giảm"
+                    disabled={!inStock}
                   >
                     <Minus size={14} />
                   </button>
-                  <span className="pd-info__qty-val">{qty}</span>
+                  <span className="pd-info__qty-val">{inStock ? qty : 0}</span>
                   <button
                     className="pd-info__qty-btn"
-                    onClick={() => setQty((q) => q + 1)}
+                    onClick={() => setQty((q) => Math.min(currentStock, q + 1))}
                     aria-label="Tăng"
+                    disabled={!inStock || qty >= currentStock}
                   >
                     <Plus size={14} />
                   </button>
-                  <span className="pd-info__stock">Còn hàng</span>
+                  <span className={`pd-info__stock ${!inStock ? 'pd-info__stock--out' : ''}`}>
+                    {inStock ? `Còn hàng (${currentStock} sản phẩm)` : 'Hết hàng'}
+                  </span>
                 </div>
               </div>
 
               {/* CTA */}
               <div className="pd-info__cta">
-                <button className="pd-info__btn pd-info__btn--cart" onClick={handleAddToCart}>
+                <button 
+                  className="pd-info__btn pd-info__btn--cart" 
+                  onClick={handleAddToCart}
+                  disabled={!inStock}
+                >
                   <ShoppingCart size={18} />
                   THÊM VÀO GIỎ HÀNG
                 </button>
-                <button className="pd-info__btn pd-info__btn--buy" onClick={handleBuyNow}>
+                <button 
+                  className="pd-info__btn pd-info__btn--buy" 
+                  onClick={handleBuyNow}
+                  disabled={!inStock}
+                >
                   <Zap size={18} />
                   MUA NGAY
                 </button>
@@ -323,10 +511,9 @@ export default function ProductDetail() {
           <div className="pd-container">
             <div className="pd-tabs">
               {[
-                { key: 'size', label: 'BẢNG SỐ ĐO' },
                 { key: 'desc', label: 'MÔ TẢ' },
                 { key: 'policy', label: 'CHÍNH SÁCH ĐỔI TRẢ' },
-                { key: 'reviews', label: `ĐÁNH GIÁ (${product.reviewCount})` },
+                { key: 'reviews', label: `ĐÁNH GIÁ (${product.totalReviews || 0})` },
               ].map((t) => (
                 <button
                   key={t.key}
@@ -339,45 +526,17 @@ export default function ProductDetail() {
             </div>
 
             <div className="pd-tab-content">
-              {/* Size chart */}
-              {activeTab === 'size' && (
-                <div className="pd-size-chart">
-                  <h3>Size Giày Nike Nam</h3>
-                  <div className="pd-size-chart__table-wrap">
-                    <table className="pd-size-chart__table">
-                      <thead>
-                        <tr>
-                          <th>US</th>
-                          <th>CM/JP</th>
-                          <th>EU</th>
-                          <th>UK</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {product.sizeChart.map((row, i) => (
-                          <tr key={i}>
-                            <td>{row.us}</td>
-                            <td>{row.cm}</td>
-                            <td>{row.eu}</td>
-                            <td>{row.uk}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
 
               {/* Description */}
               {activeTab === 'desc' && (
                 <div className="pd-desc">
-                  <p>{product.description}</p>
-                  <h4>Đặc điểm nổi bật</h4>
-                  <ul>
-                    {product.features.map((f, i) => (
-                      <li key={i}>{f}</li>
-                    ))}
-                  </ul>
+                  <p style={{ whiteSpace: 'pre-line' }}>{product.description}</p>
+                  {product.detailedDescription && (
+                    <div className="pd-desc__detailed" style={{ marginTop: '1.5rem', whiteSpace: 'pre-line' }}>
+                      <h4 style={{ fontWeight: '600', marginBottom: '0.5rem' }}>Đặc điểm chi tiết</h4>
+                      <p>{product.detailedDescription}</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -413,13 +572,13 @@ export default function ProductDetail() {
                 <div className="pd-reviews">
                   <div className="pd-reviews__summary">
                     <div className="pd-reviews__score">
-                      <span className="pd-reviews__score-num">{product.rating}</span>
-                      <StarRating rating={product.rating} size={20} />
-                      <span className="pd-reviews__score-total">{product.reviewCount} đánh giá</span>
+                      <span className="pd-reviews__score-num">{product.rating || 5.0}</span>
+                      <StarRating rating={product.rating || 5.0} size={20} />
+                      <span className="pd-reviews__score-total">{product.totalReviews || 0} đánh giá</span>
                     </div>
                   </div>
                   <div className="pd-reviews__list">
-                    {reviews.map((r) => (
+                    {mockReviews.map((r) => (
                       <div key={r.id} className="pd-review-item">
                         <div className="pd-review-item__header">
                           <div className="pd-review-item__avatar">
@@ -450,20 +609,22 @@ export default function ProductDetail() {
         </section>
 
         {/* ── Related products ── */}
-        <section className="pd-related">
-          <div className="pd-container">
-            <h2 className="pd-related__title">
-              <span>—</span> BẠN CŨNG CÓ THỂ QUAN TÂM <span>—</span>
-            </h2>
-            <div className="pd-related__grid">
-              {relatedProducts.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
+        {relatedProducts.length > 0 && (
+          <section className="pd-related">
+            <div className="pd-container">
+              <h2 className="pd-related__title">
+                <span>—</span> BẠN CŨNG CÓ THỂ QUAN TÂM <span>—</span>
+              </h2>
+              <div className="pd-related__grid">
+                {relatedProducts.map((p) => (
+                  <ProductCard key={p.productId} product={p} />
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
-        {/* ── Reviews CTA (empty state) ── */}
+        {/* ── Reviews CTA ── */}
         <section className="pd-review-cta">
           <div className="pd-container">
             <h2 className="pd-related__title">
