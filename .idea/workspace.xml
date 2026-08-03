@@ -5,25 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5c064fff-bd4c-4565-ac17-1f911a404c52" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/football-shop.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/common/ProductCard.css" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/common/ProductCard.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/common/ProductCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/common/ProductCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/home/BestSellers.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/home/BestSellers.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/home/NewProducts.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/home/NewProducts.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/home/SportCategories.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/home/SportCategories.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/BE/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FE/src/components/layout/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/layout/Navbar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/home/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/home/HomePage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/product/ProductDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/product/ProductDetail.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/products/ProductsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/products/ProductsPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/vercel.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vercel.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/pages/auth/LoginPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/auth/LoginPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/pages/auth/RegisterPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/auth/RegisterPage.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +62,7 @@
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "Spring Boot.BackendApplication.executor": "Run",
-    "git-widget-placeholder": "feature/product-api",
+    "git-widget-placeholder": "develop",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/football-shop/BE/src/main/resources",
     "node.js.detected.package.eslint": "true",

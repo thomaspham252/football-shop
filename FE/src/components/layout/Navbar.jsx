@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Heart, ShoppingCart, Menu, X, ChevronDown, Truck, Star, Package, UserPlus, LogIn } from 'lucide-react';
+import { Search, Heart, ShoppingCart, Menu, X, ChevronDown, Truck, Star, Package, UserPlus, LogIn, User } from 'lucide-react';
 import './Navbar.css';
 
 const navLinks = [
@@ -163,6 +163,17 @@ export default function Navbar() {
   const [wishlistCount] = useState(12);
   const [cartCount]     = useState(2);
 
+  const token = localStorage.getItem('token');
+  const userJson = localStorage.getItem('user');
+  const isLoggedIn = !!token;
+  const user = userJson ? JSON.parse(userJson) : {};
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/dang-nhap';
+  };
+
   return (
     <header className="navbar" onMouseLeave={() => setActiveDropdown(null)}>
       {/* Top bar */}
@@ -178,12 +189,25 @@ export default function Navbar() {
           </div>
           <div className="navbar__top-divider" />
           <div className="navbar__top-auth">
-            <a href="/dang-ky" className="navbar__top-auth-link">
-              <UserPlus size={13} /> ĐĂNG KÝ
-            </a>
-            <a href="/dang-nhap" className="navbar__top-auth-link">
-              <LogIn size={13} /> ĐĂNG NHẬP
-            </a>
+            {isLoggedIn ? (
+              <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                <span className="navbar__top-auth-link" style={{ textTransform: 'uppercase', cursor: 'default' }}>
+                  Xin chào, {user.fullName || 'Tài khoản'}
+                </span>
+                <button onClick={handleLogout} className="navbar__top-auth-link" style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 'inherit', fontWeight: 'inherit', padding: 0 }}>
+                  <LogIn size={13} style={{ transform: 'rotate(180deg)' }} /> ĐĂNG XUẤT
+                </button>
+              </div>
+            ) : (
+              <>
+                <a href="/dang-ky" className="navbar__top-auth-link">
+                  <UserPlus size={13} /> ĐĂNG KÝ
+                </a>
+                <a href="/dang-nhap" className="navbar__top-auth-link">
+                  <LogIn size={13} /> ĐĂNG NHẬP
+                </a>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -215,6 +239,11 @@ export default function Navbar() {
           </form>
 
           <div className="navbar__actions">
+            {isLoggedIn && (
+              <a href="/tai-khoan" className="navbar__action-btn" aria-label="Tài khoản" title="Tài khoản của tôi">
+                <User size={22} />
+              </a>
+            )}
             <a href="/tai-khoan" className="navbar__action-btn" aria-label="Yêu thích">
               <Heart size={22} />
               <span className="navbar__action-badge">{wishlistCount}</span>
