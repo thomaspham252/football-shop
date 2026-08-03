@@ -54,6 +54,31 @@ export function useVietnamAddress() {
   const districtName = districts.find(d => String(d.code) === String(district))?.name || '';
   const wardName     = wards.find(w => String(w.code) === String(ward))?.name || '';
 
+  const setAddressByCodes = async (pCode, dCode, wCode) => {
+    if (!pCode) return;
+    setProvinceCode(pCode);
+    setLoadingDistricts(true);
+    try {
+      const resP = await fetch(`${BASE}/p/${pCode}?depth=2`);
+      const dataP = await resP.json();
+      setDistricts(dataP.districts || []);
+      setDistrictCode(dCode);
+
+      if (dCode) {
+        setLoadingWards(true);
+        const resD = await fetch(`${BASE}/d/${dCode}?depth=2`);
+        const dataD = await resD.json();
+        setWards(dataD.wards || []);
+        setWardCode(wCode);
+      }
+    } catch (e) {
+      console.error("Failed to load address by codes", e);
+    } finally {
+      setLoadingDistricts(false);
+      setLoadingWards(false);
+    }
+  };
+ 
   return {
     provinces, districts, wards,
     province, district, ward,
@@ -61,6 +86,7 @@ export function useVietnamAddress() {
     setProvince: setProvinceCode,
     setDistrict: setDistrictCode,
     setWard:     setWardCode,
+    setAddressByCodes,
     loadingProvinces, loadingDistricts, loadingWards,
   };
 }
