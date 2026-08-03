@@ -1,5 +1,8 @@
+import { useState, useEffect } from 'react';
 import { ShoppingCart, Heart } from 'lucide-react';
 import './ProductCard.css';
+import { useCart } from '../../context/CartContext';
+import productApi from '../../api/productApi';
 
 const colorMap = {
   'Trắng': '#ffffff',
@@ -33,17 +36,69 @@ function getColorHex(name) {
 }
 
 export default function ProductCard({ product }) {
+  const { addToCart } = useCart();
+  const [adding, setAdding] = useState(false);
   const productId = product.productId ?? product.id;
   const productName = product.productName ?? product.name;
   const brandName = product.brandName ?? product.brand;
   const salePrice = product.salePrice ?? product.price ?? 0;
   const basePrice = product.basePrice ?? product.originalPrice ?? 0;
   const imageUrl = product.imageUrl ?? product.image;
+
+  const [activeImageUrl, setActiveImageUrl] = useState(imageUrl);
+  const [detailedProduct, setDetailedProduct] = useState(null);
+
+  useEffect(() => {
+    setActiveImageUrl(product.imageUrl ?? product.image);
+    setDetailedProduct(null);
+  }, [product]);
+
+  const handleColorInteraction = async (colorName) => {
+    let prodData = detailedProduct;
+    if (!prodData) {
+      try {
+        const res = await productApi.getProductDetail(productId);
+        prodData = res.data;
+        setDetailedProduct(prodData);
+      } catch (error) {
+        console.error("Lỗi khi tải chi tiết sản phẩm để đổi màu:", error);
+        return;
+      }
+    }
+
+    const matchingVariant = prodData?.variants?.find(
+      v => v.color === colorName && v.imageUrl
+    );
+    if (matchingVariant) {
+      setActiveImageUrl(matchingVariant.imageUrl);
+    }
+  };
   const discountPercentage = product.discountPercentage ??
       (product.originalPrice && product.price
           ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
           : 0);
   const colors = product.colors;
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (adding) return;
+    setAdding(true);
+    try {
+      const res = await productApi.getProductDetail(productId);
+      const prodData = res.data;
+      const firstVariant = prodData?.variants?.[0];
+      if (firstVariant) {
+        addToCart(prodData, firstVariant, 1);
+      } else {
+        alert("Sản phẩm hiện tại không có phiên bản (variant) nào khả dụng.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi thêm vào giỏ hàng:", error);
+      alert("Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.");
+    } finally {
+      setAdding(false);
+    }
+  };
 
   return (
       <div className="product-card">
@@ -60,15 +115,15 @@ export default function ProductCard({ product }) {
           </button>
 
           <img
-              src={imageUrl}
+              src={activeImageUrl}
               alt={productName}
               className="product-card__image"
           />
 
           <div className="product-card__overlay">
-            <button className="product-card__add-cart">
+            <button className="product-card__add-cart" onClick={handleAddToCart} disabled={adding}>
               <ShoppingCart size={16} />
-              Thêm vào giỏ
+              {adding ? 'Đang thêm...' : 'Thêm vào giỏ'}
             </button>
           </div>
         </a>
@@ -101,6 +156,12 @@ export default function ProductCard({ product }) {
                         className="product-card__color-dot"
                         style={{ background: colorMap[c] || getColorHex(c) }}
                         title={c}
+                        onMouseEnter={() => handleColorInteraction(c)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleColorInteraction(c);
+                        }}
                     />
                 ))}
               </div>

@@ -5,6 +5,7 @@ import Footer from '../../components/layout/Footer';
 import ProductCard from '../../components/common/ProductCard';
 import productApi from '../../api/productApi';
 import homeApi from '../../api/homeApi';
+import { useCart } from '../../context/CartContext';
 import {
   ChevronRight, Heart, ShoppingCart, Zap,
   Star, StarHalf, ChevronLeft,
@@ -81,6 +82,7 @@ function getColorHex(name) {
 }
 
 export default function ProductDetail() {
+  const { addToCart } = useCart();
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -291,13 +293,22 @@ export default function ProductDetail() {
   const handleAddToCart = () => {
     if (!selectedSize) { setSizeError(true); return; }
     setSizeError(false);
-    alert(`Đã thêm vào giỏ: ${product.productName} - Màu ${selectedColorName} - Size ${selectedSize} - Số lượng ${qty}`);
+    if (!currentVariant) {
+      alert("Phiên bản sản phẩm đã chọn không khả dụng.");
+      return;
+    }
+    addToCart(product, currentVariant, qty);
   };
 
   const handleBuyNow = () => {
     if (!selectedSize) { setSizeError(true); return; }
     setSizeError(false);
-    alert(`Mua ngay: ${product.productName} - Màu ${selectedColorName} - Size ${selectedSize} - Số lượng ${qty}`);
+    if (!currentVariant) {
+      alert("Phiên bản sản phẩm đã chọn không khả dụng.");
+      return;
+    }
+    addToCart(product, currentVariant, qty);
+    window.location.href = '/gio-hang';
   };
 
   const prevImg = () => setActiveImg((p) => (p - 1 + images.length) % images.length);

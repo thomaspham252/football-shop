@@ -51,3 +51,133 @@ img {
 ul {
   list-style: none;
 }
+
+/* ── Add to Cart Toast Notification ── */
+.cart-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 380px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border);
+  padding: 18px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: cartToastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--sans);
+}
+
+@keyframes cartToastSlideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.cart-toast-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-toast-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.cart-toast-check-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #4caf50;
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.cart-toast-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #888888;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.cart-toast-close:hover {
+  color: #000000;
+}
+
+.cart-toast-body {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.cart-toast-img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #fcfcfc;
+}
+
+.cart-toast-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.cart-toast-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #333333;
+  margin: 0;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cart-toast-variant {
+  font-size: 12px;
+  color: #888888;
+  margin: 0;
+}
+
+.cart-toast-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 10px 0;
+  background: var(--accent);
+  color: #ffffff;
+  border-radius: 24px;
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: background 0.2s;
+}
+
+.cart-toast-btn:hover {
+  background: var(--accent-hover);
+}
