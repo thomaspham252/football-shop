@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import ProductCard from '../../components/common/ProductCard';
-import { Trash2, Minus, Plus, ShoppingBag, ChevronRight, MapPin } from 'lucide-react';
-import { useVietnamAddress } from '../../hooks/useVietnamAddress';
+import { Trash2, Minus, Plus, ShoppingBag, ChevronRight } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
+import homeApi from '../../api/homeApi';
 import './CartPage.css';
 
 /* ── Mock cart items ── */
@@ -34,38 +35,71 @@ const INIT_CART = [
   },
 ];
 
-const SUGGESTED = [
-  { id: 10, name: 'Giày Đá Bóng Nike Mercurial Vapor 16 Club TF', brand: 'Nike', price: 1600000, originalPrice: 2000000, image: 'https://images.unsplash.com/photo-1556906781-9a412961a28c?w=400&q=80', badge: { type: 'sale', label: 'SALE' }, colors: ['#f5a623', '#000'] },
-  { id: 11, name: 'Giày Đá Bóng Adidas X Crazyfast Club TF', brand: 'Adidas', price: 1500000, originalPrice: null, image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80', badge: { type: 'new', label: 'MỚI' }, colors: ['#ffeb3b', '#000'] },
-  { id: 12, name: 'Giày Đá Bóng Puma Future 7 Play TF', brand: 'Puma', price: 1900000, originalPrice: 2400000, image: 'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=400&q=80', badge: null, colors: ['#9c27b0', '#fff'] },
-  { id: 13, name: 'Giày Đá Bóng Nike Tiempo Legend 10 Club FG', brand: 'Nike', price: 1800000, originalPrice: 2200000, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80', badge: { type: 'sale', label: 'SALE' }, colors: ['#fff', '#c9a96e'] },
-  { id: 14, name: 'Giày Đá Bóng Puma Ultra 5 Play FG/AG', brand: 'Puma', price: 1700000, originalPrice: 2100000, image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&q=80', badge: { type: 'sale', label: 'SALE' }, colors: ['#00bcd4', '#000'] },
-];
-
 export default function CartPage() {
-  const [cart, setCart] = useState(INIT_CART);
-  const [street, setStreet] = useState('');
+  const { cart, updateQty, removeItem, clearCart } = useCart();
+  const [suggestedProducts, setSuggestedProducts] = useState([]);
+  const [selectedIds, setSelectedIds] = useState(() => cart.map(item => item.id));
+  const [confirmAction, setConfirmAction] = useState(null);
 
-  const {
-    provinces, districts, wards,
-    province, district, ward,
-    provinceName, districtName, wardName,
-    setProvince, setDistrict, setWard,
-    loadingProvinces, loadingDistricts, loadingWards,
-  } = useVietnamAddress();
+  const handleExecuteConfirm = () => {
+    if (!confirmAction) return;
+    if (confirmAction.type === 'remove_item') {
+      removeItem(confirmAction.itemId);
+    } else if (confirmAction.type === 'clear_all') {
+      clearCart();
+    }
+    setConfirmAction(null);
+  };
 
-  /* helpers */
-  const updateQty = (id, delta) =>
-    setCart(c => c.map(item => item.id === id
-      ? { ...item, qty: Math.max(1, item.qty + delta) }
-      : item
-    ));
+  useEffect(() => {
+    setSelectedIds(prev => prev.filter(id => cart.some(item => item.id === id)));
+  }, [cart]);
 
-  const removeItem = (id) => setCart(c => c.filter(item => item.id !== id));
+  useEffect(() => {
+    setSelectedIds(prev => {
+      const newIds = cart.map(item => item.id);
+      const addedIds = newIds.filter(id => !prev.includes(id));
+      return [...prev, ...addedIds].filter(id => newIds.includes(id));
+    });
+  }, [cart.length]);
 
-  const subtotal  = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const shipping  = subtotal >= 500000 ? 0 : 30000;
+  useEffect(() => {
+    homeApi.getPromotionProducts(5)
+      .then(res => {
+        setSuggestedProducts(res.data);
+      })
+      .catch(err => {
+        console.error("Lỗi khi tải sản phẩm khuyến mãi ở giỏ hàng:", err);
+      });
+  }, []);
+
+  const isAllSelected = cart.length > 0 && selectedIds.length === cart.length;
+
+  const handleToggleAll = () => {
+    if (isAllSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(cart.map(item => item.id));
+    }
+  };
+
+  const handleToggleItem = (itemId) => {
+    setSelectedIds(prev =>
+      prev.includes(itemId)
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    );
+  };
+
+  const selectedCartItems = cart.filter(item => selectedIds.includes(item.id));
+  const subtotal  = selectedCartItems.reduce((s, i) => s + i.price * i.qty, 0);
+  const shipping  = subtotal === 0 ? 0 : (subtotal >= 500000 ? 0 : 30000);
   const total     = subtotal + shipping;
+
+  const handleCheckout = () => {
+    localStorage.setItem('checkoutItems', JSON.stringify(selectedCartItems));
+    window.location.href = '/thanh-toan';
+  };
 
   /* ── Empty cart ── */
   if (cart.length === 0) {
@@ -107,7 +141,35 @@ export default function CartPage() {
             <div className="cart-left">
               {/* Table header */}
               <div className="cart-table-head">
-                <span className="cart-table-head__product">SẢN PHẨM</span>
+                <span className="cart-table-head__product" style={{ display: 'flex', alignItems: 'center' }}>
+                  <input
+                    type="checkbox"
+                    id="selectAll"
+                    checked={isAllSelected}
+                    onChange={handleToggleAll}
+                    style={{ marginRight: '8px', cursor: 'pointer', scale: '1.2' }}
+                  />
+                  <label htmlFor="selectAll" style={{ cursor: 'pointer', fontWeight: 'bold' }}>Tất cả</label>
+                  {isAllSelected && (
+                    <button
+                      onClick={() => setConfirmAction({
+                        type: 'clear_all',
+                        message: "Bạn có chắc chắn muốn xóa toàn bộ sản phẩm khỏi giỏ hàng?"
+                      })}
+                      style={{
+                        marginLeft: '15px',
+                        color: '#e53935',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}
+                    >
+                      Xóa tất cả
+                    </button>
+                  )}
+                </span>
                 <span className="cart-table-head__qty">SỐ LƯỢNG</span>
                 <span className="cart-table-head__total">TỔNG CỘNG</span>
               </div>
@@ -117,12 +179,23 @@ export default function CartPage() {
                 {cart.map(item => (
                   <div key={item.id} className="cart-item">
                     <div className="cart-item__product">
-                      <a href={`/san-pham/${item.id}`} className="cart-item__img-wrap">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(item.id)}
+                        onChange={() => handleToggleItem(item.id)}
+                        style={{
+                          marginRight: '12px',
+                          alignSelf: 'center',
+                          cursor: 'pointer',
+                          scale: '1.2'
+                        }}
+                      />
+                      <a href={`/san-pham/${item.productId}`} className="cart-item__img-wrap">
                         <img src={item.image} alt={item.name} className="cart-item__img" />
                       </a>
                       <div className="cart-item__info">
                         <p className="cart-item__brand">{item.brand}</p>
-                        <a href={`/san-pham/${item.id}`} className="cart-item__name">{item.name}</a>
+                        <a href={`/san-pham/${item.productId}`} className="cart-item__name">{item.name}</a>
                         <div className="cart-item__meta">
                           <span>{item.color} / {item.size}</span>
                         </div>
@@ -132,19 +205,21 @@ export default function CartPage() {
                             <span className="cart-item__original">{item.originalPrice.toLocaleString('vi-VN')}đ</span>
                           )}
                         </div>
-                        <button className="cart-item__remove" onClick={() => removeItem(item.id)}>
+                        <button className="cart-item__remove" onClick={() => setConfirmAction({
+                          type: 'remove_item',
+                          itemId: item.id,
+                          message: "Bạn có muốn xóa sản phẩm ?"
+                        })}>
                           <Trash2 size={13} /> Xóa
                         </button>
                       </div>
                     </div>
-
                     <div className="cart-item__qty-wrap">
                       <div className="cart-item__qty">
                         <button onClick={() => updateQty(item.id, -1)} aria-label="Giảm"><Minus size={13} /></button>
                         <span>{item.qty}</span>
                         <button onClick={() => updateQty(item.id, +1)} aria-label="Tăng"><Plus size={13} /></button>
                       </div>
-                      <button className="cart-item__remove" onClick={() => removeItem(item.id)}>Bỏ</button>
                     </div>
 
                     <div className="cart-item__total-wrap">
@@ -211,83 +286,11 @@ export default function CartPage() {
                   Vận chuyển và các khoản thuế sẽ được tính khi thanh toán
                 </p>
 
-                {/* Shipping area */}
-                <div className="cart-shipping">
-                  <h4 className="cart-shipping__title">
-                    <MapPin size={14} /> CHỌN KHU VỰC GIAO HÀNG
-                  </h4>
-
-                  <div className="cart-shipping__fields">
-                    <div className="cart-shipping__field">
-                      <label>Tỉnh / Thành phố</label>
-                      <select
-                        value={province}
-                        onChange={e => setProvince(e.target.value)}
-                        disabled={loadingProvinces}
-                      >
-                        <option value="">
-                          {loadingProvinces ? 'Đang tải...' : '-- Chọn tỉnh/thành --'}
-                        </option>
-                        {provinces.map(p => (
-                          <option key={p.code} value={p.code}>{p.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="cart-shipping__field">
-                      <label>Quận / Huyện</label>
-                      <select
-                        value={district}
-                        onChange={e => setDistrict(e.target.value)}
-                        disabled={!province || loadingDistricts}
-                      >
-                        <option value="">
-                          {loadingDistricts ? 'Đang tải...' : '-- Chọn quận/huyện --'}
-                        </option>
-                        {districts.map(d => (
-                          <option key={d.code} value={d.code}>{d.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="cart-shipping__field">
-                      <label>Phường / Xã</label>
-                      <select
-                        value={ward}
-                        onChange={e => setWard(e.target.value)}
-                        disabled={!district || loadingWards}
-                      >
-                        <option value="">
-                          {loadingWards ? 'Đang tải...' : '-- Chọn phường/xã --'}
-                        </option>
-                        {wards.map(w => (
-                          <option key={w.code} value={w.code}>{w.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="cart-shipping__field">
-                      <label>Số nhà, tên đường</label>
-                      <input
-                        type="text"
-                        placeholder="VD: 123 Nguyễn Huệ..."
-                        className="cart-shipping__input"
-                        value={street}
-                        onChange={e => setStreet(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <button className="cart-summary__checkout" onClick={() => {
-                  localStorage.setItem('shippingAddress', JSON.stringify({
-                    province, provinceName,
-                    district, districtName,
-                    ward, wardName,
-                    street,
-                  }));
-                  window.location.href = '/thanh-toan';
-                }}>
+                <button
+                  className={`cart-summary__checkout ${selectedIds.length === 0 ? 'cart-summary__checkout--disabled' : ''}`}
+                  onClick={handleCheckout}
+                  disabled={selectedIds.length === 0}
+                >
                   🔒 THANH TOÁN
                 </button>
               </div>
@@ -295,18 +298,35 @@ export default function CartPage() {
           </div>
 
           {/* ── Suggested products ── */}
-          <section className="cart-suggested">
-            <h2 className="cart-suggested__title">BẠN CÓ THỂ THÍCH</h2>
-            <div className="cart-suggested__grid">
-              {SUGGESTED.map(p => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-          </section>
+          {suggestedProducts.length > 0 && (
+            <section className="cart-suggested">
+              <h2 className="cart-suggested__title">BẠN CÓ THỂ THÍCH</h2>
+              <div className="cart-suggested__grid">
+                {suggestedProducts.map(p => (
+                  <ProductCard key={p.productId || p.id} product={p} />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </main>
 
       <Footer />
+      {confirmAction && (
+        <div className="cart-confirm-overlay">
+          <div className="cart-confirm-toast">
+            <p className="cart-confirm-toast__msg">{confirmAction.message}</p>
+            <div className="cart-confirm-toast__actions">
+              <button className="cart-confirm-toast__btn cart-confirm-toast__btn--cancel" onClick={() => setConfirmAction(null)}>
+                Hủy
+              </button>
+              <button className="cart-confirm-toast__btn cart-confirm-toast__btn--confirm" onClick={handleExecuteConfirm}>
+                Đồng ý
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

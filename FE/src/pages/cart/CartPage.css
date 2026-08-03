@@ -452,6 +452,20 @@
   transform: translateY(-1px);
 }
 
+.cart-summary__checkout:disabled,
+.cart-summary__checkout--disabled {
+  background: #cccccc;
+  color: #888888;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cart-summary__checkout:disabled:hover,
+.cart-summary__checkout--disabled:hover {
+  background: #cccccc;
+  transform: none;
+}
+
 /* ── Suggested ── */
 .cart-suggested {
   margin-top: 48px;
@@ -548,4 +562,87 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
+}
+
+/* ── Deletion Confirmation Overlay & Modal ── */
+.cart-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-confirm-toast {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border);
+  padding: 24px;
+  width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: cartConfirmScaleIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-family: var(--sans);
+}
+
+@keyframes cartConfirmScaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.cart-confirm-toast__msg {
+  font-size: 13.5px;
+  color: #333333;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.cart-confirm-toast__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cart-confirm-toast__btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cart-confirm-toast__btn--cancel {
+  background: #f0f0f0;
+  color: #555555;
+  border: 1px solid #dddddd;
+}
+
+.cart-confirm-toast__btn--cancel:hover {
+  background: #e5e5e5;
+}
+
+.cart-confirm-toast__btn--confirm {
+  background: #e53935;
+  color: #ffffff;
+  border: none;
+}
+
+.cart-confirm-toast__btn--confirm:hover {
+  background: #d32f2f;
 }

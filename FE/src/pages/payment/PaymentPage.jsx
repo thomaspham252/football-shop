@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useVietnamAddress } from '../../hooks/useVietnamAddress';
 import { ChevronDown, ChevronUp, Info, Tag, Lock, Pencil } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
 import './PaymentPage.css';
 
 /* ── Đọc địa chỉ đã lưu từ giỏ hàng ── */
@@ -13,24 +14,7 @@ function getSavedAddress() {
 }
 
 /* ── Mock order (thực tế sẽ lấy từ cart state/context) ── */
-const ORDER_ITEMS = [
-  {
-    id: 1,
-    name: 'Giày Thể Thao Chạy Bộ Nam Nike Pegasus Plus',
-    variant: 'Size / 10',
-    price: 3989300,
-    qty: 1,
-    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&q=80',
-  },
-  {
-    id: 2,
-    name: 'Áo Ba Lỗ Thể Thao Chạy Bộ Nam On Running Pace Tank',
-    variant: 'Xám Nhạt / L',
-    price: 2355400,
-    qty: 1,
-    image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=120&q=80',
-  },
-];
+// ORDER_ITEMS mock removed in favor of useCart()
 
 const SHIPPING_OPTIONS = [
   {
@@ -74,6 +58,21 @@ const PAYMENT_METHODS = [
 ];
 
 export default function PaymentPage() {
+  const { removeItems } = useCart();
+  const [checkoutItems] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('checkoutItems') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    if (checkoutItems.length === 0) {
+      window.location.href = '/gio-hang';
+    }
+  }, [checkoutItems]);
+
   const [email, setEmail]               = useState('');
   const [sendLink, setSendLink]         = useState(true);
   const [firstName, setFirstName]       = useState('');
@@ -100,10 +99,28 @@ export default function PaymentPage() {
     loadingProvinces, loadingDistricts, loadingWards,
   } = useVietnamAddress();
 
-  const subtotal     = ORDER_ITEMS.reduce((s, i) => s + i.price * i.qty, 0);
+  const subtotal     = checkoutItems.reduce((s, i) => s + i.price * i.qty, 0);
   const shippingFee  = SHIPPING_OPTIONS.find(o => o.id === shipping)?.price ?? 0;
   const discount     = couponApplied ? Math.round(subtotal * 0.1) : 0;
   const total        = subtotal + shippingFee - discount;
+
+  const handleCheckout = (e) => {
+    e.preventDefault();
+    if (checkoutItems.length === 0) {
+      alert("Đơn hàng thanh toán của bạn đang trống!");
+      return;
+    }
+    const purchasedIds = checkoutItems.map(item => item.id);
+    removeItems(purchasedIds);
+    localStorage.removeItem('checkoutItems');
+    localStorage.setItem('shippingAddress', JSON.stringify({
+      province, provinceName,
+      district, districtName,
+      ward, wardName,
+      street,
+    }));
+    window.location.href = '/dat-hang-thanh-cong';
+  };
 
   const applyCoupon = () => {
     if (coupon.toUpperCase() === 'SALE10' || coupon.toUpperCase() === 'FREESHIP') {
@@ -115,7 +132,7 @@ export default function PaymentPage() {
   const OrderSummary = () => (
     <div className="pay-summary">
       <div className="pay-summary__items">
-        {ORDER_ITEMS.map(item => (
+        {checkoutItems.map(item => (
           <div key={item.id} className="pay-summary__item">
             <div className="pay-summary__img-wrap">
               <img src={item.image} alt={item.name} />
@@ -151,7 +168,7 @@ export default function PaymentPage() {
       {/* Totals */}
       <div className="pay-summary__totals">
         <div className="pay-summary__row">
-          <span>Tổng phụ · {ORDER_ITEMS.length} mặt hàng</span>
+          <span>Tổng phụ · {checkoutItems.length} mặt hàng</span>
           <span>{subtotal.toLocaleString('vi-VN')}đ</span>
         </div>
         {couponApplied && (
@@ -404,7 +421,7 @@ export default function PaymentPage() {
 
 
           {/* Submit */}
-          <button className="pay-submit">
+          <button className="pay-submit" onClick={handleCheckout}>
             <Lock size={15} />
             Thanh toán ngay
           </button>

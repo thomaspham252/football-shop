@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, Heart, ShoppingCart, Menu, X, ChevronDown, Truck, Star, Package, UserPlus, LogIn, User } from 'lucide-react';
 import './Navbar.css';
+import { useCart } from '../../context/CartContext';
 
 const navLinks = [
   { label: 'TRANG CHỦ',        href: '/' },
@@ -161,7 +162,8 @@ export default function Navbar() {
   const [mobileOpen,   setMobileOpen]   = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [wishlistCount] = useState(12);
-  const [cartCount]     = useState(2);
+  const { cart } = useCart();
+  const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
   const token = localStorage.getItem('token');
   const userJson = localStorage.getItem('user');
