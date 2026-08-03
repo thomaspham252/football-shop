@@ -18,5 +18,9 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     List<String> findDistinctColorsByProductId(Integer productId);
 
     List<ProductVariant> findByProductProductIdAndIsActiveTrue(Integer productId);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select pv from ProductVariant pv where pv.variantId = :variantId")
+    Optional<ProductVariant> findForUpdateByVariantId(Integer variantId);
 }
 

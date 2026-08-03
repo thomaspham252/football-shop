@@ -407,95 +407,115 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .pay-summary__item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
 .pay-summary__img-wrap {
   position: relative;
   flex-shrink: 0;
-  width: 60px;
-  height: 60px;
-  border-radius: 6px;
-  overflow: hidden;
-  background: #f0f0f0;
-  border: 1px solid var(--border);
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: visible;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .pay-summary__img-wrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 8px;
 }
 
 .pay-summary__qty {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #888;
-  color: #fff;
-  font-size: 10px;
+  top: -8px;
+  right: -8px;
+  background: #1a1a2e;
+  color: #ffffff;
+  font-size: 11px;
   font-weight: 700;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  border: 1.5px solid #ffffff;
+  z-index: 2;
 }
 
 .pay-summary__item-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .pay-summary__item-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1a1a2e;
   line-height: 1.4;
-  margin: 0 0 2px;
+  margin: 0;
 }
 
 .pay-summary__item-variant {
-  font-size: 12px;
-  color: var(--text-muted);
+  font-size: 11.5px;
+  color: #666666;
+  background: #eef1f4;
+  padding: 2px 8px;
+  border-radius: 12px;
+  align-self: flex-start;
+  font-weight: 550;
   margin: 0;
 }
 
 .pay-summary__item-price {
   font-size: 13.5px;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-weight: 700;
+  color: #1a1a2e;
   white-space: nowrap;
 }
 
 /* Coupon */
 .pay-summary__coupon {
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1.5px solid var(--border);
 }
 
 .pay-summary__coupon-row {
   display: flex;
   align-items: center;
   gap: 0;
-  border: 1.5px solid #d0d0d0;
-  border-radius: 6px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
   overflow: hidden;
-  padding-left: 10px;
+  padding-left: 12px;
+  background: #ffffff;
+  transition: border-color 0.25s, box-shadow 0.25s;
 }
 
-.pay-summary__coupon-row svg { color: #aaa; flex-shrink: 0; }
+.pay-summary__coupon-row:focus-within {
+  border-color: #1a1a2e;
+  box-shadow: 0 0 0 3px rgba(26, 26, 46, 0.08);
+}
+
+.pay-summary__coupon-row svg { color: #888888; flex-shrink: 0; }
 
 .pay-summary__coupon-row input {
   flex: 1;
-  padding: 10px 10px;
+  padding: 12px 10px;
   border: none;
   font-size: 13px;
   font-family: var(--sans);
@@ -504,38 +524,38 @@
   color: var(--text);
 }
 
-.pay-summary__coupon-row input::placeholder { color: #bbb; }
+.pay-summary__coupon-row input::placeholder { color: #aaaaaa; }
 
 .pay-summary__coupon-row button {
-  padding: 10px 16px;
-  background: none;
+  padding: 12px 20px;
+  background: #1a1a2e;
   border: none;
-  border-left: 1.5px solid #d0d0d0;
   font-size: 13px;
-  font-weight: 600;
-  color: #1565c0;
+  font-weight: 700;
+  color: #ffffff;
   cursor: pointer;
   font-family: var(--sans);
   white-space: nowrap;
-  transition: background 0.15s;
+  transition: background 0.2s;
 }
 
-.pay-summary__coupon-row button:hover { background: #f0f0f0; }
+.pay-summary__coupon-row button:hover { background: #33334d; }
 
 .pay-summary__coupon-ok {
-  font-size: 12px;
+  font-size: 12.5px;
   color: #2e7d32;
-  margin: 6px 0 0;
+  margin: 8px 0 0;
+  font-weight: 600;
 }
 
 /* Totals */
 .pay-summary__totals {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 16px;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1.5px solid var(--border);
+  margin-bottom: 20px;
 }
 
 .pay-summary__row {
@@ -546,15 +566,15 @@
   color: var(--text-light);
 }
 
-.pay-summary__row--discount { color: #2e7d32; }
+.pay-summary__row--discount { color: #2e7d32; font-weight: 600; }
 
 .pay-summary__row--total {
   font-size: 15px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #1a1a2e;
   align-items: flex-start;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  border-top: 1.5px dashed #e0e0e0;
   margin-top: 4px;
 }
 
@@ -565,12 +585,14 @@
 }
 
 .pay-summary__free {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: #2e7d32;
   background: #e8f5e9;
-  padding: 2px 8px;
+  border: 1px solid #c8e6c9;
+  padding: 3px 10px;
   border-radius: 12px;
+  letter-spacing: 0.5px;
 }
 
 .pay-summary__total-right {
@@ -587,25 +609,25 @@
 }
 
 .pay-summary__total-price {
-  font-size: 20px;
-  font-weight: 800;
-  color: #1a1a1a;
+  font-size: 22px;
+  font-weight: 900;
+  color: #e53935;
 }
 
 /* Footer links */
 .pay-summary__links {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 14px;
+  gap: 8px 16px;
 }
 
 .pay-summary__links a {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--text-muted);
   transition: color 0.2s;
 }
 
-.pay-summary__links a:hover { color: #1a1a1a; }
+.pay-summary__links a:hover { color: #1a1a2e; }
 
 /* ── Responsive ── */
 @media (max-width: 900px) {

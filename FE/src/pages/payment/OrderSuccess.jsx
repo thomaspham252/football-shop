@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { Check, Truck, MapPin, BarChart2, ShoppingCart, CreditCard, X } from 'lucide-react';
+import orderApi from '../../api/orderApi';
 import './OrderSuccess.css';
 
 const ORDER = {
@@ -39,8 +41,75 @@ const ORDER = {
 };
 
 export default function OrderSuccess() {
-  const subtotal = ORDER.items.reduce((s, i) => s + i.price * i.qty, 0);
-  const total    = subtotal + ORDER.shipping + ORDER.tax;
+  const query = new URLSearchParams(window.location.search);
+  const orderId = query.get('orderId');
+
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let activeId = orderId;
+    if (!activeId) {
+      activeId = localStorage.getItem('latestOrderId');
+    }
+
+    if (!activeId) {
+      setLoading(false);
+      return;
+    }
+
+    orderApi.getOrder(activeId)
+      .then(res => {
+        setOrder(res.data);
+      })
+      .catch(err => {
+        console.error("Lỗi khi lấy thông tin đơn hàng:", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [orderId]);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontFamily: 'var(--sans)' }}>
+        <p>Đang tải thông tin đơn hàng...</p>
+      </div>
+    );
+  }
+
+  const activeOrder = order ? {
+    code: order.orderCode,
+    date: new Date(order.createdAt).toLocaleDateString('vi-VN'),
+    deliveryFrom: new Date(new Date(order.createdAt).getTime() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('vi-VN'),
+    deliveryTo: new Date(new Date(order.createdAt).getTime() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('vi-VN'),
+    shippingMethod: 'Vận chuyển tận nơi (Giao hàng từ 2–5 ngày làm việc)',
+    address: {
+      name: (order.firstName + " " + order.lastName).trim() || 'Khách hàng',
+      street: order.street,
+      ward: order.ward,
+      district: order.district,
+      province: order.province,
+      country: 'Việt Nam',
+    },
+    items: order.items ? order.items.map(item => ({
+      id: item.orderItemId,
+      name: item.product.productName,
+      variant: `Màu ${item.color} | Size ${item.size}`,
+      qty: item.quantity,
+      price: Number(item.price),
+      image: item.productVariant.imageUrl || item.product.imageUrl || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&q=80'
+    })) : [],
+    shipping: Number(order.shippingFee),
+    tax: Math.round(Number(order.totalAmount) * 0.1),
+    paymentMethod: order.paymentMethod === 'COD' ? 'Thanh toán khi nhận hàng (COD)' : 
+                   order.paymentMethod === 'TRANSFER' ? 'Chuyển khoản ngân hàng' : 'Ví MoMo',
+    rawPaymentMethod: order.paymentMethod,
+    totalAmount: Number(order.totalAmount)
+  } : ORDER;
+
+  const subtotal = activeOrder.items.reduce((s, i) => s + i.price * i.qty, 0);
+  const total    = activeOrder.totalAmount ? activeOrder.totalAmount : subtotal + activeOrder.shipping + (activeOrder.tax || 0);
 
   return (
     <div className="os-page">
@@ -68,7 +137,7 @@ export default function OrderSuccess() {
           </div>
           <h1 className="os-hero__title">Cảm ơn bạn đã mua hàng!</h1>
           <p className="os-hero__sub">
-            Đơn hàng <strong>#{ORDER.code}</strong> đang được xử lý và sẽ sớm đến tay bạn.
+            Đơn hàng <strong>#{activeOrder.code}</strong> đang được xử lý và sẽ sớm đến tay bạn.
           </p>
         </div>
 
@@ -83,9 +152,9 @@ export default function OrderSuccess() {
                 <span>Thời Gian Giao Hàng Dự Kiến</span>
               </div>
               <p className="os-delivery__dates">
-                {ORDER.deliveryFrom} – {ORDER.deliveryTo}
+                {activeOrder.deliveryFrom} – {activeOrder.deliveryTo}
               </p>
-              <p className="os-delivery__method">{ORDER.shippingMethod}</p>
+              <p className="os-delivery__method">{activeOrder.shippingMethod}</p>
             </div>
 
             {/* Address */}
@@ -94,12 +163,50 @@ export default function OrderSuccess() {
                 <MapPin size={18} className="os-card__icon" />
                 <span>Địa Chỉ Giao Hàng</span>
               </div>
-              <p className="os-address__name">{ORDER.address.name}</p>
-              <p className="os-address__line">{ORDER.address.street}</p>
-              <p className="os-address__line">{ORDER.address.ward}, {ORDER.address.district}</p>
-              <p className="os-address__line">{ORDER.address.province}</p>
-              <p className="os-address__line">{ORDER.address.country}</p>
+              <p className="os-address__name">{activeOrder.address.name}</p>
+              <p className="os-address__line">{activeOrder.address.street}</p>
+              <p className="os-address__line">{activeOrder.address.ward}, {activeOrder.address.district}</p>
+              <p className="os-address__line">{activeOrder.address.province}</p>
+              <p className="os-address__line">{activeOrder.address.country}</p>
             </div>
+
+            {/* Chuyển khoản ngân hàng - Hộp thông tin hướng dẫn khách chuyển tiền */}
+            {activeOrder.rawPaymentMethod === 'TRANSFER' && (
+              <div className="os-card" style={{ border: '1.5px solid var(--accent)', background: '#fdfaf2' }}>
+                <div className="os-card__head" style={{ color: '#b8860b' }}>
+                  <CreditCard size={18} className="os-card__icon" />
+                  <span style={{ fontWeight: '700' }}>Thông Tin Chuyển Khoản</span>
+                </div>
+                <div style={{ marginTop: '12px', fontSize: '13px', lineHeight: '1.6', color: '#333' }}>
+                  <p>Ngân hàng: <strong>MB Bank (Ngân hàng Quân Đội)</strong></p>
+                  <p>Số tài khoản: <strong>25022004042000</strong></p>
+                  <p>Chủ tài khoản: <strong>PHAM VAN LINH</strong></p>
+                  <p>Số tiền: <strong>{total.toLocaleString('vi-VN')}đ</strong></p>
+                  <p>Nội dung chuyển khoản: <strong>{activeOrder.code}</strong></p>
+                  
+                  {/* VietQR Code Section */}
+                  <div style={{ 
+                    marginTop: '16px', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    background: '#ffffff',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0'
+                  }}>
+                    <img 
+                      src={`https://img.vietqr.io/image/MB-25022004042000-compact2.png?amount=${Math.round(total)}&addInfo=${activeOrder.code}&accountName=PHAM%20VAN%20LINH`} 
+                      alt="Mã QR Chuyển Khoản VietQR" 
+                      style={{ maxWidth: '220px', display: 'block', borderRadius: '4px' }}
+                    />
+                    <p style={{ fontSize: '11px', color: '#666', marginTop: '8px', textAlign: 'center', fontStyle: 'italic' }}>
+                      Quét mã QR bằng ứng dụng ngân hàng để tự động điền Số tài khoản, Số tiền và Nội dung.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="os-actions">
@@ -120,7 +227,7 @@ export default function OrderSuccess() {
               <h2 className="os-summary__title">Tóm Tắt Đơn Hàng</h2>
 
               <div className="os-summary__items">
-                {ORDER.items.map(item => (
+                {activeOrder.items.map(item => (
                   <div key={item.id} className="os-summary__item">
                     <img src={item.image} alt={item.name} className="os-summary__img" />
                     <div className="os-summary__item-info">
@@ -142,11 +249,13 @@ export default function OrderSuccess() {
                 </div>
                 <div className="os-summary__row">
                   <span>Vận chuyển</span>
-                  <span className="os-summary__free">MIỄN PHÍ</span>
+                  <span className={activeOrder.shipping === 0 ? "os-summary__free" : ""}>
+                    {activeOrder.shipping === 0 ? "MIỄN PHÍ" : `${activeOrder.shipping.toLocaleString('vi-VN')}đ`}
+                  </span>
                 </div>
                 <div className="os-summary__row">
-                  <span>Thuế VAT</span>
-                  <span>{ORDER.tax.toLocaleString('vi-VN')}đ</span>
+                  <span>Thuế VAT (10%)</span>
+                  <span>{activeOrder.tax.toLocaleString('vi-VN')}đ</span>
                 </div>
                 <div className="os-summary__row os-summary__row--total">
                   <span>Tổng Cộng</span>
@@ -158,7 +267,7 @@ export default function OrderSuccess() {
 
               <div className="os-summary__payment">
                 <CreditCard size={15} />
-                <span>Phương thức thanh toán: {ORDER.paymentMethod}</span>
+                <span>Phương thức thanh toán: {activeOrder.paymentMethod}</span>
               </div>
             </div>
           </div>

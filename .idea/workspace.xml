@@ -6,15 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="5c064fff-bd4c-4565-ac17-1f911a404c52" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/common/ProductCard.css" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/common/ProductCard.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/common/ProductCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/common/ProductCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/layout/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/layout/Navbar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/index.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/cart/CartPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/cart/CartPage.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/cart/CartPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/cart/CartPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/BackendApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/BackendApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/product/repositories/ProductVariantRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/product/repositories/ProductVariantRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/hooks/useVietnamAddress.js" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/hooks/useVietnamAddress.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/pages/payment/OrderSuccess.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/payment/OrderSuccess.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/pages/payment/PaymentPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/payment/PaymentPage.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FE/src/pages/payment/PaymentPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/payment/PaymentPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/product/ProductDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/product/ProductDetail.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,7 +65,7 @@
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "Spring Boot.BackendApplication.executor": "Run",
-    "git-widget-placeholder": "feature/cart-api",
+    "git-widget-placeholder": "feature/payment-api",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/football-shop/BE/src/main/resources",
     "node.js.detected.package.eslint": "true",
@@ -140,6 +138,18 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/FE/src/pages/payment/PaymentPage.jsx</url>
+          <line>374</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
