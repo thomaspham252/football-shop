@@ -15,6 +15,9 @@ const orderApi = {
     },
     applyCoupon(code, subtotal) {
         return axiosInstance.post('/coupons/apply', { code, subtotal });
+    },
+    getMyOrders() {
+        return axiosInstance.get('/orders/my-orders');
     }
 };
 

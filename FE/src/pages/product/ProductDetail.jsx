@@ -97,6 +97,37 @@ export default function ProductDetail() {
   const [sizeError, setSizeError] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
 
+  useEffect(() => {
+    if (product) {
+      const stored = localStorage.getItem('wishlist');
+      const list = stored ? JSON.parse(stored) : [];
+      const prodId = product.productId ?? product.id;
+      setWishlisted(list.some(item => String(item.id) === String(prodId)));
+    }
+  }, [product]);
+
+  const handleToggleWishlist = () => {
+    if (!product) return;
+    const stored = localStorage.getItem('wishlist');
+    let list = stored ? JSON.parse(stored) : [];
+    const prodId = product.productId ?? product.id;
+    const exists = list.some(item => String(item.id) === String(prodId));
+    if (exists) {
+      list = list.filter(item => String(item.id) !== String(prodId));
+      setWishlisted(false);
+    } else {
+      list.push({
+        id: prodId,
+        name: product.productName ?? product.name,
+        price: product.salePrice ?? product.price,
+        image: product.imageUrl ?? product.image
+      });
+      setWishlisted(true);
+    }
+    localStorage.setItem('wishlist', JSON.stringify(list));
+    window.dispatchEvent(new Event('wishlist-updated'));
+  };
+
   // Fetch product detail
   useEffect(() => {
     setLoading(true);
@@ -485,7 +516,7 @@ export default function ProductDetail() {
               <div className="pd-info__secondary-actions">
                 <button
                   className={`pd-info__wishlist ${wishlisted ? 'pd-info__wishlist--active' : ''}`}
-                  onClick={() => setWishlisted(!wishlisted)}
+                  onClick={handleToggleWishlist}
                 >
                   <Heart size={16} />
                   {wishlisted ? 'Đã yêu thích' : 'Yêu thích'}

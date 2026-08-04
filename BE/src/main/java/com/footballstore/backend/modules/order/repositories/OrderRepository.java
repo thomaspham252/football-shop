@@ -13,4 +13,5 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     Optional<Order> findByOrderCode(String orderCode);
     List<Order> findByPaymentStatusAndPaymentMethodAndCreatedAtBefore(
             String paymentStatus, String paymentMethod, LocalDateTime dateTime);
+    List<Order> findByEmailOrderByCreatedAtDesc(String email);
 }

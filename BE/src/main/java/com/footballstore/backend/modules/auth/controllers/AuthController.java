@@ -45,4 +45,84 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body(Map.of("message", "Yêu cầu cung cấp mã xác thực!"));
+        }
+        String token = authHeader.substring(7);
+        try {
+            int lastDash = token.lastIndexOf("-");
+            if (lastDash == -1) {
+                return ResponseEntity.status(401).body(Map.of("message", "Mã xác thực không hợp lệ!"));
+            }
+            String userId = token.substring(lastDash + 1);
+            com.footballstore.backend.modules.auth.models.User user = authService.getUserById(userId);
+            if (user == null) {
+                return ResponseEntity.status(404).body(Map.of("message", "Không tìm thấy người dùng!"));
+            }
+            
+            UserResponse res = UserResponse.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .fullName(user.getFullName())
+                    .phone(user.getPhone())
+                    .address(user.getAddress())
+                    .role(user.getRole().name())
+                    .provider(user.getProvider().name())
+                    .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)
+                    .build();
+            return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("message", "Mã xác thực không hợp lệ!"));
+        }
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestBody Map<String, String> body) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body(Map.of("message", "Yêu cầu cung cấp mã xác thực!"));
+        }
+        String token = authHeader.substring(7);
+        try {
+            int lastDash = token.lastIndexOf("-");
+            if (lastDash == -1) {
+                return ResponseEntity.status(401).body(Map.of("message", "Mã xác thực không hợp lệ!"));
+            }
+            String userId = token.substring(lastDash + 1);
+            com.footballstore.backend.modules.auth.models.User user = authService.getUserById(userId);
+            if (user == null) {
+                return ResponseEntity.status(404).body(Map.of("message", "Không tìm thấy người dùng!"));
+            }
+            
+            if (body.containsKey("fullName")) {
+                user.setFullName(body.get("fullName"));
+            }
+            if (body.containsKey("phone")) {
+                user.setPhone(body.get("phone"));
+            }
+            if (body.containsKey("address")) {
+                user.setAddress(body.get("address"));
+            }
+            
+            authService.updateUser(user);
+            
+            UserResponse res = UserResponse.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .fullName(user.getFullName())
+                    .phone(user.getPhone())
+                    .address(user.getAddress())
+                    .role(user.getRole().name())
+                    .provider(user.getProvider().name())
+                    .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)
+                    .build();
+            return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
 }

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Truck, CheckCircle, X, Package } from 'lucide-react';
-import { ORDERS } from '../data/profileData';
 
 const TABS = [
   { key: 'all',       label: 'Tất cả' },
@@ -10,15 +9,48 @@ const TABS = [
   { key: 'cancelled', label: 'Đã hủy' },
 ];
 
-export default function OrderHistory() {
+const mapStatus = (backendStatus) => {
+  const status = (backendStatus || '').toUpperCase();
+  if (status === 'PENDING') return 'pending';
+  if (status === 'PROCESSING' || status === 'SHIPPING' || status === 'TRANSIT') return 'transit';
+  if (status === 'DELIVERED') return 'delivered';
+  if (status === 'CANCELLED') return 'cancelled';
+  return 'pending';
+};
+
+const mapStatusLabel = (backendStatus) => {
+  const status = (backendStatus || '').toUpperCase();
+  if (status === 'PENDING') return 'Chờ xử lý';
+  if (status === 'PROCESSING') return 'Đang xử lý';
+  if (status === 'SHIPPING' || status === 'TRANSIT') return 'Đang giao hàng';
+  if (status === 'DELIVERED') return 'Đã giao hàng';
+  if (status === 'CANCELLED') return 'Đã hủy';
+  return backendStatus;
+};
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  return `${day} Tháng ${month}, ${year}`;
+};
+
+export default function OrderHistory({ orders = [] }) {
   const [tab,    setTab]    = useState('all');
   const [search, setSearch] = useState('');
 
-  const filtered = ORDERS.filter(o => {
-    const matchTab    = tab === 'all' || o.status === tab;
+  const filtered = orders.filter(o => {
+    const statusKey = mapStatus(o.orderStatus);
+    const matchTab    = tab === 'all' || statusKey === tab;
+    
+    const mainItem = o.items?.[0];
+    const productName = mainItem?.product?.productName || '';
+    
     const matchSearch = !search
-      || o.id.toLowerCase().includes(search.toLowerCase())
-      || o.product.name.toLowerCase().includes(search.toLowerCase());
+      || o.orderCode.toLowerCase().includes(search.toLowerCase())
+      || productName.toLowerCase().includes(search.toLowerCase());
     return matchTab && matchSearch;
   });
 
@@ -36,7 +68,7 @@ export default function OrderHistory() {
           </svg>
           <input
             type="text"
-            placeholder="Tìm theo mã đơn hàng..."
+            placeholder="Tìm theo mã đơn hàng hoặc tên sản phẩm..."
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -63,63 +95,83 @@ export default function OrderHistory() {
             <Package size={40} strokeWidth={1} />
             <p>Không tìm thấy đơn hàng nào</p>
           </div>
-        ) : filtered.map(o => (
-          <div key={o.id} className="oh-card">
-            <div className="oh-card__head">
-              <div className="oh-card__head-left">
-                <span className="oh-card__id">#{o.id}</span>
-                <span className="oh-card__dot">•</span>
-                <span className="oh-card__date">{o.date}</span>
-              </div>
-              <span className={`oh-card__status oh-card__status--${o.status}`}>
-                {o.status === 'transit'   && <Truck size={13} />}
-                {o.status === 'delivered' && <CheckCircle size={13} />}
-                {o.status === 'cancelled' && <X size={13} />}
-                {o.status === 'pending'   && <Package size={13} />}
-                {o.statusLabel}
-              </span>
-            </div>
+        ) : filtered.map(o => {
+          const statusKey = mapStatus(o.orderStatus);
+          const statusLabel = mapStatusLabel(o.orderStatus);
+          const mainItem = o.items?.[0];
+          const image = mainItem?.productVariant?.imageUrl || mainItem?.product?.imageUrl;
+          const name = mainItem?.product?.productName || 'Sản phẩm';
+          const qty = mainItem?.quantity || 1;
+          const extraCount = (o.items?.length || 0) - 1;
+          
+          let paymentNote = o.paymentMethod === 'MOMO' ? 'Thanh toán qua Momo'
+                          : o.paymentMethod === 'TRANSFER' ? 'Thanh toán Chuyển khoản'
+                          : 'Thanh toán COD (Nhận hàng thanh toán)';
+          
+          if (o.paymentStatus === 'PAID') {
+            paymentNote += ' - Đã thanh toán';
+          } else {
+            paymentNote += ' - Chưa thanh toán';
+          }
 
-            <div className="oh-card__body">
-              <div className="oh-card__product">
-                <img src={o.product.image} alt={o.product.name} className="oh-card__img" />
-                <div className="oh-card__product-info">
-                  <p className="oh-card__product-name">{o.product.name}</p>
-                  <p className="oh-card__product-qty">
-                    Số lượng: {o.product.qty} sản phẩm
-                    {o.product.extra && ` (và ${o.product.extra})`}
-                  </p>
-                  {o.product.note && (
-                    <p className={`oh-card__product-note ${o.status === 'transit' ? 'oh-card__product-note--transit' : ''}`}>
-                      {o.product.note}
+          return (
+            <div key={o.orderId} className="oh-card">
+              <div className="oh-card__head">
+                <div className="oh-card__head-left">
+                  <span className="oh-card__id">#{o.orderCode}</span>
+                  <span className="oh-card__dot">•</span>
+                  <span className="oh-card__date">{formatDate(o.createdAt)}</span>
+                </div>
+                <span className={`oh-card__status oh-card__status--${statusKey}`}>
+                  {statusKey === 'transit'   && <Truck size={13} />}
+                  {statusKey === 'delivered' && <CheckCircle size={13} />}
+                  {statusKey === 'cancelled' && <X size={13} />}
+                  {statusKey === 'pending'   && <Package size={13} />}
+                  {statusLabel}
+                </span>
+              </div>
+
+              <div className="oh-card__body">
+                <div className="oh-card__product">
+                  {image && <img src={image} alt={name} className="oh-card__img" />}
+                  <div className="oh-card__product-info">
+                    <p className="oh-card__product-name">{name}</p>
+                    <p className="oh-card__product-qty">
+                      Số lượng: {qty} sản phẩm
+                      {extraCount > 0 && ` (và ${extraCount} sản phẩm khác)`}
                     </p>
-                  )}
+                    {paymentNote && (
+                      <p className={`oh-card__product-note ${statusKey === 'transit' ? 'oh-card__product-note--transit' : ''}`}>
+                        {paymentNote}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <div className="oh-card__right">
-                <p className="oh-card__total-label">TỔNG CỘNG</p>
-                <p className="oh-card__total">{o.total.toLocaleString('vi-VN')}đ</p>
-                <div className="oh-card__actions">
-                  {o.status === 'delivered' && (
-                    <button className="oh-btn oh-btn--primary">Mua lại</button>
-                  )}
-                  {o.status === 'cancelled' && (
-                    <button className="oh-btn oh-btn--outline">Xem lý do hủy</button>
-                  )}
-                  {o.status !== 'cancelled' && (
-                    <a href={`/don-hang/${o.id}`} className="oh-btn oh-btn--outline">
-                      Chi tiết
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polyline points="9 18 15 12 9 6"/>
-                      </svg>
-                    </a>
-                  )}
+                <div className="oh-card__right">
+                  <p className="oh-card__total-label">TỔNG CỘNG</p>
+                  <p className="oh-card__total">{(o.totalAmount || 0).toLocaleString('vi-VN')}đ</p>
+                  <div className="oh-card__actions">
+                    {statusKey === 'delivered' && (
+                      <button className="oh-btn oh-btn--primary">Mua lại</button>
+                    )}
+                    {statusKey === 'cancelled' && (
+                      <button className="oh-btn oh-btn--outline">Xem lý do hủy</button>
+                    )}
+                    {statusKey !== 'cancelled' && (
+                      <a href={`/don-hang/${o.orderId}`} className="oh-btn oh-btn--outline">
+                        Chi tiết
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

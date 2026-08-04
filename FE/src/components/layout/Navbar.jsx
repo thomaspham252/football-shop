@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Heart, ShoppingCart, Menu, X, ChevronDown, Truck, Star, Package, UserPlus, LogIn, User } from 'lucide-react';
 import './Navbar.css';
 import { useCart } from '../../context/CartContext';
@@ -161,9 +161,20 @@ const topBarItems = [
 export default function Navbar() {
   const [mobileOpen,   setMobileOpen]   = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const [wishlistCount] = useState(12);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const { cart } = useCart();
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
+
+  useEffect(() => {
+    const updateWishlistCount = () => {
+      const stored = localStorage.getItem('wishlist');
+      const list = stored ? JSON.parse(stored) : [];
+      setWishlistCount(list.length);
+    };
+    updateWishlistCount();
+    window.addEventListener('wishlist-updated', updateWishlistCount);
+    return () => window.removeEventListener('wishlist-updated', updateWishlistCount);
+  }, []);
 
   const token = localStorage.getItem('token');
   const userJson = localStorage.getItem('user');

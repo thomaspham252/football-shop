@@ -47,11 +47,43 @@ export default function ProductCard({ product }) {
 
   const [activeImageUrl, setActiveImageUrl] = useState(imageUrl);
   const [detailedProduct, setDetailedProduct] = useState(null);
+  const [isWish, setIsWish] = useState(false);
 
   useEffect(() => {
     setActiveImageUrl(product.imageUrl ?? product.image);
     setDetailedProduct(null);
   }, [product]);
+
+  useEffect(() => {
+    const checkWish = () => {
+      const stored = localStorage.getItem('wishlist');
+      const list = stored ? JSON.parse(stored) : [];
+      setIsWish(list.some(item => String(item.id) === String(productId)));
+    };
+    checkWish();
+    window.addEventListener('wishlist-updated', checkWish);
+    return () => window.removeEventListener('wishlist-updated', checkWish);
+  }, [productId]);
+
+  const handleToggleWish = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const stored = localStorage.getItem('wishlist');
+    let list = stored ? JSON.parse(stored) : [];
+    const exists = list.some(item => String(item.id) === String(productId));
+    if (exists) {
+      list = list.filter(item => String(item.id) !== String(productId));
+    } else {
+      list.push({
+        id: productId,
+        name: productName,
+        price: salePrice,
+        image: imageUrl
+      });
+    }
+    localStorage.setItem('wishlist', JSON.stringify(list));
+    window.dispatchEvent(new Event('wishlist-updated'));
+  };
 
   const handleColorInteraction = async (colorName) => {
     let prodData = detailedProduct;
@@ -110,8 +142,8 @@ export default function ProductCard({ product }) {
           </span>
           )}
 
-          <button className="product-card__wishlist">
-            <Heart size={16} />
+          <button className="product-card__wishlist" onClick={handleToggleWish}>
+            <Heart size={16} fill={isWish ? "#e53935" : "none"} color={isWish ? "#e53935" : "currentColor"} />
           </button>
 
           <img
