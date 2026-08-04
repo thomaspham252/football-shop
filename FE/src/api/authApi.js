@@ -9,6 +9,12 @@ const authApi = {
   },
   googleLogin(idToken) {
     return axiosInstance.post('/auth/google', { idToken });
+  },
+  getProfile() {
+    return axiosInstance.get('/auth/profile');
+  },
+  updateProfile(data) {
+    return axiosInstance.put('/auth/profile', data);
   }
 };
 

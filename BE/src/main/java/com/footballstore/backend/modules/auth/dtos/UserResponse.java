@@ -12,4 +12,6 @@ public class UserResponse {
     private String phone;
     private String role;
     private String provider;
+    private String address;
+    private String createdAt;
 }

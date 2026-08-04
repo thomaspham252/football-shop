@@ -218,6 +218,10 @@ public class OrderService {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng với ID: " + orderId));
     }
 
+    public List<Order> getOrdersByEmail(String email) {
+        return orderRepository.findByEmailOrderByCreatedAtDesc(email);
+    }
+
     private String generateUniqueOrderCode() {
         Random random = new Random();
         while (true) {

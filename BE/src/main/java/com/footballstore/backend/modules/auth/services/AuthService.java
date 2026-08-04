@@ -119,8 +119,18 @@ public class AuthService {
                 .phone(user.getPhone())
                 .role(user.getRole().name())
                 .provider(user.getProvider().name())
+                .address(user.getAddress())
+                .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)
                 .build();
 
         return new AuthResponse(token, userResponse);
+    }
+
+    public User getUserById(String id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    public void updateUser(User user) {
+        userRepository.save(user);
     }
 }

@@ -24,6 +24,7 @@ public class User {
 
     private String fullName;
     private String phone;
+    private String address;
 
     @Enumerated(EnumType.STRING)
     private AuthProvider provider = AuthProvider.LOCAL;

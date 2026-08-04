@@ -29,7 +29,11 @@ export default function ProfileSidebar({ active, onChange }) {
         <li>
           <button
             className="profile-sidebar__item profile-sidebar__item--logout"
-            onClick={() => { window.location.href = '/dang-nhap'; }}
+            onClick={() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              window.location.href = '/dang-nhap';
+            }}
           >
             <span className="profile-sidebar__icon"><LogOut size={17} /></span>
             <span>Đăng Xuất</span>

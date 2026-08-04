@@ -7,6 +7,7 @@ import com.footballstore.backend.modules.order.dtos.ValidateCartResponse;
 import com.footballstore.backend.modules.order.models.Order;
 import com.footballstore.backend.modules.order.services.MomoService;
 import com.footballstore.backend.modules.order.services.OrderService;
+import com.footballstore.backend.modules.auth.services.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -21,6 +23,7 @@ import java.util.Map;
 public class OrderController {
     private final OrderService orderService;
     private final MomoService momoService;
+    private final AuthService authService;
 
     @PostMapping("/cart/validate")
     public ResponseEntity<ValidateCartResponse> validateCart(@Valid @RequestBody ValidateCartRequest request) {
@@ -90,6 +93,29 @@ public class OrderController {
             Map<String, String> response = new HashMap<>();
             response.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @GetMapping("/my-orders")
+    public ResponseEntity<?> getMyOrders(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body(Map.of("message", "Yêu cầu cung cấp mã xác thực!"));
+        }
+        String token = authHeader.substring(7);
+        try {
+            int lastDash = token.lastIndexOf("-");
+            if (lastDash == -1) {
+                return ResponseEntity.status(401).body(Map.of("message", "Mã xác thực không hợp lệ!"));
+            }
+            String userId = token.substring(lastDash + 1);
+            com.footballstore.backend.modules.auth.models.User user = authService.getUserById(userId);
+            if (user == null) {
+                return ResponseEntity.status(404).body(Map.of("message", "Không tìm thấy người dùng!"));
+            }
+            List<Order> orders = orderService.getOrdersByEmail(user.getEmail());
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("message", "Mã xác thực không hợp lệ!"));
         }
     }
 }
