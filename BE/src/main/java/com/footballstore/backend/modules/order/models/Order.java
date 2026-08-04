@@ -22,6 +22,9 @@ public class Order {
     @Column(name = "order_code", length = 50, nullable = false, unique = true)
     private String orderCode;
 
+    @Column(name = "user_id", length = 255)
+    private String userId;
+
     @Column(name = "email", length = 150, nullable = false)
     private String email;
 

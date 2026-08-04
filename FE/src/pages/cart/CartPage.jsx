@@ -4,6 +4,7 @@ import Footer from '../../components/layout/Footer';
 import ProductCard from '../../components/common/ProductCard';
 import { Trash2, Minus, Plus, ShoppingBag, ChevronRight } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useToast } from '../../context/ToastContext';
 import homeApi from '../../api/homeApi';
 import './CartPage.css';
 
@@ -36,6 +37,7 @@ const INIT_CART = [
 ];
 
 export default function CartPage() {
+  const { toast } = useToast();
   const { cart, updateQty, removeItem, clearCart } = useCart();
   const [suggestedProducts, setSuggestedProducts] = useState([]);
   const [selectedIds, setSelectedIds] = useState(() => cart.map(item => item.id));
@@ -97,6 +99,12 @@ export default function CartPage() {
   const total     = subtotal + shipping;
 
   const handleCheckout = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.warning("Vui lòng đăng nhập để tiến hành thanh toán!");
+      window.location.href = '/dang-nhap?redirect=/gio-hang';
+      return;
+    }
     localStorage.setItem('checkoutItems', JSON.stringify(selectedCartItems));
     window.location.href = '/thanh-toan';
   };

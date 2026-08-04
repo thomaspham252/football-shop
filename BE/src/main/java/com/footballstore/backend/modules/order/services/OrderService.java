@@ -134,6 +134,7 @@ public class OrderService {
 
         Order order = Order.builder()
                 .orderCode(orderCode)
+                .userId(request.getUserId())
                 .email(request.getEmail())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())

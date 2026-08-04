@@ -3,6 +3,7 @@ import { Eye, EyeOff, User, Mail, Phone, Lock, ArrowRight, Gift } from 'lucide-r
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import authApi from '../../api/authApi';
+import { useToast } from '../../context/ToastContext';
 import './LoginPage.css';
 import './RegisterPage.css';
 
@@ -10,6 +11,7 @@ import './RegisterPage.css';
 const GOOGLE_CLIENT_ID = "your-google-client-id.apps.googleusercontent.com";
 
 export default function RegisterPage() {
+  const { toast } = useToast();
   const [form, setForm] = useState({
     fullName: '', email: '', phone: '', password: '', confirmPassword: '',
   });
@@ -53,13 +55,14 @@ export default function RegisterPage() {
         setLoading(false);
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
-        alert("Đăng nhập bằng Google thành công!");
+        toast.success("Đăng nhập bằng Google thành công!");
         window.location.href = '/';
       })
       .catch(err => {
         setLoading(false);
         const errMsg = err.response?.data?.message || "Đăng nhập Google thất bại hoặc email đã đăng ký bằng phom thường!";
         setErrors({ google: errMsg });
+        toast.error(errMsg);
       });
   };
 
@@ -97,13 +100,14 @@ export default function RegisterPage() {
         setLoading(false);
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
-        alert("Đăng ký tài khoản thành công!");
+        toast.success("Đăng ký tài khoản thành công!");
         window.location.href = '/';
       })
       .catch(err => {
         setLoading(false);
         const errMsg = err.response?.data?.message || "Đăng ký tài khoản thất bại, vui lòng thử lại!";
         setErrors({ api: errMsg });
+        toast.error(errMsg);
       });
   };
 

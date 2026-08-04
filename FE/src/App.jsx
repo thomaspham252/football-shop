@@ -15,12 +15,14 @@ import OrderDetailPage from './pages/profile/OrderDetailPage';
 import SearchPage from './pages/search/SearchPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { CartProvider } from './context/CartContext';
+import { ToastProvider } from './context/ToastContext';
 
 function App() {
   return (
-    <CartProvider>
-      <BrowserRouter>
-        <Routes>
+    <ToastProvider>
+      <CartProvider>
+        <BrowserRouter>
+          <Routes>
           <Route path="/"                      element={<HomePage />} />
           <Route path="/san-pham"              element={<ProductsPage />} />
           <Route path="/san-pham/:id"          element={<ProductDetail />} />
@@ -37,7 +39,8 @@ function App() {
           <Route path="*"                      element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
-    </CartProvider>
+      </CartProvider>
+    </ToastProvider>
   );
 }
 
