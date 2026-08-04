@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ShoppingCart, Heart } from 'lucide-react';
 import './ProductCard.css';
 import { useCart } from '../../context/CartContext';
+import { useToast } from '../../context/ToastContext';
 import productApi from '../../api/productApi';
 
 const colorMap = {
@@ -36,6 +37,7 @@ function getColorHex(name) {
 }
 
 export default function ProductCard({ product }) {
+  const { toast } = useToast();
   const { addToCart } = useCart();
   const [adding, setAdding] = useState(false);
   const productId = product.productId ?? product.id;
@@ -122,11 +124,11 @@ export default function ProductCard({ product }) {
       if (firstVariant) {
         addToCart(prodData, firstVariant, 1);
       } else {
-        alert("Sản phẩm hiện tại không có phiên bản (variant) nào khả dụng.");
+        toast.warning("Sản phẩm hiện tại không có phiên bản (variant) nào khả dụng.");
       }
     } catch (error) {
       console.error("Lỗi khi thêm vào giỏ hàng:", error);
-      alert("Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.");
+      toast.error("Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.");
     } finally {
       setAdding(false);
     }

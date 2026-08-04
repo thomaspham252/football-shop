@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useVietnamAddress } from '../../hooks/useVietnamAddress';
 import { ChevronDown, ChevronUp, Info, Tag, Lock, Pencil } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useToast } from '../../context/ToastContext';
 import orderApi from '../../api/orderApi';
 import './PaymentPage.css';
 
@@ -25,6 +26,7 @@ const PAYMENT_METHODS = [
 ];
 
 export default function PaymentPage() {
+  const { toast } = useToast();
   const { removeItems } = useCart();
   const [checkoutItems] = useState(() => {
     try {
@@ -39,6 +41,31 @@ export default function PaymentPage() {
       window.location.href = '/gio-hang';
     }
   }, [checkoutItems]);
+
+  useEffect(() => {
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      try {
+        const u = JSON.parse(userJson);
+        if (u) {
+          if (u.email) setEmail(u.email);
+          if (u.fullName) {
+            const parts = u.fullName.trim().split(/\s+/);
+            if (parts.length > 1) {
+              setLastName(parts[0]);
+              setFirstName(parts.slice(1).join(' '));
+            } else {
+              setFirstName(u.fullName);
+            }
+          }
+          if (u.phone) setPhone(u.phone);
+          if (u.address) setStreet(u.address);
+        }
+      } catch (e) {
+        console.error("Lỗi khi giải mã user từ localStorage:", e);
+      }
+    }
+  }, []);
 
   const [email, setEmail]               = useState('');
   const [sendLink, setSendLink]         = useState(true);
@@ -73,22 +100,33 @@ export default function PaymentPage() {
   const handleCheckout = async (e) => {
     e.preventDefault();
     if (checkoutItems.length === 0) {
-      alert("Đơn hàng thanh toán của bạn đang trống!");
+      toast.warning("Đơn hàng thanh toán của bạn đang trống!");
       return;
     }
     if (!email.trim() || !firstName.trim() || !lastName.trim() || !phone.trim() || !street.trim() || !provinceName || !districtName || !wardName) {
-      alert("Vui lòng điền đầy đủ thông tin giao hàng!");
+      toast.warning("Vui lòng điền đầy đủ thông tin giao hàng!");
       return;
     }
     if (payment === 'cod' && total > 5000000) {
-      alert("Đơn hàng trên 5 triệu không áp dụng hình thức COD. Vui lòng chọn phương thức thanh toán khác!");
+      toast.warning("Đơn hàng trên 5 triệu không áp dụng hình thức COD. Vui lòng chọn phương thức thanh toán khác!");
       return;
     }
     
     setSubmitting(true);
     try {
+      const userJson = localStorage.getItem('user');
+      let userId = null;
+      if (userJson) {
+        try {
+          userId = JSON.parse(userJson).id;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
       const orderData = {
         items: checkoutItems.map(i => ({ variantId: i.id, qty: i.qty })),
+        userId: userId,
         email: email,
         firstName: firstName,
         lastName: lastName,
@@ -121,7 +159,7 @@ export default function PaymentPage() {
         if (paymentRes.data && paymentRes.data.payUrl) {
           window.location.href = paymentRes.data.payUrl;
         } else {
-          alert("Không thể khởi tạo cổng thanh toán MoMo. Đang chuyển hướng về trang đơn hàng thành công.");
+          toast.warning("Không thể khởi tạo cổng thanh toán MoMo. Đang chuyển hướng về trang đơn hàng thành công.");
           window.location.href = `/dat-hang-thanh-cong?orderId=${createdOrder.orderId}`;
         }
       } else {
@@ -132,7 +170,7 @@ export default function PaymentPage() {
       const errMsg = err.response && err.response.data && err.response.data.error 
           ? err.response.data.error 
           : "Không thể xử lý đơn hàng. Vui lòng kiểm tra lại tồn kho hoặc thử lại sau.";
-      alert("❌ Lỗi: " + errMsg);
+      toast.error("Lỗi: " + errMsg);
     } finally {
       setSubmitting(false);
     }

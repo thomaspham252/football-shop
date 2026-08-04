@@ -18,6 +18,8 @@ public class CreateOrderRequest {
     @Valid
     private List<CartItemDto> items;
 
+    private String userId;
+
     @Email(message = "Invalid email address")
     @NotEmpty(message = "Email is required")
     private String email;

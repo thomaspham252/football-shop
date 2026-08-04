@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import authApi from '../../../api/authApi';
+import { useToast } from '../../../context/ToastContext';
 
 export default function PersonalInfo({ user, onUpdate }) {
+  const { toast } = useToast();
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -33,13 +35,13 @@ export default function PersonalInfo({ user, onUpdate }) {
         phone: form.phone,
         address: form.address,
       });
-      alert('Cập nhật thông tin thành công!');
+      toast.success('Cập nhật thông tin thành công!');
       if (onUpdate) {
         onUpdate(res.data);
       }
     } catch (err) {
       console.error("Lỗi khi cập nhật profile:", err);
-      alert(err.response?.data?.message || 'Cập nhật thất bại. Vui lòng thử lại.');
+      toast.error(err.response?.data?.message || 'Cập nhật thất bại. Vui lòng thử lại.');
     } finally {
       setSaving(false);
     }

@@ -4,30 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5c064fff-bd4c-4565-ac17-1f911a404c52" name="Changes" comment="api-auth">
+    <list default="true" id="5c064fff-bd4c-4565-ac17-1f911a404c52" name="Changes" comment="api-payment fix">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/controllers/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/controllers/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/dtos/UserResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/dtos/UserResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/models/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/models/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/services/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/services/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/controllers/OrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/controllers/OrderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/repositories/OrderRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/repositories/OrderRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/dtos/CreateOrderRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/dtos/CreateOrderRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/models/Order.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/models/Order.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/OrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/OrderService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/api/authApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/api/authApi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/api/axiosInstance.js" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/api/axiosInstance.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/api/orderApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/api/orderApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/App.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FE/src/components/common/ProductCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/common/ProductCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/common/ProfileSidebar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/common/ProfileSidebar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/layout/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/layout/Navbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/pages/auth/LoginPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/auth/LoginPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/pages/auth/RegisterPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/auth/RegisterPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/pages/cart/CartPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/cart/CartPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/pages/payment/PaymentPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/payment/PaymentPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FE/src/pages/product/ProductDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/product/ProductDetail.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/profile/OrderDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/profile/OrderDetailPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/profile/ProfilePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/profile/ProfilePage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/profile/data/profileData.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/profile/tabs/OrderHistory.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/profile/tabs/OrderHistory.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/profile/tabs/Overview.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/profile/tabs/Overview.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FE/src/pages/profile/tabs/PersonalInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/profile/tabs/PersonalInfo.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/profile/tabs/Wishlist.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/profile/tabs/Wishlist.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/BE/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,29 +59,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;HTTP Request.product | #2.executor&quot;: &quot;Run&quot;,
-    &quot;HTTP Request.product | Lấy sản phẩm mới.executor&quot;: &quot;Run&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature/profile-api&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/football-shop/BE/src/main/resources&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;D:\\Intejj\\IntelliJ IDEA 2024.2.4\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "HTTP Request.product | #2.executor": "Run",
+    "HTTP Request.product | Lấy sản phẩm mới.executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.BackendApplication.executor": "Run",
+    "git-widget-placeholder": "feature/payment-api",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/football-shop/BE/src/main/resources",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "ts.external.directory.path": "D:\\Intejj\\IntelliJ IDEA 2024.2.4\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\football-shop\BE\src\main\resources" />
@@ -157,14 +146,15 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="api-auth" />
-    <option name="LAST_COMMIT_MESSAGE" value="api-auth" />
+    <MESSAGE value="api-payment fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="api-payment fix" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/FE/src/pages/payment/PaymentPage.jsx</url>
-          <line>374</line>
+          <line>412</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

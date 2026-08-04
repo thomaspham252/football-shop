@@ -3,12 +3,14 @@ import { Eye, EyeOff, ShieldCheck, ArrowRight } from 'lucide-react';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import authApi from '../../api/authApi';
+import { useToast } from '../../context/ToastContext';
 import './LoginPage.css';
 
 // Thay đổi Client ID này bằng Google Client ID thực tế của bạn để đăng nhập Google
 const GOOGLE_CLIENT_ID = "your-google-client-id.apps.googleusercontent.com";
 
 export default function LoginPage() {
+  const { toast } = useToast();
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -49,13 +51,15 @@ export default function LoginPage() {
         setLoading(false);
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
-        alert("Đăng nhập bằng Google thành công!");
-        window.location.href = '/';
+        toast.success("Đăng nhập bằng Google thành công!");
+        const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/';
+        window.location.href = redirectUrl;
       })
       .catch(err => {
         setLoading(false);
         const errMsg = err.response?.data?.message || "Đăng nhập Google thất bại hoặc email đã đăng ký bằng phom thường!";
         setErrors({ google: errMsg });
+        toast.error(errMsg);
       });
   };
 
@@ -80,13 +84,15 @@ export default function LoginPage() {
         setLoading(false);
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
-        alert("Đăng nhập thành công!");
-        window.location.href = '/';
+        toast.success("Đăng nhập thành công!");
+        const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/';
+        window.location.href = redirectUrl;
       })
       .catch(err => {
         setLoading(false);
         const errMsg = err.response?.data?.message || "Email hoặc mật khẩu không chính xác!";
         setErrors({ api: errMsg });
+        toast.error(errMsg);
       });
   };
 

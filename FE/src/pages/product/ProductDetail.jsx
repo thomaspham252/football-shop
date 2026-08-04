@@ -6,6 +6,7 @@ import ProductCard from '../../components/common/ProductCard';
 import productApi from '../../api/productApi';
 import homeApi from '../../api/homeApi';
 import { useCart } from '../../context/CartContext';
+import { useToast } from '../../context/ToastContext';
 import {
   ChevronRight, Heart, ShoppingCart, Zap,
   Star, StarHalf, ChevronLeft,
@@ -82,6 +83,7 @@ function getColorHex(name) {
 }
 
 export default function ProductDetail() {
+  const { toast } = useToast();
   const { addToCart } = useCart();
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -325,7 +327,7 @@ export default function ProductDetail() {
     if (!selectedSize) { setSizeError(true); return; }
     setSizeError(false);
     if (!currentVariant) {
-      alert("Phiên bản sản phẩm đã chọn không khả dụng.");
+      toast.warning("Phiên bản sản phẩm đã chọn không khả dụng.");
       return;
     }
     addToCart(product, currentVariant, qty);
@@ -335,7 +337,7 @@ export default function ProductDetail() {
     if (!selectedSize) { setSizeError(true); return; }
     setSizeError(false);
     if (!currentVariant) {
-      alert("Phiên bản sản phẩm đã chọn không khả dụng.");
+      toast.warning("Phiên bản sản phẩm đã chọn không khả dụng.");
       return;
     }
     addToCart(product, currentVariant, qty);
