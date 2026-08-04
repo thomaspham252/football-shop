@@ -27,6 +27,7 @@
       <change beforePath="$PROJECT_DIR$/FE/src/pages/profile/tabs/Overview.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/profile/tabs/Overview.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FE/src/pages/profile/tabs/PersonalInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/profile/tabs/PersonalInfo.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FE/src/pages/profile/tabs/Wishlist.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/profile/tabs/Wishlist.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/BE/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
