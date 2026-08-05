@@ -4,6 +4,7 @@ import './ProductCard.css';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 import productApi from '../../api/productApi';
+import wishlistApi from '../../api/wishlistApi';
 
 const colorMap = {
   'Trắng': '#ffffff',
@@ -58,6 +59,14 @@ export default function ProductCard({ product }) {
 
   useEffect(() => {
     const checkWish = () => {
+      const storedIds = localStorage.getItem('wishlist_ids');
+      if (storedIds) {
+        const ids = JSON.parse(storedIds);
+        if (Array.isArray(ids) && ids.length > 0) {
+          setIsWish(ids.some(id => String(id) === String(productId)));
+          return;
+        }
+      }
       const stored = localStorage.getItem('wishlist');
       const list = stored ? JSON.parse(stored) : [];
       setIsWish(list.some(item => String(item.id) === String(productId)));
@@ -67,14 +76,34 @@ export default function ProductCard({ product }) {
     return () => window.removeEventListener('wishlist-updated', checkWish);
   }, [productId]);
 
-  const handleToggleWish = (e) => {
+  const handleToggleWish = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const res = await wishlistApi.toggleWishlist(productId);
+        const added = res.data.added;
+        setIsWish(added);
+        if (added) {
+          toast.success("Đã thêm vào sản phẩm yêu thích");
+        } else {
+          toast.info("Đã xóa khỏi sản phẩm yêu thích");
+        }
+        window.dispatchEvent(new Event('wishlist-updated'));
+        return;
+      } catch (err) {
+        console.error("Lỗi khi toggle wishlist:", err);
+      }
+    }
+
     const stored = localStorage.getItem('wishlist');
     let list = stored ? JSON.parse(stored) : [];
     const exists = list.some(item => String(item.id) === String(productId));
     if (exists) {
       list = list.filter(item => String(item.id) !== String(productId));
+      toast.info("Đã xóa khỏi sản phẩm yêu thích");
     } else {
       list.push({
         id: productId,
@@ -82,6 +111,7 @@ export default function ProductCard({ product }) {
         price: salePrice,
         image: imageUrl
       });
+      toast.success("Đã thêm vào sản phẩm yêu thích");
     }
     localStorage.setItem('wishlist', JSON.stringify(list));
     window.dispatchEvent(new Event('wishlist-updated'));

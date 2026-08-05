@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Heart, ShoppingCart, Menu, X, ChevronDown, Truck, Star, Package, UserPlus, LogIn, User } from 'lucide-react';
 import './Navbar.css';
 import { useCart } from '../../context/CartContext';
+import wishlistApi from '../../api/wishlistApi';
 
 const navLinks = [
   { label: 'TRANG CHỦ',        href: '/' },
@@ -155,7 +156,6 @@ const DROPDOWNS = {
 const topBarItems = [
   { icon: <Truck size={14} />, text: 'GIAO HÀNG NHANH TOÀN QUỐC' },
   { icon: <Star size={14} />,  text: 'ƯU ĐÃI SỐC GIẢM ĐẾN 50%' },
-  { icon: <Package size={14} />, text: 'THEO DÕI ĐƠN HÀNG' },
 ];
 
 export default function Navbar() {
@@ -167,19 +167,62 @@ export default function Navbar() {
 
   useEffect(() => {
     const updateWishlistCount = () => {
-      const stored = localStorage.getItem('wishlist');
-      const list = stored ? JSON.parse(stored) : [];
-      setWishlistCount(list.length);
+      const token = localStorage.getItem('token');
+      if (token) {
+        wishlistApi.getWishlistIds()
+          .then(res => {
+            if (Array.isArray(res.data)) {
+              setWishlistCount(res.data.length);
+              localStorage.setItem('wishlist_ids', JSON.stringify(res.data));
+            }
+          })
+          .catch(() => {
+            const stored = localStorage.getItem('wishlist');
+            const list = stored ? JSON.parse(stored) : [];
+            setWishlistCount(list.length);
+          });
+      } else {
+        const stored = localStorage.getItem('wishlist');
+        const list = stored ? JSON.parse(stored) : [];
+        setWishlistCount(list.length);
+      }
     };
     updateWishlistCount();
     window.addEventListener('wishlist-updated', updateWishlistCount);
-    return () => window.removeEventListener('wishlist-updated', updateWishlistCount);
+
+    const updateUserInfo = () => {
+      const uJson = localStorage.getItem('user');
+      if (uJson) {
+        try {
+          setCurrentUser(JSON.parse(uJson));
+        } catch {
+          setCurrentUser({});
+        }
+      } else {
+        setCurrentUser({});
+      }
+    };
+    updateUserInfo();
+    window.addEventListener('user-updated', updateUserInfo);
+
+    return () => {
+      window.removeEventListener('wishlist-updated', updateWishlistCount);
+      window.removeEventListener('user-updated', updateUserInfo);
+    };
   }, []);
 
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const userJson = localStorage.getItem('user');
+      return userJson ? JSON.parse(userJson) : {};
+    } catch {
+      return {};
+    }
+  });
+
   const token = localStorage.getItem('token');
-  const userJson = localStorage.getItem('user');
   const isLoggedIn = !!token;
-  const user = userJson ? JSON.parse(userJson) : {};
+  const user = currentUser;
 
   const handleLogout = () => {
     localStorage.removeItem('token');

@@ -110,7 +110,7 @@ public class AuthService {
     }
 
     private AuthResponse generateAuthResponse(User user) {
-        String token = "auth-token-" + UUID.randomUUID().toString() + "-" + user.getId();
+        String token = "auth-token:" + UUID.randomUUID().toString() + ":" + user.getId();
         
         UserResponse userResponse = UserResponse.builder()
                 .id(user.getId())
@@ -124,6 +124,25 @@ public class AuthService {
                 .build();
 
         return new AuthResponse(token, userResponse);
+    }
+
+    public String extractUserIdFromToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+        String token = authHeader.substring(7).trim();
+        if (token.contains(":")) {
+            String[] parts = token.split(":");
+            return parts[parts.length - 1];
+        }
+        if (token.length() >= 36) {
+            return token.substring(token.length() - 36);
+        }
+        int lastDash = token.lastIndexOf("-");
+        if (lastDash != -1) {
+            return token.substring(lastDash + 1);
+        }
+        return token;
     }
 
     public User getUserById(String id) {
