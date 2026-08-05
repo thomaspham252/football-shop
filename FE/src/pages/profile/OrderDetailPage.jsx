@@ -210,9 +210,6 @@ export default function OrderDetailPage() {
                     </button>
                   )}
                   <button className="od-btn od-btn--outline">
-                    <Truck size={15} /> Theo dõi đơn hàng
-                  </button>
-                  <button className="od-btn od-btn--outline">
                     <Headphones size={15} /> Liên hệ hỗ trợ
                   </button>
                 </div>

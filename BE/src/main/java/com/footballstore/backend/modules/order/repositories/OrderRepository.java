@@ -14,4 +14,6 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findByPaymentStatusAndPaymentMethodAndCreatedAtBefore(
             String paymentStatus, String paymentMethod, LocalDateTime dateTime);
     List<Order> findByEmailOrderByCreatedAtDesc(String email);
+    List<Order> findByUserIdOrderByCreatedAtDesc(String userId);
+    List<Order> findByEmailAndUserIdIsNull(String email);
 }

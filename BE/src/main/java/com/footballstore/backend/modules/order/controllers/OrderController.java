@@ -42,7 +42,25 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/my-orders")
+    public ResponseEntity<?> getMyOrders(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        String userId = authService.extractUserIdFromToken(authHeader);
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "Yêu cầu cung cấp mã xác thực!"));
+        }
+        try {
+            com.footballstore.backend.modules.auth.models.User user = authService.getUserById(userId);
+            if (user == null) {
+                return ResponseEntity.status(404).body(Map.of("message", "Không tìm thấy người dùng!"));
+            }
+            List<Order> orders = orderService.getOrdersByUserId(user.getId(), user.getEmail());
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("message", "Mã xác thực không hợp lệ!"));
+        }
+    }
+
+    @GetMapping("/{id:\\d+}")
     public ResponseEntity<Order> getOrderById(@PathVariable Integer id) {
         try {
             return ResponseEntity.ok(orderService.getOrderById(id));
@@ -51,7 +69,7 @@ public class OrderController {
         }
     }
 
-    @PostMapping("/{id}/payment")
+    @PostMapping("/{id:\\d+}/payment")
     public ResponseEntity<?> initiatePayment(@PathVariable Integer id) {
         try {
             Order order = orderService.getOrderById(id);
@@ -84,7 +102,7 @@ public class OrderController {
         }
     }
 
-    @PatchMapping("/admin/{id}/confirm-payment")
+    @PatchMapping("/admin/{id:\\d+}/confirm-payment")
     public ResponseEntity<?> confirmPayment(@PathVariable Integer id) {
         try {
             Order order = orderService.confirmPayment(id);
@@ -96,26 +114,15 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/my-orders")
-    public ResponseEntity<?> getMyOrders(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(401).body(Map.of("message", "Yêu cầu cung cấp mã xác thực!"));
-        }
-        String token = authHeader.substring(7);
+    @PostMapping("/{id:\\d+}/cancel")
+    public ResponseEntity<?> cancelOrder(@PathVariable Integer id) {
         try {
-            int lastDash = token.lastIndexOf("-");
-            if (lastDash == -1) {
-                return ResponseEntity.status(401).body(Map.of("message", "Mã xác thực không hợp lệ!"));
-            }
-            String userId = token.substring(lastDash + 1);
-            com.footballstore.backend.modules.auth.models.User user = authService.getUserById(userId);
-            if (user == null) {
-                return ResponseEntity.status(404).body(Map.of("message", "Không tìm thấy người dùng!"));
-            }
-            List<Order> orders = orderService.getOrdersByEmail(user.getEmail());
-            return ResponseEntity.ok(orders);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(Map.of("message", "Mã xác thực không hợp lệ!"));
+            Order order = orderService.cancelOrder(id);
+            return ResponseEntity.ok(order);
+        } catch (IllegalArgumentException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
         }
     }
 }

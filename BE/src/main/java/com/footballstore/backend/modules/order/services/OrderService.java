@@ -223,6 +223,52 @@ public class OrderService {
         return orderRepository.findByEmailOrderByCreatedAtDesc(email);
     }
 
+    @Transactional
+    public List<Order> getOrdersByUserId(String userId, String email) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        if (email != null && !email.trim().isEmpty()) {
+            List<Order> legacyOrders = orderRepository.findByEmailAndUserIdIsNull(email);
+            if (!legacyOrders.isEmpty()) {
+                for (Order legacy : legacyOrders) {
+                    legacy.setUserId(userId);
+                    orderRepository.save(legacy);
+                }
+            }
+        }
+        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    @Transactional
+    public Order cancelOrder(Integer orderId) {
+        Order order = getOrderById(orderId);
+        String status = (order.getOrderStatus() != null ? order.getOrderStatus() : "").toUpperCase();
+        String payment = (order.getPaymentStatus() != null ? order.getPaymentStatus() : "").toUpperCase();
+
+        if ("SHIPPING".equals(status) || "TRANSIT".equals(status) || "DELIVERED".equals(status)) {
+            throw new IllegalArgumentException("Đơn hàng đang được vận chuyển hoặc đã giao thành công, không thể hủy!");
+        }
+        if ("PAID".equals(payment)) {
+            throw new IllegalArgumentException("Đơn hàng đã được thanh toán thành công, không thể hủy!");
+        }
+
+        order.setOrderStatus("CANCELLED");
+        order.setUpdatedAt(LocalDateTime.now());
+        Order savedOrder = orderRepository.save(order);
+
+        List<OrderItem> items = orderItemRepository.findByOrderOrderId(order.getOrderId());
+        for (OrderItem item : items) {
+            ProductVariant variant = productVariantRepository.findById(item.getProductVariant().getVariantId()).orElse(null);
+            if (variant != null) {
+                variant.setVariantStock(variant.getVariantStock() + item.getQuantity());
+                variant.setSoldCount(Math.max(0, variant.getSoldCount() - item.getQuantity()));
+                productVariantRepository.save(variant);
+            }
+        }
+        return savedOrder;
+    }
+
     private String generateUniqueOrderCode() {
         Random random = new Random();
         while (true) {

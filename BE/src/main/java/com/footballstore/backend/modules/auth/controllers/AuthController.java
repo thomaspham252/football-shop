@@ -48,16 +48,11 @@ public class AuthController {
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String userId = authService.extractUserIdFromToken(authHeader);
+        if (userId == null) {
             return ResponseEntity.status(401).body(Map.of("message", "Yêu cầu cung cấp mã xác thực!"));
         }
-        String token = authHeader.substring(7);
         try {
-            int lastDash = token.lastIndexOf("-");
-            if (lastDash == -1) {
-                return ResponseEntity.status(401).body(Map.of("message", "Mã xác thực không hợp lệ!"));
-            }
-            String userId = token.substring(lastDash + 1);
             com.footballstore.backend.modules.auth.models.User user = authService.getUserById(userId);
             if (user == null) {
                 return ResponseEntity.status(404).body(Map.of("message", "Không tìm thấy người dùng!"));
@@ -83,16 +78,11 @@ public class AuthController {
     public ResponseEntity<?> updateProfile(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestBody Map<String, String> body) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String userId = authService.extractUserIdFromToken(authHeader);
+        if (userId == null) {
             return ResponseEntity.status(401).body(Map.of("message", "Yêu cầu cung cấp mã xác thực!"));
         }
-        String token = authHeader.substring(7);
         try {
-            int lastDash = token.lastIndexOf("-");
-            if (lastDash == -1) {
-                return ResponseEntity.status(401).body(Map.of("message", "Mã xác thực không hợp lệ!"));
-            }
-            String userId = token.substring(lastDash + 1);
             com.footballstore.backend.modules.auth.models.User user = authService.getUserById(userId);
             if (user == null) {
                 return ResponseEntity.status(404).body(Map.of("message", "Không tìm thấy người dùng!"));

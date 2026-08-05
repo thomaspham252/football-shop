@@ -210,9 +210,9 @@ export default function OrderSuccess() {
 
             {/* Actions */}
             <div className="os-actions">
-              <a href="/theo-doi-don-hang" className="os-btn os-btn--primary">
+              <a href={`/don-hang/${order?.orderId || orderId || localStorage.getItem('latestOrderId')}`} className="os-btn os-btn--primary">
                 <BarChart2 size={16} />
-                Theo Dõi Đơn Hàng
+                Xem Chi Tiết Đơn Hàng
               </a>
               <a href="/san-pham" className="os-btn os-btn--outline">
                 <ShoppingCart size={16} />

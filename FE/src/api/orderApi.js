@@ -18,6 +18,9 @@ const orderApi = {
     },
     getMyOrders() {
         return axiosInstance.get('/orders/my-orders');
+    },
+    cancelOrder(orderId) {
+        return axiosInstance.post(`/orders/${orderId}/cancel`);
     }
 };
 

@@ -35,10 +35,11 @@ export default function PersonalInfo({ user, onUpdate }) {
         phone: form.phone,
         address: form.address,
       });
-      toast.success('Cập nhật thông tin thành công!');
+      toast.success('Cập nhật thông tin cá nhân thành công!');
       if (onUpdate) {
         onUpdate(res.data);
       }
+      window.dispatchEvent(new Event('user-updated'));
     } catch (err) {
       console.error("Lỗi khi cập nhật profile:", err);
       toast.error(err.response?.data?.message || 'Cập nhật thất bại. Vui lòng thử lại.');

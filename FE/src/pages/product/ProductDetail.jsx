@@ -117,6 +117,7 @@ export default function ProductDetail() {
     if (exists) {
       list = list.filter(item => String(item.id) !== String(prodId));
       setWishlisted(false);
+      toast.info("Đã xóa khỏi sản phẩm yêu thích");
     } else {
       list.push({
         id: prodId,
@@ -125,6 +126,7 @@ export default function ProductDetail() {
         image: product.imageUrl ?? product.image
       });
       setWishlisted(true);
+      toast.success("Đã thêm vào sản phẩm yêu thích");
     }
     localStorage.setItem('wishlist', JSON.stringify(list));
     window.dispatchEvent(new Event('wishlist-updated'));

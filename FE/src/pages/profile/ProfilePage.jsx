@@ -8,11 +8,19 @@ import Wishlist from './tabs/Wishlist';
 import PersonalInfo from './tabs/PersonalInfo';
 import authApi from '../../api/authApi';
 import orderApi from '../../api/orderApi';
+import wishlistApi from '../../api/wishlistApi';
 import './ProfilePage.css';
 
 export default function ProfilePage() {
   const [active, setActive] = useState('overview');
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
   const [orders, setOrders] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,33 +32,64 @@ export default function ProfilePage() {
       return;
     }
 
-    // Load wishlist
     const updateWishlist = () => {
-      const stored = localStorage.getItem('wishlist');
-      setWishlist(stored ? JSON.parse(stored) : []);
+      const token = localStorage.getItem('token');
+      if (token) {
+        wishlistApi.getWishlist()
+          .then(res => {
+            if (Array.isArray(res.data)) {
+              const formattedList = res.data.map(p => ({
+                id: p.productId,
+                name: p.productName,
+                price: p.salePrice || p.basePrice,
+                image: p.imageUrl
+              }));
+              setWishlist(formattedList);
+              localStorage.setItem('wishlist', JSON.stringify(formattedList));
+            }
+          })
+          .catch(() => {
+            const stored = localStorage.getItem('wishlist');
+            if (stored) setWishlist(JSON.parse(stored));
+          });
+      } else {
+        const stored = localStorage.getItem('wishlist');
+        if (stored) setWishlist(JSON.parse(stored));
+      }
     };
+
     updateWishlist();
     window.addEventListener('wishlist-updated', updateWishlist);
 
     // Fetch user and orders
     Promise.all([
-      authApi.getProfile(),
+      authApi.getProfile()
+        .then(res => {
+          if (res.data) {
+            setUser(res.data);
+            localStorage.setItem('user', JSON.stringify(res.data));
+          }
+          return res.data;
+        })
+        .catch(err => {
+          console.error("Lỗi khi tải profile từ server:", err);
+          return null;
+        }),
       orderApi.getMyOrders()
+        .then(res => res.data)
+        .catch(err => {
+          console.error("Lỗi khi tải đơn hàng từ server:", err);
+          return [];
+        })
     ])
-      .then(([profileRes, ordersRes]) => {
-        setUser(profileRes.data);
-        setOrders(ordersRes.data);
+      .then(([userData, ordersData]) => {
+        if (userData) setUser(userData);
+        if (ordersData) setOrders(ordersData);
         setLoading(false);
       })
       .catch(err => {
         console.error("Lỗi khi tải thông tin tài khoản:", err);
-        if (err.response?.status === 401) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/dang-nhap';
-        } else {
-          setLoading(false);
-        }
+        setLoading(false);
       });
 
     return () => {
@@ -61,6 +100,7 @@ export default function ProfilePage() {
   const handleUserUpdate = (updatedUser) => {
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
+    window.dispatchEvent(new Event('user-updated'));
   };
 
   if (loading) {
@@ -75,9 +115,17 @@ export default function ProfilePage() {
     );
   }
 
+  const refreshOrders = () => {
+    orderApi.getMyOrders()
+      .then(res => {
+        if (res.data) setOrders(res.data);
+      })
+      .catch(err => console.error("Lỗi khi tải lại đơn hàng:", err));
+  };
+
   const TABS = {
     overview: <Overview user={user} orders={orders} wishlist={wishlist} onNavigate={setActive} />,
-    orders:   <OrderHistory orders={orders} />,
+    orders:   <OrderHistory orders={orders} onRefresh={refreshOrders} />,
     wishlist: <Wishlist wishlist={wishlist} />,
     info:     <PersonalInfo user={user} onUpdate={handleUserUpdate} />,
   };

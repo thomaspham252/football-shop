@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { Truck, CheckCircle, X, Package } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Truck, CheckCircle, X, Package, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useToast } from '../../../context/ToastContext';
+import orderApi from '../../../api/orderApi';
 
 const TABS = [
   { key: 'all',       label: 'Tất cả' },
@@ -37,9 +39,47 @@ const formatDate = (dateStr) => {
   return `${day} Tháng ${month}, ${year}`;
 };
 
-export default function OrderHistory({ orders = [] }) {
-  const [tab,    setTab]    = useState('all');
-  const [search, setSearch] = useState('');
+const canCancelOrder = (o) => {
+  const status = (o.orderStatus || '').toUpperCase();
+  const payment = (o.paymentStatus || '').toUpperCase();
+  const notShipped = status === 'PENDING' || status === 'PROCESSING';
+  const notPaid = payment !== 'PAID';
+  return notShipped && notPaid;
+};
+
+export default function OrderHistory({ orders = [], onRefresh }) {
+  const { toast } = useToast();
+  const [tab,         setTab]         = useState('all');
+  const [search,      setSearch]      = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [cancelModalOrder, setCancelModalOrder] = useState(null);
+  const [cancelling, setCancelling] = useState(false);
+  const ITEMS_PER_PAGE = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [tab, search]);
+
+  const handleOpenCancelModal = (o) => {
+    setCancelModalOrder(o);
+    toast.warning(`Bạn muốn hủy đơn hàng #${o.orderCode}?`);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!cancelModalOrder) return;
+    setCancelling(true);
+    try {
+      await orderApi.cancelOrder(cancelModalOrder.orderId);
+      toast.success(`Đã hủy thành công đơn hàng #${cancelModalOrder.orderCode}`);
+      setCancelModalOrder(null);
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error("Lỗi khi hủy đơn hàng:", err);
+      toast.error(err.response?.data?.error || err.response?.data?.message || "Không thể hủy đơn hàng này");
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   const filtered = orders.filter(o => {
     const statusKey = mapStatus(o.orderStatus);
@@ -53,6 +93,10 @@ export default function OrderHistory({ orders = [] }) {
       || productName.toLowerCase().includes(search.toLowerCase());
     return matchTab && matchSearch;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedOrders = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   return (
     <div className="oh-wrap">
@@ -95,7 +139,7 @@ export default function OrderHistory({ orders = [] }) {
             <Package size={40} strokeWidth={1} />
             <p>Không tìm thấy đơn hàng nào</p>
           </div>
-        ) : filtered.map(o => {
+        ) : paginatedOrders.map(o => {
           const statusKey = mapStatus(o.orderStatus);
           const statusLabel = mapStatusLabel(o.orderStatus);
           const mainItem = o.items?.[0];
@@ -152,20 +196,23 @@ export default function OrderHistory({ orders = [] }) {
                   <p className="oh-card__total-label">TỔNG CỘNG</p>
                   <p className="oh-card__total">{(o.totalAmount || 0).toLocaleString('vi-VN')}đ</p>
                   <div className="oh-card__actions">
+                    {canCancelOrder(o) && (
+                      <button 
+                        className="oh-btn oh-btn--danger"
+                        onClick={() => handleOpenCancelModal(o)}
+                      >
+                        Hủy đơn
+                      </button>
+                    )}
                     {statusKey === 'delivered' && (
                       <button className="oh-btn oh-btn--primary">Mua lại</button>
                     )}
-                    {statusKey === 'cancelled' && (
-                      <button className="oh-btn oh-btn--outline">Xem lý do hủy</button>
-                    )}
-                    {statusKey !== 'cancelled' && (
-                      <a href={`/don-hang/${o.orderId}`} className="oh-btn oh-btn--outline">
-                        Chi tiết
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="9 18 15 12 9 6"/>
-                        </svg>
-                      </a>
-                    )}
+                    <a href={`/don-hang/${o.orderId}`} className="oh-btn oh-btn--outline">
+                      Chi tiết
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="9 18 15 12 9 6"/>
+                      </svg>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -173,6 +220,61 @@ export default function OrderHistory({ orders = [] }) {
           );
         })}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="oh-pagination">
+          <button
+            className="oh-pagination__btn"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+          >
+            <ChevronLeft size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
+            Trang trước
+          </button>
+          <span className="oh-pagination__info">
+            Trang {currentPage} / {totalPages}
+          </span>
+          <button
+            className="oh-pagination__btn"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+          >
+            Trang sau
+            <ChevronRight size={16} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: 4 }} />
+          </button>
+        </div>
+      )}
+
+      {/* Modal xác nhận hủy đơn hàng */}
+      {cancelModalOrder && (
+        <div className="oh-modal-overlay">
+          <div className="oh-modal">
+            <h3 className="oh-modal__title">Xác nhận hủy đơn hàng</h3>
+            <p className="oh-modal__text">
+              Bạn có chắc chắn muốn hủy đơn hàng <strong>#{cancelModalOrder.orderCode}</strong> không? 
+              Số lượng sản phẩm trong đơn sẽ được tự động hoàn lại tồn kho.
+            </p>
+            <div className="oh-modal__actions">
+              <button 
+                className="oh-btn oh-btn--outline" 
+                onClick={() => setCancelModalOrder(null)}
+                disabled={cancelling}
+              >
+                Bỏ qua
+              </button>
+              <button 
+                className="oh-btn oh-btn--danger" 
+                style={{ background: '#e53935', color: '#fff' }}
+                onClick={handleConfirmCancel}
+                disabled={cancelling}
+              >
+                {cancelling ? 'Đang hủy...' : 'Xác nhận hủy'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

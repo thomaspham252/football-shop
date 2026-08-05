@@ -1,4 +1,5 @@
 import { Pencil, Truck, CheckCircle, X, Package, Heart } from 'lucide-react';
+import wishlistApi from '../../../api/wishlistApi';
 
 const STATUS_ICON = {
   delivered: <CheckCircle size={14} />,
@@ -44,9 +45,19 @@ const formatJoinDate = (dateStr) => {
 };
 
 export default function Overview({ user, orders = [], wishlist = [], onNavigate }) {
-  const handleRemoveWish = (e, id) => {
+  const handleRemoveWish = async (e, id) => {
     e.preventDefault();
     e.stopPropagation();
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await wishlistApi.toggleWishlist(id);
+        window.dispatchEvent(new Event('wishlist-updated'));
+        return;
+      } catch (err) {
+        console.error("Lỗi khi xóa khỏi wishlist DB:", err);
+      }
+    }
     const stored = localStorage.getItem('wishlist');
     let list = stored ? JSON.parse(stored) : [];
     list = list.filter(item => String(item.id) !== String(id));
@@ -144,13 +155,18 @@ export default function Overview({ user, orders = [], wishlist = [], onNavigate 
       <div className="profile-card" style={{ marginTop: 20 }}>
         <div className="profile-card__head">
           <h2 className="profile-card__title">Sản Phẩm Yêu Thích</h2>
-          <span className="profile-card__badge">{wishlist.length} sản phẩm</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span className="profile-card__badge">{wishlist.length} sản phẩm</span>
+            <button className="profile-card__link" onClick={() => onNavigate('wishlist')}>
+              Xem tất cả
+            </button>
+          </div>
         </div>
         <div className="profile-wishlist-grid">
           {wishlist.length === 0 ? (
             <p style={{ color: '#888', padding: '15px 0', gridColumn: '1 / -1' }}>Chưa có sản phẩm yêu thích nào.</p>
           ) : (
-            wishlist.map(item => (
+            wishlist.slice(0, 4).map(item => (
               <a key={item.id} href={`/san-pham/${item.id}`} className="profile-wishlist-item">
                 <div className="profile-wishlist-item__img-wrap">
                   <img src={item.image} alt={item.name} />
