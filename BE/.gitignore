@@ -32,3 +32,11 @@ build/
 # Vercel
 vercel.json
 FE/vercel.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# XML files
+*.xml

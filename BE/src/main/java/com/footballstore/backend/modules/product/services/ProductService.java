@@ -3,6 +3,7 @@ package com.footballstore.backend.modules.product.services;
 import com.footballstore.backend.modules.product.dtos.response.ProductCardResponse;
 import com.footballstore.backend.modules.product.dtos.response.ProductDetailResponse;
 import com.footballstore.backend.modules.product.dtos.response.ProductVariantResponse;
+import com.footballstore.backend.modules.product.models.Category;
 import com.footballstore.backend.modules.product.models.Product;
 import com.footballstore.backend.modules.product.models.ProductVariant;
 import com.footballstore.backend.modules.product.repositories.ProductRepository;
@@ -88,7 +89,9 @@ public class ProductService {
                         .discountPercentage(product.getDiscountPercentage())
                         .colors(productVariantRepository.findDistinctColorsByProductId(product.getProductId()))
                         .brandName(product.getBrand() != null ? product.getBrand().getBrandName() : null)
+                        .brandLogoUrl(product.getBrand() != null ? product.getBrand().getLogoUrl() : null)
                         .categoryName(product.getCategory() != null ? product.getCategory().getCategoryName() : null)
+                        .categoryImageUrl(product.getCategory() != null ? product.getCategory().getImageUrl() : null)
                         .build();
 
     }

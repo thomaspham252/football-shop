@@ -4,7 +4,8 @@
   border-radius: 10px;
   overflow: hidden;
   position: sticky;
-  top: 80px;
+  top: 155px;
+  z-index: 90;
 }
 
 .profile-sidebar__nav {

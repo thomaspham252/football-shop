@@ -31,8 +31,10 @@ public class ProductCardResponse {
     private String size;
 
     private String brandName;
+    private String brandLogoUrl;
 
     private String categoryName;
+    private String categoryImageUrl;
 }
 
 

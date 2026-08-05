@@ -10,8 +10,29 @@ import {
 } from 'lucide-react';
 import './ProductsPage.css';
 
-const BRANDS    = ['Nike', 'Adidas', 'Puma'];
-const CATEGORIES = ['Giày FG', 'Giày TF', 'Giày MG', 'Áo đấu', 'Quần đấu', 'Phụ kiện'];
+// Danh mục cha từ categories.csv (parent_category_id == NULL) -> Không hiển thị
+const PARENT_CATEGORIES = [
+  'Giày bóng đá',
+  'Phụ kiện',
+  'Quần áo bóng đá',
+  'SHOES',
+  'ACCESSORIES',
+  'CLOTHING'
+];
+
+// Danh mục con từ categories.csv (parent_category_id != NULL)
+const ALL_CHILD_CATEGORIES = [
+  'Sân tự nhiên (FG)',
+  'Sân nhân tạo (AG)',
+  'Băng cố chân',
+  'Tất bóng đá',
+  'Găng tay',
+  'Quả bóng',
+  'Áo CLB',
+  'Áo đội tuyển',
+  'Áo không logo'
+];
+
 const PRICE_RANGES = [
   { label: 'Dưới 1.000.000đ',   min: 0,       max: 1000000 },
   { label: '1.000.000 - 3.000.000đ', min: 1000000, max: 3000000 },
@@ -50,14 +71,14 @@ export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [selectedBrands,     setSelectedBrands]     = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedPrices,     setSelectedPrices]     = useState([]);
-  const [selectedSizes,      setSelectedSizes]      = useState([]);
-  const [selectedColors,     setSelectedColors]     = useState([]);
-  const [sort,               setSort]               = useState('default');
-  const [page,               setPage]               = useState(1);
-  const [mobileSidebarOpen,  setMobileSidebarOpen]  = useState(false);
+  const [selectedBrand,     setSelectedBrand]     = useState('');
+  const [selectedCategory,  setSelectedCategory]  = useState('');
+  const [selectedPrice,     setSelectedPrice]     = useState('');
+  const [selectedSizes,     setSelectedSizes]     = useState([]);
+  const [selectedColors,    setSelectedColors]    = useState([]);
+  const [sort,              setSort]              = useState('default');
+  const [page,              setPage]              = useState(1);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -83,27 +104,56 @@ export default function ProductsPage() {
     fetchProducts();
   }, [typeParam]);
 
-  /* toggle helpers */
-  const toggle = (arr, setArr, val) =>
-    setArr(arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val]);
+  const brandParam = searchParams.get('brand') || '';
+  const categoryParam = searchParams.get('category') || '';
+
+  useEffect(() => {
+    if (brandParam) {
+      setSelectedBrand(brandParam);
+    }
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [brandParam, categoryParam]);
+
+  /* Lọc danh mục con theo dữ liệu sản phẩm trong DB (Chỉ hiện danh mục con CÓ sản phẩm, ẩn danh mục không có sản phẩm, không hiện danh mục cha) */
+  const categoriesList = useMemo(() => {
+    const activeCategories = new Set();
+    products.forEach(p => {
+      const cat = p.categoryName || p.category?.categoryName;
+      if (cat && !PARENT_CATEGORIES.includes(cat)) {
+        activeCategories.add(cat);
+      }
+    });
+    return Array.from(activeCategories);
+  }, [products]);
+
+  const brandsList = useMemo(() => {
+    const set = new Set();
+    products.forEach(p => {
+      const b = p.brandName || p.brand?.brandName;
+      if (b) set.add(b);
+    });
+    return Array.from(set);
+  }, [products]);
 
   /* filter + sort */
   const filtered = useMemo(() => {
     let list = [...products];
-    if (selectedBrands.length) {
-      list = list.filter(p => selectedBrands.includes(p.brandName || p.brand));
+    if (selectedBrand) {
+      list = list.filter(p => (p.brandName || p.brand?.brandName || p.brand) === selectedBrand);
     }
-    if (selectedCategories.length) {
-      list = list.filter(p => selectedCategories.includes(p.categoryName || p.category));
+    if (selectedCategory) {
+      list = list.filter(p => (p.categoryName || p.category?.categoryName || p.category) === selectedCategory);
     }
-    if (selectedPrices.length) {
-      list = list.filter(p => {
-        const price = p.salePrice ?? p.price ?? 0;
-        return selectedPrices.some(label => {
-          const r = PRICE_RANGES.find(pr => pr.label === label);
-          return r && price >= r.min && price < r.max;
+    if (selectedPrice) {
+      const r = PRICE_RANGES.find(pr => pr.label === selectedPrice);
+      if (r) {
+        list = list.filter(p => {
+          const price = p.salePrice ?? p.basePrice ?? p.price ?? 0;
+          return price >= r.min && price < r.max;
         });
-      });
+      }
     }
     if (selectedSizes.length) {
       list = list.filter(p => (p.sizes || ['39', '40', '41', '42']).some(s => selectedSizes.includes(s)));
@@ -114,24 +164,26 @@ export default function ProductsPage() {
       );
     }
     switch (sort) {
-      case 'price-asc':  list.sort((a, b) => (a.salePrice ?? a.price ?? 0) - (b.salePrice ?? b.price ?? 0)); break;
-      case 'price-desc': list.sort((a, b) => (b.salePrice ?? b.price ?? 0) - (a.salePrice ?? a.price ?? 0)); break;
+      case 'price-asc':  list.sort((a, b) => (a.salePrice ?? a.basePrice ?? a.price ?? 0) - (b.salePrice ?? b.basePrice ?? b.price ?? 0)); break;
+      case 'price-desc': list.sort((a, b) => (b.salePrice ?? b.basePrice ?? b.price ?? 0) - (a.salePrice ?? a.basePrice ?? a.price ?? 0)); break;
       case 'name-asc':   list.sort((a, b) => (a.productName ?? a.name).localeCompare(b.productName ?? b.name)); break;
       default: break;
     }
     return list;
-  }, [products, selectedBrands, selectedCategories, selectedPrices, selectedSizes, sort]);
+  }, [products, selectedBrand, selectedCategory, selectedPrice, selectedSizes, sort]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const activeFilterCount =
-    selectedBrands.length + selectedCategories.length +
-    selectedPrices.length + selectedSizes.length + selectedColors.length;
+    (selectedBrand ? 1 : 0) + (selectedCategory ? 1 : 0) +
+    (selectedPrice ? 1 : 0) + selectedSizes.length + selectedColors.length;
 
   const clearAll = () => {
-    setSelectedBrands([]); setSelectedCategories([]);
-    setSelectedPrices([]); setSelectedSizes([]);
+    setSelectedBrand('');
+    setSelectedCategory('');
+    setSelectedPrice('');
+    setSelectedSizes([]);
     setSelectedColors([]);
     setPage(1);
   };
@@ -159,13 +211,18 @@ export default function ProductsPage() {
         {/* Active tags */}
         {activeFilterCount > 0 && (
           <div className="filter-tags">
-            {[...selectedBrands, ...selectedCategories, ...selectedPrices, ...selectedSizes].map(tag => (
+            {[
+              ...(selectedBrand ? [selectedBrand] : []),
+              ...(selectedCategory ? [selectedCategory] : []),
+              ...(selectedPrice ? [selectedPrice] : []),
+              ...selectedSizes
+            ].map(tag => (
               <span key={tag} className="filter-tag">
                 {tag}
                 <button onClick={() => {
-                  if (selectedBrands.includes(tag))     handleFilterChange(() => setSelectedBrands(selectedBrands.filter(v => v !== tag)));
-                  else if (selectedCategories.includes(tag)) handleFilterChange(() => setSelectedCategories(selectedCategories.filter(v => v !== tag)));
-                  else if (selectedPrices.includes(tag))     handleFilterChange(() => setSelectedPrices(selectedPrices.filter(v => v !== tag)));
+                  if (tag === selectedBrand) handleFilterChange(() => setSelectedBrand(''));
+                  else if (tag === selectedCategory) handleFilterChange(() => setSelectedCategory(''));
+                  else if (tag === selectedPrice) handleFilterChange(() => setSelectedPrice(''));
                   else handleFilterChange(() => setSelectedSizes(selectedSizes.filter(v => v !== tag)));
                 }}>
                   <X size={10} />
@@ -176,12 +233,22 @@ export default function ProductsPage() {
         )}
 
         <FilterGroup title="DANH MỤC">
-          {CATEGORIES.map(cat => (
-            <label key={cat} className="filter-checkbox">
+          <label className="filter-radio">
+            <input
+              type="radio"
+              name="category-range"
+              checked={selectedCategory === ''}
+              onChange={() => handleFilterChange(() => setSelectedCategory(''))}
+            />
+            <span>Tất cả danh mục</span>
+          </label>
+          {categoriesList.map(cat => (
+            <label key={cat} className="filter-radio">
               <input
-                type="checkbox"
-                checked={selectedCategories.includes(cat)}
-                onChange={() => handleFilterChange(() => toggle(selectedCategories, setSelectedCategories, cat))}
+                type="radio"
+                name="category-range"
+                checked={selectedCategory === cat}
+                onChange={() => handleFilterChange(() => setSelectedCategory(selectedCategory === cat ? '' : cat))}
               />
               <span>{cat}</span>
             </label>
@@ -189,12 +256,22 @@ export default function ProductsPage() {
         </FilterGroup>
 
         <FilterGroup title="THƯƠNG HIỆU">
-          {BRANDS.map(b => (
-            <label key={b} className="filter-checkbox">
+          <label className="filter-radio">
+            <input
+              type="radio"
+              name="brand-range"
+              checked={selectedBrand === ''}
+              onChange={() => handleFilterChange(() => setSelectedBrand(''))}
+            />
+            <span>Tất cả thương hiệu</span>
+          </label>
+          {brandsList.map(b => (
+            <label key={b} className="filter-radio">
               <input
-                type="checkbox"
-                checked={selectedBrands.includes(b)}
-                onChange={() => handleFilterChange(() => toggle(selectedBrands, setSelectedBrands, b))}
+                type="radio"
+                name="brand-range"
+                checked={selectedBrand === b}
+                onChange={() => handleFilterChange(() => setSelectedBrand(selectedBrand === b ? '' : b))}
               />
               <span>{b}</span>
             </label>
@@ -202,12 +279,22 @@ export default function ProductsPage() {
         </FilterGroup>
 
         <FilterGroup title="GIÁ">
+          <label className="filter-radio">
+            <input
+              type="radio"
+              name="price-range"
+              checked={selectedPrice === ''}
+              onChange={() => handleFilterChange(() => setSelectedPrice(''))}
+            />
+            <span>Tất cả mức giá</span>
+          </label>
           {PRICE_RANGES.map(r => (
-            <label key={r.label} className="filter-checkbox">
+            <label key={r.label} className="filter-radio">
               <input
-                type="checkbox"
-                checked={selectedPrices.includes(r.label)}
-                onChange={() => handleFilterChange(() => toggle(selectedPrices, setSelectedPrices, r.label))}
+                type="radio"
+                name="price-range"
+                checked={selectedPrice === r.label}
+                onChange={() => handleFilterChange(() => setSelectedPrice(selectedPrice === r.label ? '' : r.label))}
               />
               <span>{r.label}</span>
             </label>

@@ -200,6 +200,27 @@
   flex-shrink: 0;
 }
 
+/* Radio button for price filter */
+.filter-radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  transition: color 0.15s;
+}
+
+.filter-radio:hover { color: #1a1a1a; }
+
+.filter-radio input[type="radio"] {
+  width: 15px;
+  height: 15px;
+  accent-color: #1a1a1a;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 /* Size buttons */
 .filter-sizes {
   display: flex;

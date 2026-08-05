@@ -7,8 +7,7 @@ import { useToast } from '../../context/ToastContext';
 import './LoginPage.css';
 import './RegisterPage.css';
 
-// Thay đổi Client ID này bằng Google Client ID thực tế của bạn để đăng ký bằng Google
-const GOOGLE_CLIENT_ID = "your-google-client-id.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "your-google-client-id.apps.googleusercontent.com";
 
 export default function RegisterPage() {
   const { toast } = useToast();
