@@ -9,6 +9,8 @@ export default function PersonalInfo({ user, onUpdate }) {
     email: '',
     phone: '',
     address: '',
+    password: '',
+    confirmPassword: '',
   });
   const [saving, setSaving] = useState(false);
 
@@ -19,6 +21,8 @@ export default function PersonalInfo({ user, onUpdate }) {
         email: user.email || '',
         phone: user.phone || '',
         address: user.address || '',
+        password: '',
+        confirmPassword: '',
       });
     }
   }, [user]);
@@ -28,14 +32,31 @@ export default function PersonalInfo({ user, onUpdate }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (saving) return;
+
+    if (form.password || form.confirmPassword) {
+      if (form.password.length < 6) {
+        toast.error('Mật khẩu mới phải chứa ít nhất 6 ký tự!');
+        return;
+      }
+      if (form.password !== form.confirmPassword) {
+        toast.error('Xác nhận mật khẩu mới không trùng khớp!');
+        return;
+      }
+    }
+
     setSaving(true);
     try {
-      const res = await authApi.updateProfile({
+      const payload = {
         fullName: form.fullName,
         phone: form.phone,
         address: form.address,
-      });
-      toast.success('Cập nhật thông tin cá nhân thành công!');
+      };
+      if (form.password && form.password.trim().length >= 6) {
+        payload.password = form.password;
+      }
+      const res = await authApi.updateProfile(payload);
+      toast.success('Cập nhật thông tin cá nhân và mật khẩu thành công!');
+      setForm(prev => ({ ...prev, password: '', confirmPassword: '' }));
       if (onUpdate) {
         onUpdate(res.data);
       }
@@ -55,6 +76,8 @@ export default function PersonalInfo({ user, onUpdate }) {
         email: user.email || '',
         phone: user.phone || '',
         address: user.address || '',
+        password: '',
+        confirmPassword: '',
       });
     }
   };
@@ -88,6 +111,32 @@ export default function PersonalInfo({ user, onUpdate }) {
         <div className="profile-info-form__field">
           <label>Địa Chỉ </label>
           <input type="text" value={form.address} onChange={set('address')} />
+        </div>
+        
+        <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px dashed #e2e8f0' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#1a1a1a', marginBottom: '12px' }}>
+            Đặt / Cập Nhật Mật Khẩu (Dùng để đăng nhập bằng Email + Mật khẩu)
+          </h3>
+          <div className="profile-info-form__row">
+            <div className="profile-info-form__field">
+              <label>Mật Khẩu Mới</label>
+              <input 
+                type="password" 
+                placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)" 
+                value={form.password} 
+                onChange={set('password')} 
+              />
+            </div>
+            <div className="profile-info-form__field">
+              <label>Xác Nhận Mật Khẩu Mới</label>
+              <input 
+                type="password" 
+                placeholder="Nhập lại mật khẩu mới" 
+                value={form.confirmPassword} 
+                onChange={set('confirmPassword')} 
+              />
+            </div>
+          </div>
         </div>
         <div className="profile-info-form__actions">
           <button type="submit" className="profile-info-form__save" disabled={saving}>

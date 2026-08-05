@@ -18,28 +18,35 @@ export default function LoginPage() {
 
   // Dynamic Google Client script mounting
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID;
 
-    script.onload = () => {
-      if (window.google) {
+    const initGoogleBtn = () => {
+      if (window.google && window.google.accounts) {
         window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
+          client_id: googleClientId,
           callback: handleGoogleLoginSuccess
         });
-        window.google.accounts.id.renderButton(
-          document.getElementById("google-login-button"),
-          { theme: "outline", size: "large", width: "100%" }
-        );
+        const btnContainer = document.getElementById("google-login-button");
+        if (btnContainer) {
+          btnContainer.innerHTML = "";
+          window.google.accounts.id.renderButton(
+            btnContainer,
+            { theme: "outline", size: "large", width: "100%" }
+          );
+        }
       }
     };
 
-    return () => {
-      document.body.removeChild(script);
-    };
+    if (window.google && window.google.accounts) {
+      initGoogleBtn();
+    } else {
+      const script = document.createElement('script');
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = initGoogleBtn;
+      document.body.appendChild(script);
+    }
   }, []);
 
   const handleGoogleLoginSuccess = (response) => {

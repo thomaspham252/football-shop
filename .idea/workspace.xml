@@ -6,19 +6,15 @@
   <component name="ChangeListManager">
     <list default="true" id="5c064fff-bd4c-4565-ac17-1f911a404c52" name="Changes" comment="api-payment fix">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/BE/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/product/dtos/response/ProductCardResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/product/dtos/response/ProductCardResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/product/services/ProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/product/services/ProductService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/controllers/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/controllers/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/services/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/services/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/EmailService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/MomoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/MomoService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BE/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/FE/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/api/axiosInstance.js" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/api/axiosInstance.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/common/ProfileSidebar.css" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/common/ProfileSidebar.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/layout/Navbar.css" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/layout/Navbar.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/layout/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/layout/Navbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/App.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FE/src/pages/auth/LoginPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/auth/LoginPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FE/src/pages/auth/RegisterPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/auth/RegisterPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/products/ProductsPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/products/ProductsPage.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/products/ProductsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/products/ProductsPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FE/src/pages/profile/tabs/PersonalInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/profile/tabs/PersonalInfo.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +67,7 @@
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "Spring Boot.BackendApplication.executor": "Run",
-    "git-widget-placeholder": "develop",
+    "git-widget-placeholder": "ui/admin",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/football-shop/BE/src/main/resources",
     "node.js.detected.package.eslint": "true",
@@ -141,6 +137,7 @@
       <workItem from="1785692421423" duration="4622000" />
       <workItem from="1785827844982" duration="1329000" />
       <workItem from="1785836201249" duration="1702000" />
+      <workItem from="1785948475646" duration="3469000" />
     </task>
     <task id="LOCAL-00001" summary="api-payment fix">
       <option name="closed" value="true" />

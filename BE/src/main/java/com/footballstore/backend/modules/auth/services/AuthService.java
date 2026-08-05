@@ -48,8 +48,8 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Email hoặc mật khẩu không chính xác"));
 
-        if (user.getProvider() != AuthProvider.LOCAL) {
-            throw new RuntimeException("Tài khoản này được đăng ký thông qua mạng xã hội Google. Vui lòng chọn đăng nhập bằng Google.");
+        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+            throw new RuntimeException("Tài khoản này được đăng ký qua Google và chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google hoặc vào Thông tin cá nhân để tạo mật khẩu.");
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -84,9 +84,6 @@ public class AuthService {
         User user = userRepository.findByEmail(email).orElse(null);
 
         if (user != null) {
-            if (user.getProvider() == AuthProvider.LOCAL) {
-                throw new RuntimeException("Email này đã được đăng ký bằng mật khẩu thường. Vui lòng đăng nhập bằng mật khẩu.");
-            }
             if (user.getProviderId() == null) {
                 user.setProviderId(googleId);
                 userRepository.save(user);
@@ -107,6 +104,10 @@ public class AuthService {
         }
 
         return generateAuthResponse(user);
+    }
+
+    public String encodePassword(String rawPassword) {
+        return passwordEncoder.encode(rawPassword);
     }
 
     private AuthResponse generateAuthResponse(User user) {

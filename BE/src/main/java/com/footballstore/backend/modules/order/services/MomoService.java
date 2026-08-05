@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +36,15 @@ public class MomoService {
     @Value("${momo.ipn-url:http://localhost:8080/api/webhooks/momo}")
     private String ipnUrl;
 
+    @PostConstruct
+    public void init() {
+        if (partnerCode == null || partnerCode.trim().isEmpty() || "MOMOBKUN20180529".equalsIgnoreCase(partnerCode.trim()) || "MOMO".equalsIgnoreCase(partnerCode.trim())) {
+            this.partnerCode = "MOMOBKUN20180529";
+            this.accessKey = "klm05Bh5mEs15crK";
+            this.secretKey = "at1Rw5Bt1y450dgObHA15Qo1U1s05n5w";
+        }
+    }
+
     public MomoPaymentResponse createPayment(String orderId, Long amount, String orderInfo) {
         String requestId = orderId + "_" + System.currentTimeMillis();
         String extraData = "";
@@ -56,8 +66,6 @@ public class MomoService {
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("partnerCode", partnerCode);
-        payload.put("partnerName", "ULTRASPORT");
-        payload.put("storeId", "ULTRASPORT_STORE");
         payload.put("requestId", requestId);
         payload.put("amount", amount);
         payload.put("orderId", orderId);
@@ -77,6 +85,10 @@ public class MomoService {
 
         try {
             return restTemplate.postForObject(apiEndpoint, entity, MomoPaymentResponse.class);
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {
+            String errorResponseBody = e.getResponseBodyAsString();
+            System.err.println("MoMo API Error Response: " + errorResponseBody);
+            throw new RuntimeException("Cổng thanh toán MoMo báo lỗi (HTTP " + e.getStatusCode() + "): " + (errorResponseBody.isEmpty() ? e.getMessage() : errorResponseBody), e);
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi kết nối đến cổng thanh toán MoMo: " + e.getMessage(), e);
         }
