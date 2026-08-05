@@ -97,6 +97,9 @@ public class AuthController {
             if (body.containsKey("address")) {
                 user.setAddress(body.get("address"));
             }
+            if (body.containsKey("password") && body.get("password") != null && !body.get("password").trim().isEmpty()) {
+                user.setPassword(authService.encodePassword(body.get("password")));
+            }
             
             authService.updateUser(user);
             
