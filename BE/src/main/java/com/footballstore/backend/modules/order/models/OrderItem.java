@@ -1,5 +1,7 @@
 package com.footballstore.backend.modules.order.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.footballstore.backend.modules.product.models.Product;
 import com.footballstore.backend.modules.product.models.ProductVariant;
 import jakarta.persistence.*;
@@ -14,6 +16,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,17 +25,17 @@ public class OrderItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    @com.fasterxml.jackson.annotation.JsonIgnore
+    @JsonIgnore
     private Order order;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", nullable = false)
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"category", "brand", "hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({"category", "brand", "hibernateLazyInitializer", "handler"})
     private Product product;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "variant_id", nullable = false)
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"product", "hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({"product", "hibernateLazyInitializer", "handler"})
     private ProductVariant productVariant;
 
     @Column(name = "quantity", nullable = false)

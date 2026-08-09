@@ -3,7 +3,6 @@ package com.footballstore.backend.modules.product.services;
 import com.footballstore.backend.modules.product.dtos.response.ProductCardResponse;
 import com.footballstore.backend.modules.product.dtos.response.ProductDetailResponse;
 import com.footballstore.backend.modules.product.dtos.response.ProductVariantResponse;
-import com.footballstore.backend.modules.product.models.Category;
 import com.footballstore.backend.modules.product.models.Product;
 import com.footballstore.backend.modules.product.models.ProductVariant;
 import com.footballstore.backend.modules.product.repositories.ProductRepository;
@@ -23,7 +22,8 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
-    @Value("${app.promotion.discount-threshold}")
+    
+    @Value("${app.promotion.discount-threshold:30}")
     private Integer discountThreshold;
 
 
@@ -159,4 +159,3 @@ public class ProductService {
         }
     }
 }
-

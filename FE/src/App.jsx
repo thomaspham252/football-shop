@@ -15,6 +15,7 @@ import OrderDetailPage from './pages/profile/OrderDetailPage';
 import SearchPage from './pages/search/SearchPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AdminLayout from './pages/admin/AdminLayout';
+import AdminRoute from './components/auth/AdminRoute';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
 
@@ -24,7 +25,14 @@ function App() {
       <CartProvider>
         <BrowserRouter>
           <Routes>
-          <Route path="/admin/*"               element={<AdminLayout />} />
+          <Route 
+            path="/admin/*" 
+            element={
+              <AdminRoute>
+                <AdminLayout />
+              </AdminRoute>
+            } 
+          />
           <Route path="/"                      element={<HomePage />} />
           <Route path="/san-pham"              element={<ProductsPage />} />
           <Route path="/san-pham/:id"          element={<ProductDetail />} />
@@ -47,4 +55,3 @@ function App() {
 }
 
 export default App;
-

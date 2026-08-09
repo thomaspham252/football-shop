@@ -1,5 +1,6 @@
 package com.footballstore.backend.modules.product.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,12 +39,14 @@ public class Product {
     @Column(name = "detailed_description", columnDefinition = "TEXT")
     private String detailedDescription;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "brand_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Brand brand;
 
     @Column(name = "base_price", nullable = false, precision = 10, scale = 2)
@@ -54,7 +58,6 @@ public class Product {
     @Column(name = "discount_percentage")
     private Integer discountPercentage;
 
-
     @Column(name = "sale_price", precision = 10, scale = 2, insertable = false, updatable = false)
     private BigDecimal salePrice;
 
@@ -63,7 +66,6 @@ public class Product {
 
     @Column(name = "image_url", length = 255)
     private String imageUrl;
-
 
     @Column(name = "gallery_images", columnDefinition = "jsonb")
     private String galleryImages;
