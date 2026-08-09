@@ -1,6 +1,8 @@
 package com.footballstore.backend.modules.product.repositories;
 
 import com.footballstore.backend.modules.product.models.InventoryHistory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -12,4 +14,6 @@ public interface InventoryHistoryRepository extends JpaRepository<InventoryHisto
     List<InventoryHistory> findByTransactionType(String transactionType);
 
     List<InventoryHistory> findByReferenceCode(String referenceCode);
+
+    Page<InventoryHistory> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

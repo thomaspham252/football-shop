@@ -76,18 +76,21 @@ public class SecurityConfig {
                 
                 // Cấu hình Phân quyền URL API (Role-Based Access Control)
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Endpoint Công khai (Public)
+                        // 1. Cho phép tất cả các Request OPTIONS (CORS Preflight)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // 2. Endpoint Công khai (Public)
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
-                        // 2. Endpoint cho ROLE_ADMIN (Toàn quyền quản trị hệ thống)
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // 3. Endpoint dành riêng cho Quản trị viên tối cao ROLE_ADMIN (Quản lý User, Hệ thống)
+                        .requestMatchers("/api/admin/users/**", "/api/admin/system/**").hasRole("ADMIN")
 
-                        // 3. Endpoint cho ROLE_STAFF (Quản lý sản phẩm, tồn kho, duyệt đơn hàng)
-                        .requestMatchers("/api/staff/**").hasAnyRole("ADMIN", "STAFF")
+                        // 4. Endpoint cho cả ROLE_ADMIN và ROLE_STAFF (Dashboard, Quản lý đơn hàng, Tồn kho, Sản phẩm)
+                        .requestMatchers("/api/admin/**", "/api/staff/**").hasAnyRole("ADMIN", "STAFF")
 
-                        // 4. Endpoint cho ROLE_CUSTOMER (Khách hàng: Mua sắm, giỏ hàng, đơn hàng cá nhân)
+                        // 5. Endpoint cho ROLE_CUSTOMER (Khách hàng: Mua sắm, giỏ hàng, đơn hàng cá nhân)
                         .requestMatchers("/api/customer/**", "/api/cart/**", "/api/orders/**").hasAnyRole("ADMIN", "STAFF", "CUSTOMER")
 
                         // Mọi yêu cầu khác phải xác thực
@@ -104,9 +107,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Accept"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Accept", "X-Requested-With"));
         configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
         

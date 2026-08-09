@@ -1,22 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   Boxes, 
   Layers, 
   ShoppingCart, 
   Users, 
-  Plus, 
   Settings, 
   HelpCircle, 
   Search, 
   Bell, 
   Mail, 
-  ShieldCheck,
-  Trophy,
-  ChevronDown,
-  Menu,
-  X,
-  LogOut
+  ChevronDown, 
+  Menu, 
+  LogOut 
 } from 'lucide-react';
 import './AdminLayout.css';
 
@@ -32,14 +28,32 @@ import AdjustStockModal from './modals/AdjustStockModal';
 import OrderDetailsModal from './modals/OrderDetailsModal';
 
 export default function AdminLayout() {
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'kho-hang' | 'san-pham' | 'don-hang' | 'nguoi-dung' | 'cai-dat'
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Modals state
   const [isCreateOrderOpen, setIsCreateOrderOpen] = useState(false);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [isAdjustStockOpen, setIsAdjustStockOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        setCurrentUser(JSON.parse(userStr));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/dang-nhap';
+  };
 
   const handleOpenOrderDetails = (order) => {
     setSelectedOrder(order);
@@ -107,7 +121,6 @@ export default function AdminLayout() {
     <div className="admin-wrapper">
       {/* ── LEFT SIDEBAR ── */}
       <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}>
-        {/* Brand logo header matching ULTRA SPORT website */}
         <a href="/" className="admin-sidebar__brand" style={{ textDecoration: 'none', padding: '24px 20px' }}>
           <div className="admin-sidebar__brand-info">
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
@@ -136,7 +149,6 @@ export default function AdminLayout() {
           >
             <span className="admin-sidebar__nav-icon"><Boxes size={19} /></span>
             <span>Kho hàng</span>
-            <span className="admin-sidebar__badge">24</span>
           </button>
 
           <button
@@ -175,24 +187,23 @@ export default function AdminLayout() {
 
           <button
             className="admin-sidebar__nav-item"
-            onClick={() => alert('Tổng đài hỗ trợ kỹ thuật: 1900 6789')}
+            onClick={handleLogout}
+            style={{ color: '#ef4444' }}
           >
-            <span className="admin-sidebar__nav-icon"><HelpCircle size={19} /></span>
-            <span>Hỗ trợ</span>
+            <span className="admin-sidebar__nav-icon"><LogOut size={19} /></span>
+            <span>Đăng xuất</span>
           </button>
         </nav>
 
         {/* User profile bottom item */}
         <div className="admin-sidebar__footer">
           <div className="admin-sidebar__user">
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-              alt="Avatar Admin"
-              className="admin-sidebar__user-avatar"
-            />
+            <div className="admin-sidebar__user-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--admin-accent)', color: '#fff', fontWeight: 700, borderRadius: '50%', width: '36px', height: '36px' }}>
+              {(currentUser?.fullName || currentUser?.email || 'A').charAt(0).toUpperCase()}
+            </div>
             <div className="admin-sidebar__user-info">
-              <span className="admin-sidebar__user-name">Nguyễn Văn A</span>
-              <span className="admin-sidebar__user-role">Quản lý kho</span>
+              <span className="admin-sidebar__user-name">{currentUser?.fullName || currentUser?.email || 'Admin'}</span>
+              <span className="admin-sidebar__user-role">{currentUser?.role || 'ROLE_ADMIN'}</span>
             </div>
           </div>
         </div>
@@ -211,7 +222,6 @@ export default function AdminLayout() {
               <Menu size={20} />
             </button>
 
-            {/* Global Search Bar */}
             <div className="admin-header__search">
               <Search className="admin-header__search-icon" size={18} />
               <input
@@ -222,25 +232,21 @@ export default function AdminLayout() {
             </div>
           </div>
 
-          {/* Header Action Tools */}
           <div className="admin-header__actions">
             <button className="admin-header__icon-btn" title="Thông báo">
               <Bell size={18} />
-              <span className="admin-header__badge-dot">3</span>
             </button>
 
             <button className="admin-header__icon-btn" title="Tin nhắn">
               <Mail size={18} />
             </button>
 
-            <div className="admin-header__profile">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                alt="Profile Avatar"
-                className="admin-header__profile-avatar"
-              />
-              <span className="admin-header__profile-name">Nguyễn Văn A</span>
-              <ChevronDown size={14} style={{ color: 'var(--admin-text-muted)' }} />
+            <div className="admin-header__profile" onClick={handleLogout} style={{ cursor: 'pointer' }} title="Bấm để Đăng xuất">
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--admin-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '14px' }}>
+                {(currentUser?.fullName || currentUser?.email || 'A').charAt(0).toUpperCase()}
+              </div>
+              <span className="admin-header__profile-name">{currentUser?.fullName || currentUser?.email || 'Admin'}</span>
+              <LogOut size={16} style={{ color: '#ef4444', marginLeft: '4px' }} />
             </div>
           </div>
         </header>
@@ -271,6 +277,7 @@ export default function AdminLayout() {
         isOpen={!!selectedOrder} 
         order={selectedOrder} 
         onClose={() => setSelectedOrder(null)} 
+        onOrderUpdated={() => setSelectedOrder(null)}
       />
     </div>
   );

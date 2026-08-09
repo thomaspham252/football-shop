@@ -91,7 +91,15 @@ export default function LoginPage() {
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
         toast.success("Đăng nhập thành công!");
-        const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/';
+        let redirectUrl = new URLSearchParams(window.location.search).get('redirect');
+        if (!redirectUrl) {
+            const role = String(res.data.user?.role || '').toUpperCase();
+            if (role.includes('ADMIN') || role.includes('STAFF')) {
+                redirectUrl = '/admin';
+            } else {
+                redirectUrl = '/';
+            }
+        }
         window.location.href = redirectUrl;
       })
       .catch(err => {

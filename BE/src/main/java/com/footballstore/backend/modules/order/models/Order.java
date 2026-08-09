@@ -1,10 +1,12 @@
 package com.footballstore.backend.modules.order.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -13,7 +15,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Order {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
@@ -22,32 +26,35 @@ public class Order {
     @Column(name = "order_code", length = 50, nullable = false, unique = true)
     private String orderCode;
 
-    @Column(name = "user_id", length = 255)
+    @Column(name = "user_id", length = 100)
     private String userId;
+
+    @Column(name = "first_name", length = 100, nullable = false)
+    private String firstName;
+
+    @Column(name = "last_name", length = 100, nullable = false)
+    private String lastName;
 
     @Column(name = "email", length = 150, nullable = false)
     private String email;
 
-    @Column(name = "first_name", length = 100)
-    private String firstName;
-
-    @Column(name = "last_name", length = 100)
-    private String lastName;
-
-    @Column(name = "phone", length = 50)
+    @Column(name = "phone", length = 20, nullable = false)
     private String phone;
 
-    @Column(name = "province", length = 150)
+    @Column(name = "province", length = 100, nullable = false)
     private String province;
 
-    @Column(name = "district", length = 150)
+    @Column(name = "district", length = 100, nullable = false)
     private String district;
 
-    @Column(name = "ward", length = 150)
+    @Column(name = "ward", length = 100, nullable = false)
     private String ward;
 
-    @Column(name = "street", length = 255)
+    @Column(name = "street", length = 255, nullable = false)
     private String street;
+
+    @Column(name = "note", columnDefinition = "TEXT")
+    private String note;
 
     @Column(name = "payment_method", length = 50, nullable = false)
     private String paymentMethod;
@@ -64,20 +71,19 @@ public class Order {
     @Column(name = "shipping_fee", nullable = false, precision = 10, scale = 2)
     private BigDecimal shippingFee;
 
-    @Column(name = "discount_amount", nullable = false, precision = 10, scale = 2)
+    @Column(name = "discount_amount", precision = 10, scale = 2)
     private BigDecimal discountAmount;
 
     @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
-    @Builder.Default
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    @Column(name = "updated_at", insertable = false)
+    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
-    private java.util.List<OrderItem> items;
+    @JsonIgnoreProperties({"order", "hibernateLazyInitializer", "handler"})
+    private List<OrderItem> items;
 }

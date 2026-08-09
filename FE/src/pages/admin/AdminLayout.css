@@ -162,11 +162,10 @@
   height: 0;
 }
 
-/* Hide scrollbars globally across admin layout */
+/* Hide scrollbars on sidebar and modal, but keep visible scrollbars on table wrapper */
 .admin-wrapper,
 .admin-sidebar,
 .admin-main,
-.admin-table-wrapper,
 .admin-modal {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -175,11 +174,37 @@
 .admin-wrapper::-webkit-scrollbar,
 .admin-sidebar::-webkit-scrollbar,
 .admin-main::-webkit-scrollbar,
-.admin-table-wrapper::-webkit-scrollbar,
 .admin-modal::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
+}
+
+/* Styled horizontal scrollbar for table wrapper */
+.admin-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: auto;
+  -ms-overflow-style: auto;
+}
+
+.admin-table-wrapper::-webkit-scrollbar {
+  display: block !important;
+  height: 8px !important;
+}
+
+.admin-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.admin-table-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.admin-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .admin-sidebar__section-label {

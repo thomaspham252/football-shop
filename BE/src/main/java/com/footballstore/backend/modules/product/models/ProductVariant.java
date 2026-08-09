@@ -1,5 +1,6 @@
 package com.footballstore.backend.modules.product.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,14 +14,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ProductVariant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "variant_id")
     private Integer variantId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Product product;
 
     @Column(name = "color", length = 100, nullable = false)
@@ -28,6 +31,7 @@ public class ProductVariant {
 
     @Column(name = "size", length = 50, nullable = false)
     private String size;
+
     @Column(name = "surface_type")
     private String surfaceType;
 
@@ -64,7 +68,7 @@ public class ProductVariant {
     @Column(name = "updated_at", insertable = false, updatable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "sold_count",nullable = false)
+    @Column(name = "sold_count", nullable = false)
     @Builder.Default
     private Integer soldCount = 0;
 }
