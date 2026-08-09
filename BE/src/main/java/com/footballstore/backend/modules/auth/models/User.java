@@ -27,13 +27,16 @@ public class User {
     private String address;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private AuthProvider provider = AuthProvider.LOCAL;
 
     private String providerId; // Google user ID
 
     @Enumerated(EnumType.STRING)
-    private Role role = Role.USER;
+    @Builder.Default
+    private Role role = Role.ROLE_CUSTOMER;
 
+    @Builder.Default
     private boolean enabled = true;
     private LocalDateTime createdAt;
 }

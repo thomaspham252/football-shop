@@ -1,26 +1,31 @@
 package com.footballstore.backend.modules.auth.services;
 
+import com.footballstore.backend.config.security.JwtUtils;
 import com.footballstore.backend.modules.auth.dtos.*;
 import com.footballstore.backend.modules.auth.models.AuthProvider;
 import com.footballstore.backend.modules.auth.models.Role;
 import com.footballstore.backend.modules.auth.models.User;
 import com.footballstore.backend.modules.auth.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
     private final RestTemplate restTemplate = new RestTemplate();
 
     public AuthResponse register(RegisterRequest request) {
@@ -34,7 +39,7 @@ public class AuthService {
                 .fullName(request.getFullName())
                 .phone(request.getPhone())
                 .provider(AuthProvider.LOCAL)
-                .role(Role.USER)
+                .role(Role.ROLE_CUSTOMER)
                 .enabled(true)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -49,14 +54,20 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Email hoặc mật khẩu không chính xác"));
 
         if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
-            throw new RuntimeException("Tài khoản này được đăng ký qua Google và chưa đặt mật khẩu. Vui lòng đăng nhập bằng Google hoặc vào Thông tin cá nhân để tạo mật khẩu.");
+            throw new RuntimeException("Tài khoản này được đăng ký qua Google. Vui lòng đăng nhập bằng Google!");
         }
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Email hoặc mật khẩu không chính xác");
-        }
+        // Thực hiện xác thực Spring Security AuthenticationManager
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+        );
 
-        return generateAuthResponse(user);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String jwtToken = jwtUtils.generateJwtToken(authentication);
+        UserResponse userResponse = buildUserResponse(user);
+
+        return new AuthResponse(jwtToken, userResponse);
     }
 
     @SuppressWarnings("unchecked")
@@ -89,13 +100,13 @@ public class AuthService {
                 userRepository.save(user);
             }
         } else {
-            // Auto register a new account for Google login user
+            // Auto register a new customer account for Google login user
             user = User.builder()
                     .email(email)
                     .fullName(name != null ? name : email.split("@")[0])
                     .provider(AuthProvider.GOOGLE)
                     .providerId(googleId)
-                    .role(Role.USER)
+                    .role(Role.ROLE_CUSTOMER)
                     .enabled(true)
                     .createdAt(LocalDateTime.now())
                     .build();
@@ -111,9 +122,13 @@ public class AuthService {
     }
 
     private AuthResponse generateAuthResponse(User user) {
-        String token = "auth-token:" + UUID.randomUUID().toString() + ":" + user.getId();
-        
-        UserResponse userResponse = UserResponse.builder()
+        String token = jwtUtils.generateTokenFromUser(user.getEmail(), user.getId(), user.getRole().name());
+        UserResponse userResponse = buildUserResponse(user);
+        return new AuthResponse(token, userResponse);
+    }
+
+    private UserResponse buildUserResponse(User user) {
+        return UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
@@ -123,8 +138,6 @@ public class AuthService {
                 .address(user.getAddress())
                 .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)
                 .build();
-
-        return new AuthResponse(token, userResponse);
     }
 
     public String extractUserIdFromToken(String authHeader) {
@@ -132,18 +145,10 @@ public class AuthService {
             return null;
         }
         String token = authHeader.substring(7).trim();
-        if (token.contains(":")) {
-            String[] parts = token.split(":");
-            return parts[parts.length - 1];
+        if (jwtUtils.validateJwtToken(token)) {
+            return jwtUtils.getUserIdFromJwtToken(token);
         }
-        if (token.length() >= 36) {
-            return token.substring(token.length() - 36);
-        }
-        int lastDash = token.lastIndexOf("-");
-        if (lastDash != -1) {
-            return token.substring(lastDash + 1);
-        }
-        return token;
+        return null;
     }
 
     public User getUserById(String id) {

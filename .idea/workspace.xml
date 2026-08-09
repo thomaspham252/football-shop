@@ -6,15 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="5c064fff-bd4c-4565-ac17-1f911a404c52" name="Changes" comment="api-payment fix">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/controllers/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/controllers/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/BE/.env.example" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/BE/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/models/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/models/Role.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/models/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/models/User.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/services/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/services/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/EmailService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/MomoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/MomoService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BE/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/auth/LoginPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/auth/LoginPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/auth/RegisterPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/auth/RegisterPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/profile/tabs/PersonalInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/profile/tabs/PersonalInfo.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,7 +65,7 @@
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "Spring Boot.BackendApplication.executor": "Run",
-    "git-widget-placeholder": "ui/admin",
+    "git-widget-placeholder": "feature/auth-api",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/football-shop/BE/src/main/resources",
     "node.js.detected.package.eslint": "true",
