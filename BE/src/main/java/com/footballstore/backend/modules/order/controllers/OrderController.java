@@ -1,5 +1,7 @@
 package com.footballstore.backend.modules.order.controllers;
 
+import com.footballstore.backend.modules.auth.models.User;
+import com.footballstore.backend.modules.auth.services.AuthService;
 import com.footballstore.backend.modules.order.dtos.CreateOrderRequest;
 import com.footballstore.backend.modules.order.dtos.MomoPaymentResponse;
 import com.footballstore.backend.modules.order.dtos.ValidateCartRequest;
@@ -7,20 +9,21 @@ import com.footballstore.backend.modules.order.dtos.ValidateCartResponse;
 import com.footballstore.backend.modules.order.models.Order;
 import com.footballstore.backend.modules.order.services.MomoService;
 import com.footballstore.backend.modules.order.services.OrderService;
-import com.footballstore.backend.modules.auth.services.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
 public class OrderController {
+
     private final OrderService orderService;
     private final MomoService momoService;
     private final AuthService authService;
@@ -36,9 +39,7 @@ public class OrderController {
             Order order = orderService.createOrder(request);
             return ResponseEntity.ok(order);
         } catch (IllegalArgumentException e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -46,17 +47,17 @@ public class OrderController {
     public ResponseEntity<?> getMyOrders(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         String userId = authService.extractUserIdFromToken(authHeader);
         if (userId == null) {
-            return ResponseEntity.status(401).body(Map.of("message", "Yêu cầu cung cấp mã xác thực!"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Yêu cầu cung cấp mã xác thực!"));
         }
         try {
-            com.footballstore.backend.modules.auth.models.User user = authService.getUserById(userId);
+            User user = authService.getUserById(userId);
             if (user == null) {
-                return ResponseEntity.status(404).body(Map.of("message", "Không tìm thấy người dùng!"));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Không tìm thấy người dùng!"));
             }
             List<Order> orders = orderService.getOrdersByUserId(user.getId(), user.getEmail());
             return ResponseEntity.ok(orders);
         } catch (Exception e) {
-            return ResponseEntity.status(401).body(Map.of("message", "Mã xác thực không hợp lệ!"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Mã xác thực không hợp lệ!"));
         }
     }
 
@@ -90,15 +91,13 @@ public class OrderController {
                 bankInfo.put("orderCode", order.getOrderCode());
                 return ResponseEntity.ok(bankInfo);
             } else {
-                Map<String, String> response = new HashMap<>();
-                response.put("paymentMethod", "COD");
-                response.put("message", "Thanh toán khi nhận hàng. Không cần cổng thanh toán.");
-                return ResponseEntity.ok(response);
+                return ResponseEntity.ok(Map.of(
+                        "paymentMethod", "COD",
+                        "message", "Thanh toán khi nhận hàng. Không cần cổng thanh toán."
+                ));
             }
         } catch (Exception e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -108,9 +107,7 @@ public class OrderController {
             Order order = orderService.confirmPayment(id);
             return ResponseEntity.ok(order);
         } catch (IllegalArgumentException e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -120,9 +117,7 @@ public class OrderController {
             Order order = orderService.cancelOrder(id);
             return ResponseEntity.ok(order);
         } catch (IllegalArgumentException e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 }

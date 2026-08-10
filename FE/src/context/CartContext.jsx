@@ -6,7 +6,13 @@ export function CartProvider({ children }) {
   const [cart, setCart] = useState(() => {
     try {
       const stored = localStorage.getItem('cart');
-      return stored ? JSON.parse(stored) : [];
+      if (!stored) return [];
+      const parsed = JSON.parse(stored);
+      // Fallback migration: map any legacy 'qty' property to 'quantity'
+      return parsed.map(item => ({
+        ...item,
+        quantity: item.quantity ?? item.qty ?? 1
+      }));
     } catch (e) {
       console.error("Failed to load cart from localStorage", e);
       return [];
@@ -43,18 +49,17 @@ export function CartProvider({ children }) {
       const maxStock = variant.variantStock ?? product.stockQuantity ?? 99;
 
       if (existingItemIndex > -1) {
-        // Item exists, update quantity
         return prevCart.map((item, idx) => {
           if (idx === existingItemIndex) {
-            const newQty = Math.min(item.qty + qty, maxStock);
-            return { ...item, qty: newQty };
+            const currentQty = item.quantity ?? item.qty ?? 0;
+            const newQty = Math.min(currentQty + qty, maxStock);
+            return { ...item, quantity: newQty };
           }
           return item;
         });
       } else {
-        // Item does not exist, add it
         const newItem = {
-          id: variant.variantId, // Unique cart item ID (variant ID)
+          id: variant.variantId,
           productId: product.productId || product.id,
           name: product.productName || product.name,
           brand: product.brandName || product.brand || 'Football Store',
@@ -65,7 +70,7 @@ export function CartProvider({ children }) {
           price: variant.variantPrice || product.salePrice || product.price || 0,
           originalPrice: product.basePrice || product.originalPrice || 0,
           image: variant.imageUrl || product.imageUrl || product.image || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80',
-          qty: Math.min(qty, maxStock),
+          quantity: Math.min(qty, maxStock),
           maxStock: maxStock
         };
         return [...prevCart, newItem];
@@ -77,8 +82,9 @@ export function CartProvider({ children }) {
     setCart(prevCart =>
       prevCart.map(item => {
         if (item.id === id) {
-          const newQty = Math.max(1, Math.min(item.qty + delta, item.maxStock || 99));
-          return { ...item, qty: newQty };
+          const currentQty = item.quantity ?? item.qty ?? 1;
+          const newQty = Math.max(1, Math.min(currentQty + delta, item.maxStock || 99));
+          return { ...item, quantity: newQty };
         }
         return item;
       })

@@ -11,6 +11,12 @@ const TABS = [
   { key: 'cancelled', label: 'Đã hủy' },
 ];
 
+const styles = {
+  prevIcon: { display: 'inline', verticalAlign: 'middle', marginRight: 4 },
+  nextIcon: { display: 'inline', verticalAlign: 'middle', marginLeft: 4 },
+  confirmCancelBtn: { background: '#e53935', color: '#fff' }
+};
+
 const mapStatus = (backendStatus) => {
   const status = (backendStatus || '').toUpperCase();
   if (status === 'PENDING') return 'pending';
@@ -100,7 +106,6 @@ export default function OrderHistory({ orders = [], onRefresh }) {
 
   return (
     <div className="oh-wrap">
-      {/* Header */}
       <div className="oh-header">
         <div>
           <h2 className="oh-header__title">Lịch sử đơn hàng</h2>
@@ -119,7 +124,6 @@ export default function OrderHistory({ orders = [], onRefresh }) {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="oh-tabs">
         {TABS.map(t => (
           <button
@@ -132,7 +136,6 @@ export default function OrderHistory({ orders = [], onRefresh }) {
         ))}
       </div>
 
-      {/* Order cards */}
       <div className="oh-list">
         {filtered.length === 0 ? (
           <div className="oh-empty">
@@ -221,7 +224,6 @@ export default function OrderHistory({ orders = [], onRefresh }) {
         })}
       </div>
 
-      {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="oh-pagination">
           <button
@@ -229,7 +231,7 @@ export default function OrderHistory({ orders = [], onRefresh }) {
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
           >
-            <ChevronLeft size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
+            <ChevronLeft size={16} style={styles.prevIcon} />
             Trang trước
           </button>
           <span className="oh-pagination__info">
@@ -241,12 +243,11 @@ export default function OrderHistory({ orders = [], onRefresh }) {
             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
           >
             Trang sau
-            <ChevronRight size={16} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: 4 }} />
+            <ChevronRight size={16} style={styles.nextIcon} />
           </button>
         </div>
       )}
 
-      {/* Modal xác nhận hủy đơn hàng */}
       {cancelModalOrder && (
         <div className="oh-modal-overlay">
           <div className="oh-modal">
@@ -265,7 +266,7 @@ export default function OrderHistory({ orders = [], onRefresh }) {
               </button>
               <button 
                 className="oh-btn oh-btn--danger" 
-                style={{ background: '#e53935', color: '#fff' }}
+                style={styles.confirmCancelBtn}
                 onClick={handleConfirmCancel}
                 disabled={cancelling}
               >

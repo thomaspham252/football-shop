@@ -1,9 +1,15 @@
 package com.footballstore.backend.modules.auth.controllers;
 
-import com.footballstore.backend.modules.auth.dtos.*;
+import com.footballstore.backend.modules.auth.dtos.AuthResponse;
+import com.footballstore.backend.modules.auth.dtos.GoogleLoginRequest;
+import com.footballstore.backend.modules.auth.dtos.LoginRequest;
+import com.footballstore.backend.modules.auth.dtos.RegisterRequest;
+import com.footballstore.backend.modules.auth.dtos.UserResponse;
+import com.footballstore.backend.modules.auth.models.User;
 import com.footballstore.backend.modules.auth.services.AuthService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,10 +17,10 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
@@ -50,14 +56,14 @@ public class AuthController {
     public ResponseEntity<?> getProfile(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         String userId = authService.extractUserIdFromToken(authHeader);
         if (userId == null) {
-            return ResponseEntity.status(401).body(Map.of("message", "Yêu cầu cung cấp mã xác thực!"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Yêu cầu cung cấp mã xác thực!"));
         }
         try {
-            com.footballstore.backend.modules.auth.models.User user = authService.getUserById(userId);
+            User user = authService.getUserById(userId);
             if (user == null) {
-                return ResponseEntity.status(404).body(Map.of("message", "Không tìm thấy người dùng!"));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Không tìm thấy người dùng!"));
             }
-            
+
             UserResponse res = UserResponse.builder()
                     .id(user.getId())
                     .email(user.getEmail())
@@ -70,7 +76,7 @@ public class AuthController {
                     .build();
             return ResponseEntity.ok(res);
         } catch (Exception e) {
-            return ResponseEntity.status(401).body(Map.of("message", "Mã xác thực không hợp lệ!"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Mã xác thực không hợp lệ!"));
         }
     }
 
@@ -80,14 +86,14 @@ public class AuthController {
             @RequestBody Map<String, String> body) {
         String userId = authService.extractUserIdFromToken(authHeader);
         if (userId == null) {
-            return ResponseEntity.status(401).body(Map.of("message", "Yêu cầu cung cấp mã xác thực!"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Yêu cầu cung cấp mã xác thực!"));
         }
         try {
-            com.footballstore.backend.modules.auth.models.User user = authService.getUserById(userId);
+            User user = authService.getUserById(userId);
             if (user == null) {
-                return ResponseEntity.status(404).body(Map.of("message", "Không tìm thấy người dùng!"));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Không tìm thấy người dùng!"));
             }
-            
+
             if (body.containsKey("fullName")) {
                 user.setFullName(body.get("fullName"));
             }
@@ -100,9 +106,9 @@ public class AuthController {
             if (body.containsKey("password") && body.get("password") != null && !body.get("password").trim().isEmpty()) {
                 user.setPassword(authService.encodePassword(body.get("password")));
             }
-            
+
             authService.updateUser(user);
-            
+
             UserResponse res = UserResponse.builder()
                     .id(user.getId())
                     .email(user.getEmail())

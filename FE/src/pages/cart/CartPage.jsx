@@ -8,33 +8,26 @@ import { useToast } from '../../context/ToastContext';
 import homeApi from '../../api/homeApi';
 import './CartPage.css';
 
-/* ── Mock cart items ── */
-const INIT_CART = [
-  {
-    id: 1,
-    name: 'Giày Thể Thao Bóng Đá Sân Cỏ Tự Nhiên Nam Nike Zoom Vapor 16 Academy AG',
-    brand: 'Nike',
-    sku: 'NK-ZV16-AG-001',
-    size: '42',
-    color: 'Xanh/Đen',
-    price: 2769000,
-    originalPrice: 3200000,
-    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80',
-    qty: 1,
+const styles = {
+  headProduct: { display: 'flex', alignItems: 'center' },
+  checkboxAll: { marginRight: '8px', cursor: 'pointer', scale: '1.2' },
+  labelAll: { cursor: 'pointer', fontWeight: 'bold' },
+  clearAllBtn: {
+    marginLeft: '15px',
+    color: '#e53935',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '12px',
+    fontWeight: '600'
   },
-  {
-    id: 2,
-    name: 'Giày Đá Bóng Adidas Predator Elite FG',
-    brand: 'Adidas',
-    sku: 'AD-PE-FG-002',
-    size: '41',
-    color: 'Đen/Đỏ',
-    price: 5200000,
-    originalPrice: 6500000,
-    image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300&q=80',
-    qty: 1,
-  },
-];
+  checkboxItem: {
+    marginRight: '12px',
+    alignSelf: 'center',
+    cursor: 'pointer',
+    scale: '1.2'
+  }
+};
 
 export default function CartPage() {
   const { toast } = useToast();
@@ -94,8 +87,8 @@ export default function CartPage() {
   };
 
   const selectedCartItems = cart.filter(item => selectedIds.includes(item.id));
-  const subtotal  = selectedCartItems.reduce((s, i) => s + i.price * i.qty, 0);
-  const shipping  = subtotal === 0 ? 0 : (subtotal >= 500000 ? 0 : 30000);
+  const subtotal  = selectedCartItems.reduce((s, i) => s + i.price * (i.quantity ?? i.qty ?? 1), 0);
+  const shipping  = subtotal === 0 ? 0 : (subtotal >= 500000 ? 0 : 40000);
   const total     = subtotal + shipping;
 
   const handleCheckout = () => {
@@ -109,7 +102,6 @@ export default function CartPage() {
     window.location.href = '/thanh-toan';
   };
 
-  /* ── Empty cart ── */
   if (cart.length === 0) {
     return (
       <div className="cart-page">
@@ -135,7 +127,6 @@ export default function CartPage() {
 
       <main className="cart-main">
         <div className="cart-container">
-          {/* Breadcrumb */}
           <div className="cart-breadcrumb">
             <a href="/">Trang chủ</a>
             <ChevronRight size={13} />
@@ -145,34 +136,24 @@ export default function CartPage() {
           <h1 className="cart-heading">GIỎ HÀNG</h1>
 
           <div className="cart-layout">
-            {/* ── Left: product table ── */}
             <div className="cart-left">
-              {/* Table header */}
               <div className="cart-table-head">
-                <span className="cart-table-head__product" style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="cart-table-head__product" style={styles.headProduct}>
                   <input
                     type="checkbox"
                     id="selectAll"
                     checked={isAllSelected}
                     onChange={handleToggleAll}
-                    style={{ marginRight: '8px', cursor: 'pointer', scale: '1.2' }}
+                    style={styles.checkboxAll}
                   />
-                  <label htmlFor="selectAll" style={{ cursor: 'pointer', fontWeight: 'bold' }}>Tất cả</label>
+                  <label htmlFor="selectAll" style={styles.labelAll}>Tất cả</label>
                   {isAllSelected && (
                     <button
                       onClick={() => setConfirmAction({
                         type: 'clear_all',
                         message: "Bạn có chắc chắn muốn xóa toàn bộ sản phẩm khỏi giỏ hàng?"
                       })}
-                      style={{
-                        marginLeft: '15px',
-                        color: '#e53935',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                        fontWeight: '600'
-                      }}
+                      style={styles.clearAllBtn}
                     >
                       Xóa tất cả
                     </button>
@@ -182,7 +163,6 @@ export default function CartPage() {
                 <span className="cart-table-head__total">TỔNG CỘNG</span>
               </div>
 
-              {/* Items */}
               <div className="cart-items">
                 {cart.map(item => (
                   <div key={item.id} className="cart-item">
@@ -191,12 +171,7 @@ export default function CartPage() {
                         type="checkbox"
                         checked={selectedIds.includes(item.id)}
                         onChange={() => handleToggleItem(item.id)}
-                        style={{
-                          marginRight: '12px',
-                          alignSelf: 'center',
-                          cursor: 'pointer',
-                          scale: '1.2'
-                        }}
+                        style={styles.checkboxItem}
                       />
                       <a href={`/san-pham/${item.productId}`} className="cart-item__img-wrap">
                         <img src={item.image} alt={item.name} className="cart-item__img" />
@@ -216,7 +191,7 @@ export default function CartPage() {
                         <button className="cart-item__remove" onClick={() => setConfirmAction({
                           type: 'remove_item',
                           itemId: item.id,
-                          message: "Bạn có muốn xóa sản phẩm ?"
+                          message: "Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?"
                         })}>
                           <Trash2 size={13} /> Xóa
                         </button>
@@ -225,18 +200,18 @@ export default function CartPage() {
                     <div className="cart-item__qty-wrap">
                       <div className="cart-item__qty">
                         <button onClick={() => updateQty(item.id, -1)} aria-label="Giảm"><Minus size={13} /></button>
-                        <span>{item.qty}</span>
+                        <span>{item.quantity ?? item.qty ?? 1}</span>
                         <button onClick={() => updateQty(item.id, +1)} aria-label="Tăng"><Plus size={13} /></button>
                       </div>
                     </div>
 
                     <div className="cart-item__total-wrap">
                       <span className="cart-item__total">
-                        {(item.price * item.qty).toLocaleString('vi-VN')}đ
+                        {(item.price * (item.quantity ?? item.qty ?? 1)).toLocaleString('vi-VN')}đ
                       </span>
                       {item.originalPrice && (
                         <span className="cart-item__total-original">
-                          {(item.originalPrice * item.qty).toLocaleString('vi-VN')}đ
+                          {(item.originalPrice * (item.quantity ?? item.qty ?? 1)).toLocaleString('vi-VN')}đ
                         </span>
                       )}
                     </div>
@@ -244,8 +219,6 @@ export default function CartPage() {
                 ))}
               </div>
 
-              {/* Actions */}
-              {/* Trust badges */}
               <div className="cart-trust">
                 <div className="cart-trust__item">
                   <span className="cart-trust__check">✔</span>
@@ -270,7 +243,6 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* ── Right: summary ── */}
             <div className="cart-right">
               <div className="cart-summary">
                 <h3 className="cart-summary__title">TỔNG CỘNG</h3>
@@ -305,7 +277,6 @@ export default function CartPage() {
             </div>
           </div>
 
-          {/* ── Suggested products ── */}
           {suggestedProducts.length > 0 && (
             <section className="cart-suggested">
               <h2 className="cart-suggested__title">BẠN CÓ THỂ THÍCH</h2>

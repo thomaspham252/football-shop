@@ -2,6 +2,7 @@ package com.footballstore.backend.modules.order.services;
 
 import com.footballstore.backend.modules.order.dtos.MomoIPNRequest;
 import com.footballstore.backend.modules.order.dtos.MomoPaymentResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,19 +13,20 @@ import org.springframework.web.client.RestTemplate;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class MomoService {
-    @Value("${momo.partner-code:MOMOBKUN20180529}")
+
+    @Value("${momo.partner-code}")
     private String partnerCode;
 
-    @Value("${momo.access-key:klm05Bh5mEs15crK}")
+    @Value("${momo.access-key}")
     private String accessKey;
 
-    @Value("${momo.secret-key:at1Rw5Bt1y450dgObHA15Qo1U1s05n5w}")
+    @Value("${momo.secret-key}")
     private String secretKey;
 
     @Value("${momo.api-endpoint:https://test-payment.momo.vn/v2/gateway/api/create}")
@@ -36,21 +38,13 @@ public class MomoService {
     @Value("${momo.ipn-url:http://localhost:8080/api/webhooks/momo}")
     private String ipnUrl;
 
-    @PostConstruct
-    public void init() {
-        if (partnerCode == null || partnerCode.trim().isEmpty() || "MOMOBKUN20180529".equalsIgnoreCase(partnerCode.trim()) || "MOMO".equalsIgnoreCase(partnerCode.trim())) {
-            this.partnerCode = "MOMOBKUN20180529";
-            this.accessKey = "klm05Bh5mEs15crK";
-            this.secretKey = "at1Rw5Bt1y450dgObHA15Qo1U1s05n5w";
-        }
-    }
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public MomoPaymentResponse createPayment(String orderId, Long amount, String orderInfo) {
         String requestId = orderId + "_" + System.currentTimeMillis();
         String extraData = "";
         String requestType = "captureWallet";
 
-        // Signature raw data
         String rawHash = "accessKey=" + accessKey +
                 "&amount=" + amount +
                 "&extraData=" + extraData +
@@ -77,7 +71,6 @@ public class MomoService {
         payload.put("requestType", requestType);
         payload.put("signature", signature);
 
-        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -87,9 +80,10 @@ public class MomoService {
             return restTemplate.postForObject(apiEndpoint, entity, MomoPaymentResponse.class);
         } catch (org.springframework.web.client.HttpStatusCodeException e) {
             String errorResponseBody = e.getResponseBodyAsString();
-            System.err.println("MoMo API Error Response: " + errorResponseBody);
+            log.error("MoMo API Error Response: {}", errorResponseBody);
             throw new RuntimeException("Cổng thanh toán MoMo báo lỗi (HTTP " + e.getStatusCode() + "): " + (errorResponseBody.isEmpty() ? e.getMessage() : errorResponseBody), e);
         } catch (Exception e) {
+            log.error("Lỗi khi kết nối đến cổng thanh toán MoMo: {}", e.getMessage());
             throw new RuntimeException("Lỗi khi kết nối đến cổng thanh toán MoMo: " + e.getMessage(), e);
         }
     }

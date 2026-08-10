@@ -1,14 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useVietnamAddress } from '../../hooks/useVietnamAddress';
-import { ChevronDown, ChevronUp, Info, Tag, Lock, Pencil } from 'lucide-react';
+import { ChevronDown, ChevronUp, Info, Tag, Lock } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 import orderApi from '../../api/orderApi';
 import './PaymentPage.css';
-
-
-/* ── Mock order (thực tế sẽ lấy từ cart state/context) ── */
-// ORDER_ITEMS mock removed in favor of useCart()
 
 const PAYMENT_METHODS = [
   {
@@ -24,6 +20,51 @@ const PAYMENT_METHODS = [
     label: 'Ví MoMo',
   }
 ];
+
+const styles = {
+  couponMsg: { marginTop: '8px', fontSize: '12.5px', fontWeight: '600' },
+  shippingCard: {
+    background: '#ffffff',
+    border: '1.5px solid var(--border)',
+    borderRadius: '8px',
+    padding: '16px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    fontSize: '14px',
+    fontFamily: 'var(--sans)'
+  },
+  shippingTitle: { fontWeight: '600', color: '#1a1a2e', margin: 0 },
+  shippingDesc: { fontSize: '12px', color: '#666', margin: '4px 0 0 0' },
+  freeShipBanner: {
+    fontSize: '12.5px',
+    color: 'var(--accent-hover)',
+    fontWeight: '600',
+    marginTop: '10px',
+    background: '#fdf7e7',
+    border: '1px solid #fce8bd',
+    padding: '10px 14px',
+    borderRadius: '6px'
+  },
+  momoBadge: {
+    background: '#a50064',
+    color: '#fff',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    fontSize: '10px',
+    fontWeight: 'bold',
+    marginLeft: '8px'
+  },
+  bankDetails: {
+    background: '#f8f9fa',
+    border: '1.5px solid var(--border)',
+    borderRadius: '6px',
+    padding: '16px',
+    marginTop: '12px',
+    fontSize: '13.5px',
+    lineHeight: '1.6'
+  }
+};
 
 export default function PaymentPage() {
   const { toast } = useToast();
@@ -41,6 +82,21 @@ export default function PaymentPage() {
       window.location.href = '/gio-hang';
     }
   }, [checkoutItems]);
+
+  const [email, setEmail]               = useState('');
+  const [sendLink, setSendLink]         = useState(true);
+  const [firstName, setFirstName]       = useState('');
+  const [lastName, setLastName]         = useState('');
+  const [phone, setPhone]               = useState('');
+  const [agree, setAgree]               = useState(true);
+  const [payment, setPayment]           = useState('cod');
+  const [coupon, setCoupon]             = useState('');
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [couponMessage, setCouponMessage] = useState('');
+  const [discount, setDiscount]           = useState(0);
+  const [submitting, setSubmitting]       = useState(false);
+  const [showOrderMobile, setShowOrderMobile] = useState(false);
+  const [street, setStreet]               = useState('');
 
   useEffect(() => {
     const userJson = localStorage.getItem('user');
@@ -67,23 +123,6 @@ export default function PaymentPage() {
     }
   }, []);
 
-  const [email, setEmail]               = useState('');
-  const [sendLink, setSendLink]         = useState(true);
-  const [firstName, setFirstName]       = useState('');
-  const [lastName, setLastName]         = useState('');
-  const [phone, setPhone]               = useState('');
-  const [agree, setAgree]               = useState(true);
-  const [payment, setPayment]           = useState('cod');
-  const [billingSame, setBillingSame]   = useState(true);
-  const [coupon, setCoupon]             = useState('');
-  const [couponApplied, setCouponApplied] = useState(false);
-  const [couponMessage, setCouponMessage] = useState('');
-  const [discount, setDiscount]           = useState(0);
-  const [submitting, setSubmitting]       = useState(false);
-  const [showOrderMobile, setShowOrderMobile] = useState(false);
-
-  const [street, setStreet] = useState('');
-
   const {
     provinces, districts, wards,
     province, district, ward,
@@ -92,7 +131,7 @@ export default function PaymentPage() {
     loadingProvinces, loadingDistricts, loadingWards,
   } = useVietnamAddress();
 
-  const subtotal     = checkoutItems.reduce((s, i) => s + i.price * i.qty, 0);
+  const subtotal     = checkoutItems.reduce((s, i) => s + i.price * (i.quantity ?? i.qty ?? 1), 0);
   const shippingFee  = subtotal >= 500000 ? 0 : 40000;
   const remainingForFreeShip = 500000 - subtotal;
   const total        = subtotal + shippingFee - discount;
@@ -111,7 +150,7 @@ export default function PaymentPage() {
       toast.warning("Đơn hàng trên 5 triệu không áp dụng hình thức COD. Vui lòng chọn phương thức thanh toán khác!");
       return;
     }
-    
+
     setSubmitting(true);
     try {
       const userJson = localStorage.getItem('user');
@@ -119,13 +158,13 @@ export default function PaymentPage() {
       if (userJson) {
         try {
           userId = JSON.parse(userJson).id;
-        } catch (e) {
-          console.error(e);
+        } catch {
+          userId = null;
         }
       }
 
       const orderData = {
-        items: checkoutItems.map(i => ({ variantId: i.id, qty: i.qty })),
+        items: checkoutItems.map(i => ({ variantId: i.id, quantity: i.quantity ?? i.qty ?? 1 })),
         userId: userId,
         email: email,
         firstName: firstName,
@@ -154,7 +193,7 @@ export default function PaymentPage() {
       localStorage.setItem('latestOrderId', createdOrder.orderId);
 
       const paymentRes = await orderApi.initiatePayment(createdOrder.orderId);
-      
+
       if (payment === 'momo') {
         if (paymentRes.data && paymentRes.data.payUrl) {
           window.location.href = paymentRes.data.payUrl;
@@ -167,8 +206,8 @@ export default function PaymentPage() {
       }
     } catch (err) {
       console.error("Lỗi khi xử lý thanh toán:", err);
-      const errMsg = err.response && err.response.data && err.response.data.error 
-          ? err.response.data.error 
+      const errMsg = err.response && err.response.data && err.response.data.error
+          ? err.response.data.error
           : "Không thể xử lý đơn hàng. Vui lòng kiểm tra lại tồn kho hoặc thử lại sau.";
       toast.error("Lỗi: " + errMsg);
     } finally {
@@ -200,7 +239,6 @@ export default function PaymentPage() {
     }
   };
 
-  /* ── Order summary panel ── */
   const OrderSummary = () => (
     <div className="pay-summary">
       <div className="pay-summary__items">
@@ -208,7 +246,7 @@ export default function PaymentPage() {
           <div key={item.id} className="pay-summary__item">
             <div className="pay-summary__img-wrap">
               <img src={item.image} alt={item.name} />
-              <span className="pay-summary__qty">{item.qty}</span>
+              <span className="pay-summary__qty">{item.quantity ?? item.qty ?? 1}</span>
             </div>
             <div className="pay-summary__item-info">
               <p className="pay-summary__item-name">{item.name}</p>
@@ -221,7 +259,6 @@ export default function PaymentPage() {
         ))}
       </div>
 
-      {/* Coupon */}
       <div className="pay-summary__coupon">
         <div className="pay-summary__coupon-row">
           <Tag size={14} />
@@ -235,13 +272,12 @@ export default function PaymentPage() {
           <button onClick={applyCoupon}>Áp dụng</button>
         </div>
         {couponMessage && (
-          <p className="pay-summary__coupon-ok" style={{ color: couponApplied ? '#2e7d32' : 'var(--red)', marginTop: '8px', fontSize: '12.5px', fontWeight: '600' }}>
+          <p className="pay-summary__coupon-ok" style={{ ...styles.couponMsg, color: couponApplied ? '#2e7d32' : 'var(--red)' }}>
             {couponMessage}
           </p>
         )}
       </div>
 
-      {/* Totals */}
       <div className="pay-summary__totals">
         <div className="pay-summary__row">
           <span>Tổng phụ · {checkoutItems.length} mặt hàng</span>
@@ -249,7 +285,7 @@ export default function PaymentPage() {
         </div>
         {couponApplied && (
           <div className="pay-summary__row pay-summary__row--discount">
-            <span>Giảm giá (10%)</span>
+            <span>Giảm giá</span>
             <span>-{discount.toLocaleString('vi-VN')}đ</span>
           </div>
         )}
@@ -264,7 +300,7 @@ export default function PaymentPage() {
         <div className="pay-summary__row pay-summary__row--total">
           <span>Tổng</span>
           <div className="pay-summary__total-right">
-            <span className="pay-summary__vat">Đã gồm 469.978đ tiền thuế</span>
+            <span className="pay-summary__vat">Đã gồm thuế VAT</span>
             <span className="pay-summary__total-price">{total.toLocaleString('vi-VN')}đ</span>
           </div>
         </div>
@@ -282,7 +318,6 @@ export default function PaymentPage() {
 
   return (
     <div className="pay-page">
-      {/* Minimal header */}
       <div className="pay-header-wrap">
         <header className="pay-header">
           <a href="/" className="pay-header__logo">
@@ -299,7 +334,6 @@ export default function PaymentPage() {
         </header>
       </div>
 
-      {/* Mobile order toggle */}
       <button
         className="pay-mobile-order-toggle"
         onClick={() => setShowOrderMobile(!showOrderMobile)}
@@ -322,10 +356,7 @@ export default function PaymentPage() {
       )}
 
       <div className="pay-layout">
-        {/* ── LEFT: form ── */}
         <div className="pay-form-col">
-
-          {/* Liên hệ */}
           <section className="pay-section">
             <h2 className="pay-section__title">Liên hệ</h2>
             <div className="pay-field">
@@ -343,7 +374,6 @@ export default function PaymentPage() {
             </label>
           </section>
 
-          {/* Thông tin giao hàng */}
           <section className="pay-section">
             <div className="pay-section__title-row">
               <h2 className="pay-section__title">Thông Tin Giao Hàng</h2>
@@ -398,31 +428,18 @@ export default function PaymentPage() {
               <Info size={16} className="pay-field__icon" />
             </div>
 
-
-
             <label className="pay-checkbox" style={{ marginTop: 12 }}>
               <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} />
               <span>Nhấn vào ô này đồng nghĩa với việc đồng ý với các thông tin và điều khoản thanh toán</span>
             </label>
           </section>
 
-          {/* Phương thức vận chuyển */}
           <section className="pay-section">
             <h2 className="pay-section__title">Phương thức vận chuyển</h2>
-            <div style={{
-              background: '#ffffff',
-              border: '1.5px solid var(--border)',
-              borderRadius: '8px',
-              padding: '16px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              fontSize: '14px',
-              fontFamily: 'var(--sans)'
-            }}>
+            <div style={styles.shippingCard}>
               <div>
-                <p style={{ fontWeight: '600', color: '#1a1a2e', margin: 0 }}>Vận chuyển tận nơi</p>
-                <p style={{ fontSize: '12px', color: '#666', margin: '4px 0 0 0' }}>Giao hàng từ 2–5 ngày làm việc</p>
+                <p style={styles.shippingTitle}>Vận chuyển tận nơi</p>
+                <p style={styles.shippingDesc}>Giao hàng từ 2–5 ngày làm việc</p>
               </div>
               <div>
                 {subtotal >= 500000 ? (
@@ -437,22 +454,12 @@ export default function PaymentPage() {
             </div>
 
             {subtotal < 500000 && (
-              <p style={{
-                fontSize: '12.5px',
-                color: 'var(--accent-hover)',
-                fontWeight: '600',
-                marginTop: '10px',
-                background: '#fdf7e7',
-                border: '1px solid #fce8bd',
-                padding: '10px 14px',
-                borderRadius: '6px'
-              }}>
+              <p style={styles.freeShipBanner}>
                 💡 Mua thêm <strong>{remainingForFreeShip.toLocaleString('vi-VN')}đ</strong> để được MIỄN PHÍ vận chuyển!
               </p>
             )}
           </section>
 
-          {/* Thanh toán */}
           <section className="pay-section">
             <h2 className="pay-section__title">Thanh toán</h2>
             <p className="pay-section__desc">Toàn bộ các giao dịch được bảo mật và mã hóa.</p>
@@ -476,15 +483,7 @@ export default function PaymentPage() {
                     <span className="pay-option__label" style={{ display: 'flex', alignItems: 'center' }}>
                       {m.label}
                       {m.id === 'momo' && (
-                        <span style={{
-                          background: '#a50064',
-                          color: '#fff',
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          fontSize: '10px',
-                          fontWeight: 'bold',
-                          marginLeft: '8px'
-                        }}>
+                        <span style={styles.momoBadge}>
                           MoMo
                         </span>
                       )}
@@ -501,21 +500,13 @@ export default function PaymentPage() {
             )}
 
             {payment === 'transfer' && (
-              <div className="pay-bank-details" style={{
-                background: '#f8f9fa',
-                border: '1.5px solid var(--border)',
-                borderRadius: '6px',
-                padding: '16px',
-                marginTop: '12px',
-                fontSize: '13.5px',
-                lineHeight: '1.6'
-              }}>
+              <div className="pay-bank-details" style={styles.bankDetails}>
                 <p style={{ fontWeight: '700', color: '#1a1a2e', marginBottom: '8px', fontSize: '14px' }}>
                   Thông tin chuyển khoản ngân hàng:
                 </p>
                 <p>Ngân hàng: <strong>MB Bank (Ngân hàng Quân Đội)</strong></p>
-                <p>Số tài khoản: <strong>25022004042000</strong></p>
-                <p>Chủ tài khoản: <strong>PHAM VAN LINH</strong></p>
+                <p>Số tài khoản: <strong>0999888777666</strong></p>
+                <p>Chủ tài khoản: <strong>CONG TY TNHH ULTRASPORT</strong></p>
                 <p>Số tiền: <strong>{total.toLocaleString('vi-VN')}đ</strong></p>
                 <p>Cú pháp chuyển khoản: <strong>[Mã đơn hàng của bạn]</strong></p>
                 <p style={{ fontSize: '11px', color: '#666', marginTop: '8px', fontStyle: 'italic' }}>
@@ -531,15 +522,12 @@ export default function PaymentPage() {
             )}
           </section>
 
-
-          {/* Submit */}
           <button className="pay-submit" onClick={handleCheckout} disabled={submitting}>
             <Lock size={15} />
             {submitting ? 'Đang xử lý...' : 'Thanh toán ngay'}
           </button>
         </div>
 
-        {/* ── RIGHT: order summary ── */}
         <div className="pay-summary-col">
           <OrderSummary />
         </div>

@@ -12,7 +12,9 @@ import {
   Mail, 
   ChevronDown, 
   Menu, 
-  LogOut 
+  LogOut,
+  Bot,
+  MessageSquare
 } from 'lucide-react';
 import './AdminLayout.css';
 
@@ -21,6 +23,9 @@ import AdminInventory from './components/AdminInventory';
 import AdminProducts from './components/AdminProducts';
 import AdminOrders from './components/AdminOrders';
 import AdminUsers from './components/AdminUsers';
+import AdminBotDashboard from './components/AdminBotDashboard';
+import AdminBotChatHistory from './components/AdminBotChatHistory';
+import ChatManagement from './ChatManagement';
 
 import CreateOrderModal from './modals/CreateOrderModal';
 import AddUserModal from './modals/AddUserModal';
@@ -68,6 +73,12 @@ export default function AdminLayout() {
             onViewOrderDetails={handleOpenOrderDetails} 
           />
         );
+      case 'chatbot':
+        return <ChatManagement />;
+      case 'bot-dashboard':
+        return <AdminBotDashboard />;
+      case 'bot-chat-history':
+        return <AdminBotChatHistory />;
       case 'kho-hang':
         return (
           <AdminInventory 
@@ -100,11 +111,11 @@ export default function AdminLayout() {
             <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '500px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Tên cửa hàng</label>
-                <input type="text" defaultValue="The Pitch Football Shop" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-border)' }} />
+                <input type="text" defaultValue="ULTRASPORT Football Shop" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-border)' }} />
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Email thông báo đơn hàng</label>
-                <input type="email" defaultValue="admin@footballshop.vn" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-border)' }} />
+                <input type="email" defaultValue="admin@ultrasport.vn" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-border)' }} />
               </div>
               <button className="admin-btn admin-btn--primary" style={{ width: 'fit-content', marginTop: '10px' }}>
                 Lưu cấu hình
@@ -175,6 +186,16 @@ export default function AdminLayout() {
             <span>Quản lý người dùng</span>
           </button>
 
+          <div className="admin-sidebar__section-label" style={{ marginTop: '16px' }}>BOTADMIN AI</div>
+
+          <button
+            className={`admin-sidebar__nav-item ${activeTab === 'chatbot' ? 'active' : ''}`}
+            onClick={() => setActiveTab('chatbot')}
+          >
+            <span className="admin-sidebar__nav-icon"><Bot size={19} /></span>
+            <span>Quản lý Chatbot</span>
+          </button>
+
           <div className="admin-sidebar__section-label" style={{ marginTop: '16px' }}>HỆ THỐNG</div>
 
           <button
@@ -227,7 +248,7 @@ export default function AdminLayout() {
               <input
                 type="text"
                 className="admin-header__search-input"
-                placeholder="Tìm kiếm đơn hàng, sản phẩm, khách hàng..."
+                placeholder="Tìm kiếm đơn hàng, sản phẩm, phiên chat..."
               />
             </div>
           </div>
