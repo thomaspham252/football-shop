@@ -1,0 +1,278 @@
+/* BotAdmin Dashboard Styling - Image 1 Exact Layout */
+.bot-admin-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  color: #1e293b;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.bot-admin-dashboard__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bot-admin-dashboard__title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+}
+
+.bot-admin-dashboard__subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+}
+
+.bot-admin-btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bot-admin-btn-refresh:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.bot-admin-btn-refresh .spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+/* 3 Stat Cards Grid */
+.bot-admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.bot-admin-stat-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid #f1f5f9;
+  position: relative;
+  overflow: hidden;
+}
+
+.bot-admin-stat-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bot-admin-stat-card__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.bot-admin-stat-card__val {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.bot-admin-stat-card__growth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 12.5px;
+}
+
+.growth-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.bot-admin-stat-card__growth.positive .growth-badge {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.bot-admin-stat-card__growth.negative .growth-badge {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.growth-text {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.bot-admin-stat-card__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-blue {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.icon-light-blue {
+  background: #60a5fa;
+  color: #ffffff;
+}
+
+.icon-dark-blue {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+/* Chart Card Section */
+.bot-admin-chart-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.bot-admin-chart-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bot-admin-chart-card__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.bot-admin-chart-card__filters {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 10px;
+  gap: 2px;
+}
+
+.bot-admin-filter-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bot-admin-filter-btn.active {
+  background: #1e40af;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(30, 64, 175, 0.2);
+}
+
+/* Chart Visual */
+.bot-admin-chart-body {
+  display: flex;
+  height: 280px;
+  gap: 16px;
+  padding-top: 10px;
+}
+
+.bot-admin-chart-yaxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 600;
+  padding-bottom: 24px;
+}
+
+.bot-admin-chart-bars {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+  gap: 12px;
+}
+
+.bot-admin-chart-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.bot-admin-bar-wrapper {
+  flex: 1;
+  width: 100%;
+  max-width: 54px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bot-admin-bar {
+  width: 100%;
+  background: #1d4ed8;
+  border-radius: 6px 6px 0 0;
+  transition: height 0.4s ease, background 0.2s ease;
+}
+
+.bot-admin-bar:hover {
+  background: #2563eb;
+}
+
+.bot-admin-bar.highlight {
+  background: #0284c7;
+}
+
+.bot-admin-chart-label {
+  margin-top: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.bot-admin-chart-label.active {
+  font-weight: 800;
+  color: #0f172a;
+}

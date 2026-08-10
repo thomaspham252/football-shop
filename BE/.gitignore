@@ -34,13 +34,14 @@ build/
 vercel.json
 FE/vercel.json
 
-# Environment variables & Sensitive properties
+# Environment variables & Local secret overrides
 .env
 .env.local
 .env.*.local
-*.properties
 application.properties
 application-*.properties
+*.properties
+!application.properties.example
 
 # XML files
 *.xml

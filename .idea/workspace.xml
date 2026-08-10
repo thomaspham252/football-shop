@@ -5,32 +5,49 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5c064fff-bd4c-4565-ac17-1f911a404c52" name="Changes" comment="api-payment fix">
+      <change afterPath="$PROJECT_DIR$/BE/admin-chatbot-co-ban.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/controllers/AdminDashboardController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/controllers/AdminInventoryController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/controllers/AdminOrderController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/controllers/AdminProductController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/controllers/AdminUserController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/dtos/CreateUserRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/dtos/DashboardStatsDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/dtos/SaveProductRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/dtos/UpdateOrderStatusRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/dtos/UpdateUserRoleRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/services/AdminDashboardService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/services/AdminInventoryService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/services/AdminOrderService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/services/AdminProductService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/admin/services/AdminUserService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/chatbot/controllers/AdminChatController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/chatbot/controllers/AdminChatbotController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/chatbot/controllers/ChatController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/chatbot/dtos/ChatMessageDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/chatbot/dtos/ChatStatsDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/chatbot/dtos/DailyCountDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/chatbot/dtos/SessionSummaryDto.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/chatbot/models/ChatMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/chatbot/repositories/ChatMessageRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/chatbot/services/AdminChatbotService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/chatbot/services/GeminiService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/chatbot/services/PromptBuilderService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/models/OrderStatus.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/models/PaymentStatus.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BE/src/main/resources/application.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FE/src/api/adminApi.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FE/src/components/auth/AdminRoute.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FE/src/components/chat/ChatWidget.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FE/src/components/chat/ChatWidget.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FE/src/pages/admin/ChatManagement.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FE/src/pages/admin/components/AddEditProductForm.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FE/src/pages/admin/components/AdminBotChatHistory.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FE/src/pages/admin/components/AdminBotChatHistory.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FE/src/pages/admin/components/AdminBotDashboard.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/FE/src/pages/admin/components/AdminBotDashboard.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BE/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/BE/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/config/security/JwtUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/config/security/JwtUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/controllers/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/controllers/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/services/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/auth/services/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/controllers/OrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/controllers/OrderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/dtos/CartItemDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/dtos/CartItemDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/dtos/CreateOrderRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/dtos/CreateOrderRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/dtos/ValidateCartRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/dtos/ValidateCartRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/MomoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/MomoService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/OrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/order/services/OrderService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/product/controllers/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/product/controllers/ProductController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/product/repositories/ProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/product/repositories/ProductRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/product/services/ProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/java/com/footballstore/backend/modules/product/services/ProductService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BE/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/BE/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/components/layout/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/components/layout/Navbar.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/context/CartContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/context/CartContext.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/admin/AdminLayout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/admin/AdminLayout.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/cart/CartPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/cart/CartPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/payment/OrderSuccess.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/payment/OrderSuccess.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/payment/PaymentPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/payment/PaymentPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/product/ProductDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/product/ProductDetail.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/products/ProductsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/products/ProductsPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FE/src/pages/profile/tabs/OrderHistory.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/FE/src/pages/profile/tabs/OrderHistory.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,6 +64,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="feature/chatbot" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -83,7 +105,7 @@
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "Spring Boot.BackendApplication.executor": "Run",
-    "git-widget-placeholder": "feature/chatbot",
+    "git-widget-placeholder": "develop",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/football-shop/BE",
     "node.js.detected.package.eslint": "true",
