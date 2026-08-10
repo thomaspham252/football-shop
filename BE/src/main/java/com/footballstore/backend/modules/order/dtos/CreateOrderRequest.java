@@ -14,20 +14,20 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class CreateOrderRequest {
-    @NotEmpty(message = "Cart items cannot be empty")
+    @NotEmpty(message = "Danh sách sản phẩm trong giỏ hàng không được để trống")
     @Valid
     private List<CartItemDto> items;
 
     private String userId;
 
-    @Email(message = "Invalid email address")
-    @NotEmpty(message = "Email is required")
+    @Email(message = "Địa chỉ email không đúng định dạng")
+    @NotEmpty(message = "Địa chỉ email là bắt buộc")
     private String email;
 
     private String firstName;
     private String lastName;
 
-    @NotEmpty(message = "Phone number is required")
+    @NotEmpty(message = "Số điện thoại là bắt buộc")
     private String phone;
 
     private String province;
@@ -35,7 +35,7 @@ public class CreateOrderRequest {
     private String ward;
     private String street;
 
-    @NotNull(message = "Payment method is required")
+    @NotNull(message = "Phương thức thanh toán là bắt buộc")
     private String paymentMethod; // COD, TRANSFER, MOMO
 
     private String couponCode;

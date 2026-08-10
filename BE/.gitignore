@@ -26,6 +26,7 @@ build/
 *.iml
 *.ipr
 .idea/workspace.xml
+
 # VS Code
 .vscode/
 
@@ -33,10 +34,13 @@ build/
 vercel.json
 FE/vercel.json
 
-# Environment variables
+# Environment variables & Sensitive properties
 .env
 .env.local
 .env.*.local
+*.properties
+application.properties
+application-*.properties
 
 # XML files
 *.xml

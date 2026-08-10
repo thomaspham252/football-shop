@@ -18,27 +18,24 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
+    public static final long DEFAULT_EXPIRATION_MS = 86400000L; // 24 giờ
+
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration-ms}")
+    @Value("${jwt.expiration-ms:86400000}")
     private long jwtExpirationMs;
 
     private SecretKey getSigningKey() {
         byte[] keyBytes;
         try {
-            // Trường hợp Secret Key được mã hóa Base64
             keyBytes = Decoders.BASE64.decode(jwtSecret);
         } catch (IllegalArgumentException e) {
-            // Trường hợp Secret Key là chuỗi plain text
             keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
         }
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    /**
-     * Tạo JWT Token từ đối tượng Authentication
-     */
     public String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
@@ -47,37 +44,36 @@ public class JwtUtils {
                 .map(GrantedAuthority::getAuthority)
                 .orElse("ROLE_CUSTOMER");
 
+        long expirationTime = jwtExpirationMs > 0 ? jwtExpirationMs : DEFAULT_EXPIRATION_MS;
+
         return Jwts.builder()
-                .subject(userPrincipal.getUsername()) // Email của người dùng
+                .subject(userPrincipal.getUsername())
                 .claim("userId", userPrincipal.getId())
                 .claim("role", role)
                 .claim("fullName", userPrincipal.getFullName())
                 .issuedAt(new Date())
-                .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    /**
-     * Tạo JWT Token trực tiếp từ thông tin User
-     */
     public String generateTokenFromUser(String email, String userId, String role) {
         if (!role.startsWith("ROLE_")) {
             role = "ROLE_" + role;
         }
+
+        long expirationTime = jwtExpirationMs > 0 ? jwtExpirationMs : DEFAULT_EXPIRATION_MS;
+
         return Jwts.builder()
                 .subject(email)
                 .claim("userId", userId)
                 .claim("role", role)
                 .issuedAt(new Date())
-                .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    /**
-     * Lấy Username (Email) từ JWT Token
-     */
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -87,9 +83,6 @@ public class JwtUtils {
                 .getSubject();
     }
 
-    /**
-     * Lấy User ID từ JWT Token
-     */
     public String getUserIdFromJwtToken(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -99,15 +92,12 @@ public class JwtUtils {
         return claims.get("userId", String.class);
     }
 
-    /**
-     * Kiểm tra tính hợp lệ của JWT Token
-     */
     public boolean validateJwtToken(String authToken) {
         try {
             Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(authToken);
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(authToken);
             return true;
         } catch (SignatureException e) {
             log.error("Chữ ký JWT không hợp lệ: {}", e.getMessage());

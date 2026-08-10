@@ -1,7 +1,11 @@
 package com.footballstore.backend.modules.auth.services;
 
 import com.footballstore.backend.config.security.JwtUtils;
-import com.footballstore.backend.modules.auth.dtos.*;
+import com.footballstore.backend.modules.auth.dtos.AuthResponse;
+import com.footballstore.backend.modules.auth.dtos.GoogleLoginRequest;
+import com.footballstore.backend.modules.auth.dtos.LoginRequest;
+import com.footballstore.backend.modules.auth.dtos.RegisterRequest;
+import com.footballstore.backend.modules.auth.dtos.UserResponse;
 import com.footballstore.backend.modules.auth.models.AuthProvider;
 import com.footballstore.backend.modules.auth.models.Role;
 import com.footballstore.backend.modules.auth.models.User;
@@ -13,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -28,6 +33,7 @@ public class AuthService {
     private final JwtUtils jwtUtils;
     private final RestTemplate restTemplate = new RestTemplate();
 
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email đã được đăng ký sử dụng bởi tài khoản khác");
@@ -57,7 +63,6 @@ public class AuthService {
             throw new RuntimeException("Tài khoản này được đăng ký qua Google. Vui lòng đăng nhập bằng Google!");
         }
 
-        // Thực hiện xác thực Spring Security AuthenticationManager
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
@@ -70,6 +75,7 @@ public class AuthService {
         return new AuthResponse(jwtToken, userResponse);
     }
 
+    @Transactional
     @SuppressWarnings("unchecked")
     public AuthResponse googleLogin(GoogleLoginRequest request) {
         String googleVerifyUrl = "https://oauth2.googleapis.com/tokeninfo?id_token=" + request.getIdToken();
@@ -100,7 +106,6 @@ public class AuthService {
                 userRepository.save(user);
             }
         } else {
-            // Auto register a new customer account for Google login user
             user = User.builder()
                     .email(email)
                     .fullName(name != null ? name : email.split("@")[0])
@@ -151,10 +156,12 @@ public class AuthService {
         return null;
     }
 
+    @Transactional(readOnly = true)
     public User getUserById(String id) {
         return userRepository.findById(id).orElse(null);
     }
 
+    @Transactional
     public void updateUser(User user) {
         userRepository.save(user);
     }

@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ValidateCartRequest {
-    @NotEmpty(message = "Cart items cannot be empty")
+    @NotEmpty(message = "Danh sách sản phẩm trong giỏ hàng không được để trống")
     @Valid
     private List<CartItemDto> items;
 }

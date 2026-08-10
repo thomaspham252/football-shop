@@ -18,12 +18,14 @@ import AdminLayout from './pages/admin/AdminLayout';
 import AdminRoute from './components/auth/AdminRoute';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
+import ChatWidget from './components/chat/ChatWidget';
 
 function App() {
   return (
     <ToastProvider>
       <CartProvider>
         <BrowserRouter>
+          <ChatWidget />
           <Routes>
           <Route 
             path="/admin/*" 

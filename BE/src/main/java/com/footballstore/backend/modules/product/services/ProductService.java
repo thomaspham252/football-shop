@@ -1,5 +1,7 @@
 package com.footballstore.backend.modules.product.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.footballstore.backend.modules.product.dtos.response.ProductCardResponse;
 import com.footballstore.backend.modules.product.dtos.response.ProductDetailResponse;
 import com.footballstore.backend.modules.product.dtos.response.ProductVariantResponse;
@@ -8,6 +10,7 @@ import com.footballstore.backend.modules.product.models.ProductVariant;
 import com.footballstore.backend.modules.product.repositories.ProductRepository;
 import com.footballstore.backend.modules.product.repositories.ProductVariantRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,22 +20,28 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
+
+    public static final int DEFAULT_PAGE_SIZE = 12;
+    public static final int DEFAULT_LIMIT = 4;
+
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
-    
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Value("${app.promotion.discount-threshold:30}")
     private Integer discountThreshold;
 
-
-//  Lay san pham moi
+    @Transactional(readOnly = true)
     public List<ProductCardResponse> getNewProducts(int limit, String sortDir) {
+        int effectiveLimit = limit > 0 ? limit : DEFAULT_LIMIT;
         Sort sort = "asc".equalsIgnoreCase(sortDir)
                 ? Sort.by("createdAt").ascending()
                 : Sort.by("createdAt").descending();
-        Pageable pageable = PageRequest.of(0, limit, sort);
+        Pageable pageable = PageRequest.of(0, effectiveLimit, sort);
 
         return productRepository
                 .findByIsActiveTrue(pageable)
@@ -42,13 +51,15 @@ public class ProductService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ProductCardResponse> getNewProducts(int limit) {
         return getNewProducts(limit, "desc");
     }
 
-//  Lay san pham ban chay
+    @Transactional(readOnly = true)
     public List<ProductCardResponse> getBestSellingProduct(int limit) {
-        Pageable pageable = PageRequest.of(0, limit, Sort.by("soldCount").descending());
+        int effectiveLimit = limit > 0 ? limit : DEFAULT_LIMIT;
+        Pageable pageable = PageRequest.of(0, effectiveLimit, Sort.by("soldCount").descending());
 
         return productRepository
                 .findByIsActiveTrue(pageable)
@@ -58,9 +69,10 @@ public class ProductService {
                 .toList();
     }
 
-//Lay san pham co giam gia tren 30%
+    @Transactional(readOnly = true)
     public List<ProductCardResponse> getPromotionProducts(int limit) {
-        Pageable pageable = PageRequest.of(0, limit, Sort.by("discountPercentage").descending());
+        int effectiveLimit = limit > 0 ? limit : DEFAULT_LIMIT;
+        Pageable pageable = PageRequest.of(0, effectiveLimit, Sort.by("discountPercentage").descending());
 
         return productRepository.findPromotionProductsPaged(discountThreshold, pageable)
                 .getContent()
@@ -69,7 +81,7 @@ public class ProductService {
                 .toList();
     }
 
-// Lay toan bo san pham dang hoat dong
+    @Transactional(readOnly = true)
     public List<ProductCardResponse> getAllProducts() {
         return productRepository.findByIsActiveTrue()
                 .stream()
@@ -77,29 +89,26 @@ public class ProductService {
                 .toList();
     }
 
-
     private ProductCardResponse toProductCardResponse(Product product) {
-        return
-                ProductCardResponse.builder()
-                        .productId(product.getProductId())
-                        .productName(product.getProductName())
-                        .imageUrl(product.getImageUrl())
-                        .basePrice(product.getBasePrice())
-                        .salePrice(product.getSalePrice())
-                        .discountPercentage(product.getDiscountPercentage())
-                        .colors(productVariantRepository.findDistinctColorsByProductId(product.getProductId()))
-                        .brandName(product.getBrand() != null ? product.getBrand().getBrandName() : null)
-                        .brandLogoUrl(product.getBrand() != null ? product.getBrand().getLogoUrl() : null)
-                        .categoryName(product.getCategory() != null ? product.getCategory().getCategoryName() : null)
-                        .categoryImageUrl(product.getCategory() != null ? product.getCategory().getImageUrl() : null)
-                        .build();
-
+        return ProductCardResponse.builder()
+                .productId(product.getProductId())
+                .productName(product.getProductName())
+                .imageUrl(product.getImageUrl())
+                .basePrice(product.getBasePrice())
+                .salePrice(product.getSalePrice())
+                .discountPercentage(product.getDiscountPercentage())
+                .colors(productVariantRepository.findDistinctColorsByProductId(product.getProductId()))
+                .brandName(product.getBrand() != null ? product.getBrand().getBrandName() : null)
+                .brandLogoUrl(product.getBrand() != null ? product.getBrand().getLogoUrl() : null)
+                .categoryName(product.getCategory() != null ? product.getCategory().getCategoryName() : null)
+                .categoryImageUrl(product.getCategory() != null ? product.getCategory().getImageUrl() : null)
+                .build();
     }
 
     @Transactional(readOnly = true)
     public ProductDetailResponse getProductDetail(Integer productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm với mã: " + productId));
 
         List<ProductVariant> variants = productVariantRepository.findByProductProductIdAndIsActiveTrue(productId);
 
@@ -152,9 +161,9 @@ public class ProductService {
             return List.of();
         }
         try {
-            return new com.fasterxml.jackson.databind.ObjectMapper()
-                    .readValue(galleryJson, new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {});
+            return objectMapper.readValue(galleryJson, new TypeReference<List<String>>() {});
         } catch (Exception e) {
+            log.warn("Lỗi khi giải mã galleryImages JSON: {}", e.getMessage());
             return List.of();
         }
     }

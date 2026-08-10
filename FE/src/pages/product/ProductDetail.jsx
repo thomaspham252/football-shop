@@ -31,20 +31,6 @@ function StarRating({ rating, size = 16 }) {
   );
 }
 
-const defaultSizeChart = [
-  { us: '6.5', cm: '24.5', eu: '38', uk: '6' },
-  { us: '7', cm: '25', eu: '40', uk: '6' },
-  { us: '7.5', cm: '25.5', eu: '40.5', uk: '6.5' },
-  { us: '8', cm: '26', eu: '41', uk: '7' },
-  { us: '8.5', cm: '26.5', eu: '42', uk: '7.5' },
-  { us: '9', cm: '27', eu: '42.5', uk: '8' },
-  { us: '9.5', cm: '27.5', eu: '43', uk: '8.5' },
-  { us: '10', cm: '28', eu: '44', uk: '9' },
-  { us: '10.5', cm: '28.5', eu: '44.5', uk: '9.5' },
-  { us: '11', cm: '29', eu: '45', uk: '10' },
-  { us: '11.5', cm: '30', eu: '45.5', uk: '10.5' },
-];
-
 const mockReviews = [
   { id: 1, name: 'Nguyễn Văn A', rating: 5, date: '12/05/2025', comment: 'Giày rất tốt, đi êm chân, đúng size. Giao hàng nhanh, đóng gói cẩn thận. Sẽ ủng hộ shop lần sau!', verified: true },
   { id: 2, name: 'Trần Thị B', rating: 4, date: '08/05/2025', comment: 'Chất lượng ổn, màu sắc đẹp như hình. Chỉ hơi tiếc là không có size 39.5 màu đen.', verified: true },
@@ -64,6 +50,14 @@ const colorMap = {
   'Xanh Lá': '#4caf50',
   'Trắng/Đỏ': '#ffffff',
   'Đen/Trắng': '#1a1a1a'
+};
+
+const styles = {
+  centerBox: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' },
+  centerColumn: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', gap: '1.5rem' },
+  loadingText: { fontSize: '1.2rem', color: '#1a1a1a', fontWeight: '500' },
+  errorText: { color: '#d32f2f', fontSize: '1.3rem', fontWeight: 'bold' },
+  backLink: { display: 'inline-flex', alignItems: 'center', color: '#0d47a1', fontWeight: '500', textDecoration: 'underline' }
 };
 
 function getColorHex(name) {
@@ -132,7 +126,6 @@ export default function ProductDetail() {
     window.dispatchEvent(new Event('wishlist-updated'));
   };
 
-  // Fetch product detail
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -144,7 +137,6 @@ export default function ProductDetail() {
         setActiveImg(0);
         setSelectedColor(0);
 
-        // Auto-select size and image of the first variant if available
         const firstVariant = prodData.variants?.[0];
         if (firstVariant) {
           setSelectedSize(firstVariant.size);
@@ -160,7 +152,6 @@ export default function ProductDetail() {
       });
   }, [id]);
 
-  // Fetch related products
   useEffect(() => {
     homeApi.getNewProducts(8)
       .then(res => {
@@ -172,7 +163,6 @@ export default function ProductDetail() {
       });
   }, [id]);
 
-  // Derive images (null-safe, runs on every render above early returns)
   const images = [];
   if (product) {
     if (product.imageUrl) images.push(product.imageUrl);
@@ -195,7 +185,6 @@ export default function ProductDetail() {
     images.push('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80');
   }
 
-  // Extract unique colors from variants (null-safe)
   const colors = [];
   const seenColors = new Set();
   if (product && product.variants && product.variants.length > 0) {
@@ -215,7 +204,6 @@ export default function ProductDetail() {
     colors.push({ name: 'Mặc định', hex: '#1a1a1a', border: '#1a1a1a' });
   }
 
-  // Sync image when color selection changes (above early returns)
   useEffect(() => {
     if (product && colors[selectedColor]) {
       const colName = colors[selectedColor].name;
@@ -229,13 +217,12 @@ export default function ProductDetail() {
     }
   }, [selectedColor, product, colors, images]);
 
-  // Loading and Error handlers (early returns)
   if (loading) {
     return (
       <div className="pd-page">
         <Navbar />
-        <main className="pd-main" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-          <div className="loading-spinner" style={{ fontSize: '1.2rem', color: '#1a1a1a', fontWeight: '500' }}>
+        <main className="pd-main" style={styles.centerBox}>
+          <div className="loading-spinner" style={styles.loadingText}>
             Đang tải thông tin sản phẩm...
           </div>
         </main>
@@ -248,11 +235,11 @@ export default function ProductDetail() {
     return (
       <div className="pd-page">
         <Navbar />
-        <main className="pd-main" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', gap: '1.5rem' }}>
-          <div className="error-message" style={{ color: '#d32f2f', fontSize: '1.3rem', fontWeight: 'bold' }}>
+        <main className="pd-main" style={styles.centerColumn}>
+          <div className="error-message" style={styles.errorText}>
             {error || "Sản phẩm không tồn tại!"}
           </div>
-          <a href="/" style={{ display: 'inline-flex', alignItems: 'center', color: '#0d47a1', fontWeight: '500', textDecoration: 'underline' }}>
+          <a href="/" style={styles.backLink}>
             Quay lại trang chủ
           </a>
         </main>
@@ -261,7 +248,6 @@ export default function ProductDetail() {
     );
   }
 
-  // Extract unique sizes from variants
   const allSizes = [];
   const seenSizes = new Set();
   if (product.variants) {
@@ -280,8 +266,7 @@ export default function ProductDetail() {
   });
 
   const selectedColorName = colors[selectedColor]?.name;
-  
-  // Format sizes availability for selected color (only keeping available/in-stock sizes)
+
   const sizes = allSizes.map(sz => {
     const match = product.variants?.find(v => v.color === selectedColorName && v.size === sz);
     return {
@@ -293,26 +278,22 @@ export default function ProductDetail() {
     };
   }).filter(s => s.available);
 
-  // Get selected variant
   const currentVariant = product.variants?.find(
     v => v.color === selectedColorName && v.size === selectedSize
   );
 
-  // Price calculations
   const displayPrice = currentVariant?.variantPrice || product.salePrice || product.basePrice || 0;
   const displayOriginalPrice = product.basePrice || 0;
   const discount = displayOriginalPrice > displayPrice
     ? Math.round(((displayOriginalPrice - displayPrice) / displayOriginalPrice) * 100)
     : 0;
 
-  // Determine stock
   const currentStock = currentVariant
     ? currentVariant.variantStock
     : (product.variants?.filter(v => v.color === selectedColorName).reduce((sum, v) => sum + v.variantStock, 0) || product.stockQuantity || 0);
 
   const inStock = currentStock > 0;
 
-  // Handler for changing colors (automatically select first size available for that color)
   const handleColorChange = (index) => {
     setSelectedColor(index);
     const targetColorName = colors[index]?.name;
@@ -354,7 +335,6 @@ export default function ProductDetail() {
       <Navbar />
 
       <main className="pd-main">
-        {/* Breadcrumb */}
         <div className="pd-breadcrumb">
           <div className="pd-container">
             <a href="/">Trang chủ</a>
@@ -365,11 +345,9 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        {/* Product section */}
         <section className="pd-section">
           <div className="pd-container pd-product-grid">
 
-            {/* ── Gallery ── */}
             <div className="pd-gallery">
               <div className="pd-gallery__main">
                 <button className="pd-gallery__arrow pd-gallery__arrow--left" onClick={prevImg} aria-label="Ảnh trước">
@@ -399,9 +377,8 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            {/* ── Info ── */}
             <div className="pd-info">
-              <p className="pd-info__brand">{product.brandName || 'Football Store'}</p>
+              <p className="pd-info__brand">{product.brandName || 'ULTRASPORT'}</p>
               <h1 className="pd-info__name">{product.productName}</h1>
 
               <div className="pd-info__meta">
@@ -423,7 +400,6 @@ export default function ProductDetail() {
                 )}
               </div>
 
-              {/* Color */}
               {colors.length > 0 && colors[0].name !== 'Mặc định' && (
                 <div className="pd-info__option">
                   <p className="pd-info__option-label">
@@ -444,7 +420,6 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {/* Size */}
               {sizes.length > 0 && (
                 <div className="pd-info__option">
                   <div className="pd-info__size-header">
@@ -470,7 +445,6 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {/* Quantity */}
               <div className="pd-info__option">
                 <p className="pd-info__option-label">Số lượng:</p>
                 <div className="pd-info__qty">
@@ -497,7 +471,6 @@ export default function ProductDetail() {
                 </div>
               </div>
 
-              {/* CTA */}
               <div className="pd-info__cta">
                 <button 
                   className="pd-info__btn pd-info__btn--cart" 
@@ -531,7 +504,6 @@ export default function ProductDetail() {
                 </button>
               </div>
 
-              {/* Policies */}
               <div className="pd-info__policies">
                 <div className="pd-info__policy">
                   <Truck size={16} />
@@ -552,7 +524,6 @@ export default function ProductDetail() {
           </div>
         </section>
 
-        {/* ── Tabs ── */}
         <section className="pd-tabs-section">
           <div className="pd-container">
             <div className="pd-tabs">
@@ -573,7 +544,6 @@ export default function ProductDetail() {
 
             <div className="pd-tab-content">
 
-              {/* Description */}
               {activeTab === 'desc' && (
                 <div className="pd-desc">
                   <p style={{ whiteSpace: 'pre-line' }}>{product.description}</p>
@@ -586,7 +556,6 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {/* Policy */}
               {activeTab === 'policy' && (
                 <div className="pd-policy">
                   <div className="pd-policy__item">
@@ -613,7 +582,6 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {/* Reviews */}
               {activeTab === 'reviews' && (
                 <div className="pd-reviews">
                   <div className="pd-reviews__summary">
@@ -654,7 +622,6 @@ export default function ProductDetail() {
           </div>
         </section>
 
-        {/* ── Related products ── */}
         {relatedProducts.length > 0 && (
           <section className="pd-related">
             <div className="pd-container">
@@ -670,7 +637,6 @@ export default function ProductDetail() {
           </section>
         )}
 
-        {/* ── Reviews CTA ── */}
         <section className="pd-review-cta">
           <div className="pd-container">
             <h2 className="pd-related__title">

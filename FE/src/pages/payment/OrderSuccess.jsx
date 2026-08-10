@@ -96,7 +96,7 @@ export default function OrderSuccess() {
       id: item.orderItemId,
       name: item.product.productName,
       variant: `Màu ${item.color} | Size ${item.size}`,
-      qty: item.quantity,
+      quantity: item.quantity,
       price: Number(item.price),
       image: item.productVariant.imageUrl || item.product.imageUrl || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&q=80'
     })) : [],
@@ -108,7 +108,7 @@ export default function OrderSuccess() {
     totalAmount: Number(order.totalAmount)
   } : ORDER;
 
-  const subtotal = activeOrder.items.reduce((s, i) => s + i.price * i.qty, 0);
+  const subtotal = activeOrder.items.reduce((s, i) => s + i.price * (i.quantity ?? i.qty ?? 1), 0);
   const total    = activeOrder.totalAmount ? activeOrder.totalAmount : subtotal + activeOrder.shipping + (activeOrder.tax || 0);
 
   return (
@@ -233,7 +233,7 @@ export default function OrderSuccess() {
                     <div className="os-summary__item-info">
                       <p className="os-summary__item-name">{item.name}</p>
                       <p className="os-summary__item-variant">{item.variant}</p>
-                      <p className="os-summary__item-qty">Số lượng: {item.qty}</p>
+                      <p className="os-summary__item-qty">Số lượng: {item.quantity ?? item.qty ?? 1}</p>
                     </div>
                     <span className="os-summary__item-price">
                       {item.price.toLocaleString('vi-VN')}đ

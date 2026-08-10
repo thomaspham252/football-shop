@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import './ProductsPage.css';
 
-// Danh mục cha từ categories.csv (parent_category_id == NULL) -> Không hiển thị
 const PARENT_CATEGORIES = [
   'Giày bóng đá',
   'Phụ kiện',
@@ -18,19 +17,6 @@ const PARENT_CATEGORIES = [
   'SHOES',
   'ACCESSORIES',
   'CLOTHING'
-];
-
-// Danh mục con từ categories.csv (parent_category_id != NULL)
-const ALL_CHILD_CATEGORIES = [
-  'Sân tự nhiên (FG)',
-  'Sân nhân tạo (AG)',
-  'Băng cố chân',
-  'Tất bóng đá',
-  'Găng tay',
-  'Quả bóng',
-  'Áo CLB',
-  'Áo đội tuyển',
-  'Áo không logo'
 ];
 
 const PRICE_RANGES = [
@@ -49,6 +35,10 @@ const SORT_OPTIONS = [
 ];
 
 const PAGE_SIZE = 8;
+
+const styles = {
+  loadingState: { textAlign: 'center', padding: '40px 0', fontSize: '18px', color: '#666' }
+};
 
 /* ── Collapsible filter group ── */
 function FilterGroup({ title, children, defaultOpen = true }) {
@@ -116,7 +106,6 @@ export default function ProductsPage() {
     }
   }, [brandParam, categoryParam]);
 
-  /* Lọc danh mục con theo dữ liệu sản phẩm trong DB (Chỉ hiện danh mục con CÓ sản phẩm, ẩn danh mục không có sản phẩm, không hiện danh mục cha) */
   const categoriesList = useMemo(() => {
     const activeCategories = new Set();
     products.forEach(p => {
@@ -137,7 +126,6 @@ export default function ProductsPage() {
     return Array.from(set);
   }, [products]);
 
-  /* filter + sort */
   const filtered = useMemo(() => {
     let list = [...products];
     if (selectedBrand) {
@@ -170,7 +158,7 @@ export default function ProductsPage() {
       default: break;
     }
     return list;
-  }, [products, selectedBrand, selectedCategory, selectedPrice, selectedSizes, sort]);
+  }, [products, selectedBrand, selectedCategory, selectedPrice, selectedSizes, selectedColors, sort]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -190,7 +178,6 @@ export default function ProductsPage() {
 
   const handleFilterChange = (fn) => { fn(); setPage(1); };
 
-  /* ── Sidebar ── */
   const Sidebar = () => (
     <aside className={`products-sidebar ${mobileSidebarOpen ? 'products-sidebar--open' : ''}`}>
       <div className="products-sidebar__inner">
@@ -208,7 +195,6 @@ export default function ProductsPage() {
           </button>
         </div>
 
-        {/* Active tags */}
         {activeFilterCount > 0 && (
           <div className="filter-tags">
             {[
@@ -310,7 +296,6 @@ export default function ProductsPage() {
       <Navbar />
 
       <main className="products-main">
-        {/* Breadcrumb */}
         <div className="products-breadcrumb">
           <div className="products-container">
             <a href="/">Trang chủ</a>
@@ -320,16 +305,13 @@ export default function ProductsPage() {
         </div>
 
         <div className="products-container products-layout">
-          {/* Sidebar overlay (mobile) */}
           {mobileSidebarOpen && (
             <div className="products-sidebar__overlay" onClick={() => setMobileSidebarOpen(false)} />
           )}
 
           <Sidebar />
 
-          {/* Main content */}
           <div className="products-content">
-            {/* Toolbar */}
             <div className="products-toolbar">
               <div className="products-toolbar__left">
                 <h1 className="products-toolbar__title">GIÀY BÓNG ĐÁ</h1>
@@ -357,9 +339,8 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* Grid / List */}
             {loading ? (
-              <div className="products-loading" style={{ textAlign: 'center', padding: '40px 0', fontSize: '18px', color: '#666' }}>
+              <div className="products-loading" style={styles.loadingState}>
                 Đang tải sản phẩm...
               </div>
             ) : paginated.length === 0 ? (
@@ -375,7 +356,6 @@ export default function ProductsPage() {
               </div>
             )}
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className="products-pagination">
                 <button

@@ -27,7 +27,7 @@ export default function Navbar() {
   const [dbBrands, setDbBrands] = useState([]);
   const [dbCategoryMap, setDbCategoryMap] = useState({});
   const { cart } = useCart();
-  const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
+  const cartCount = cart.reduce((sum, item) => sum + (item.quantity ?? item.qty ?? 0), 0);
 
   useEffect(() => {
     homeApi.getAllProducts()

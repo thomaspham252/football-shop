@@ -14,6 +14,18 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     Page<Product> findByIsActiveTrueOrderBySoldCountDesc(Pageable pageable);
 
+    @Query("""
+        SELECT p FROM Product p
+        LEFT JOIN p.category c
+        LEFT JOIN c.parentCategory pc
+        WHERE p.isActive = true AND (
+            LOWER(c.categoryName) = LOWER(:categoryName) OR
+            LOWER(pc.categoryName) = LOWER(:categoryName)
+        )
+        ORDER BY p.soldCount DESC
+    """)
+    List<Product> findActiveByCategoryName(@Param("categoryName") String categoryName, Pageable pageable);
+
     @Query("SELECT p FROM Product p WHERE p.discountPercentage > :threshold AND p.isActive = true")
     Page<Product> findPromotionProductsPaged(@Param("threshold") Integer threshold, Pageable pageable);
 
@@ -44,4 +56,17 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             @Param("keyword") String keyword,
             Pageable pageable
     );
+
+    @Query("""
+        SELECT DISTINCT p FROM Product p 
+        LEFT JOIN ProductVariant pv ON pv.product.productId = p.productId
+        WHERE p.isActive = true AND (
+            LOWER(p.productName) LIKE LOWER(CONCAT('%', :kw, '%')) OR 
+            LOWER(p.description) LIKE LOWER(CONCAT('%', :kw, '%')) OR
+            LOWER(p.category.categoryName) LIKE LOWER(CONCAT('%', :kw, '%')) OR
+            LOWER(p.brand.brandName) LIKE LOWER(CONCAT('%', :kw, '%')) OR
+            LOWER(pv.color) LIKE LOWER(CONCAT('%', :kw, '%'))
+        )
+    """)
+    List<Product> searchByKeyword(@Param("kw") String keyword, Pageable pageable);
 }
