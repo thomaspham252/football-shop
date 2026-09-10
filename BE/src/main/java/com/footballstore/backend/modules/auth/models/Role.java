@@ -10,10 +10,4 @@ public enum Role {
     ROLE_ADMIN,
     ROLE_STAFF,
     ROLE_CUSTOMER,
-    
-    // Alias giữ tương thích nếu cần
-    ADMIN,
-    STAFF,
-    CUSTOMER,
-    USER
 }

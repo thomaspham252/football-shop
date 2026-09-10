@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Plus, ShoppingBag, User, Phone, MapPin, CheckCircle2, Mail } from 'lucide-react';
+import { useState } from 'react';
+import { X, ShoppingBag, CheckCircle2 } from 'lucide-react';
 
 export default function CreateOrderModal({ isOpen, onClose }) {
   const [firstName, setFirstName] = useState('');
@@ -11,7 +11,6 @@ export default function CreateOrderModal({ isOpen, onClose }) {
   const [district, setDistrict] = useState('');
   const [province, setProvince] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('COD');
-  const [selectedProduct, setSelectedProduct] = useState('1');
   const [quantity, setQuantity] = useState(1);
   const [submitted, setSubmitted] = useState(false);
 

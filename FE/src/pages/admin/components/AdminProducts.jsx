@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
@@ -39,14 +39,49 @@ export default function AdminProducts() {
   // Modal Thương hiệu & Danh mục
   const [isAddBrandOpen, setIsAddBrandOpen] = useState(false);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+  const [isAddCouponOpen, setIsAddCouponOpen] = useState(false);
+  const [coupons, setCoupons] = useState([]);
+  const [couponForm, setCouponForm] = useState({
+    couponId: null,
+    code: '',
+    discountPercentage: 0,
+    maxDiscountAmount: 0,
+    expiryDate: '',
+    usageLimit: 0,
+    isActive: true
+  });
+
+  // Custom Confirm Dialog
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null
+  });
+
+  const showConfirm = (title, message, onConfirm) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      onConfirm
+    });
+  };
+
+  const closeConfirm = () => {
+    setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+  };
 
   const [brandForm, setBrandForm] = useState({
+    brandId: null,
     brandCode: '',
     brandName: '',
     description: '',
     logoUrl: '',
+    website: '',
     country: '',
-    status: 'Đang hoạt động',
+    status: 'Hoạt động',
+    isPopular: false,
     displayOrder: 1
   });
 
@@ -58,7 +93,8 @@ export default function AdminProducts() {
     slug: '',
     imageUrl: '',
     displayOrder: 1,
-    isActive: true
+    isActive: true,
+    parentCategoryId: ''
   });
 
   useEffect(() => {
@@ -68,16 +104,19 @@ export default function AdminProducts() {
 
   const fetchMetadata = async () => {
     try {
-      const [catsData, brandsData] = await Promise.all([
+      const [catsData, brandsData, couponsData] = await Promise.all([
         adminApi.getCategories(),
-        adminApi.getBrands()
+        adminApi.getBrands(),
+        adminApi.getCoupons()
       ]);
       setCategories(catsData || []);
       setBrands(brandsData || []);
+      setCoupons(couponsData || []);
     } catch (err) {
-      console.warn("Lỗi nạp danh mục/thương hiệu từ API:", err);
+      console.warn("Lỗi nạp metadata từ API:", err);
       setCategories([]);
       setBrands([]);
+      setCoupons([]);
     }
   };
 
@@ -121,16 +160,19 @@ export default function AdminProducts() {
 
   const handleDeleteVariant = async (v) => {
     const vId = v.variantId;
-    if (!window.confirm(`⚠️ Bạn có chắc chắn muốn XÓA dòng chi tiết "${v.product?.productName} - Màu: ${v.color} (Size ${v.size})"?`)) {
-      return;
-    }
-    try {
-      await adminApi.deleteVariant(vId);
-      toast.success("Đã xóa chi tiết sản phẩm thành công!");
-      fetchVariants();
-    } catch (err) {
-      toast.error("Không thể xóa chi tiết sản phẩm này!");
-    }
+    showConfirm(
+      "Xác nhận xóa",
+      `Bạn có chắc chắn muốn XÓA dòng chi tiết "${v.product?.productName} - Màu: ${v.color} (Size ${v.size})"?`,
+      async () => {
+        try {
+          await adminApi.deleteVariant(vId);
+          toast.success("Đã xóa chi tiết sản phẩm thành công!");
+          fetchVariants();
+        } catch {
+          toast.error("Không thể xóa chi tiết sản phẩm này!");
+        }
+      }
+    );
   };
 
   const handleEditProductFromVariant = (v) => {
@@ -147,28 +189,106 @@ export default function AdminProducts() {
     fetchVariants();
   };
 
+  const handleEditBrand = (brand) => {
+    setBrandForm({
+      brandId: brand.brandId,
+      brandCode: brand.brandCode || '',
+      brandName: brand.brandName || '',
+      description: brand.description || '',
+      logoUrl: brand.logoUrl || '',
+      website: brand.website || '',
+      country: brand.country || '',
+      status: brand.status || 'Hoạt động',
+      isPopular: brand.isPopular || false,
+      displayOrder: brand.displayOrder || 1
+    });
+    setIsAddBrandOpen(true);
+  };
+
   const handleAddBrandSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await adminApi.saveBrand(brandForm);
-      toast.success(`Đã thêm thương hiệu "${brandForm.brandName}" thành công!`);
-      setIsAddBrandOpen(false);
-      fetchMetadata();
-    } catch (err) {
-      toast.error("Tạo thương hiệu thất bại!");
-    }
+    showConfirm("Xác nhận lưu", "Bạn có chắc chắn muốn lưu thương hiệu này không?", async () => {
+      try {
+        await adminApi.saveBrand(brandForm);
+        if (brandForm.brandId) {
+          toast.success(`Đã cập nhật thương hiệu "${brandForm.brandName}" thành công!`);
+        } else {
+          toast.success(`Đã thêm thương hiệu "${brandForm.brandName}" thành công!`);
+        }
+        setIsAddBrandOpen(false);
+        fetchMetadata();
+      } catch {
+        toast.error("Lưu thương hiệu thất bại!");
+      }
+    });
   };
 
   const handleAddCategorySubmit = async (e) => {
     e.preventDefault();
-    try {
-      await adminApi.saveCategory(catForm);
-      toast.success(`Đã thêm danh mục "${catForm.categoryName}" thành công!`);
-      setIsAddCategoryOpen(false);
-      fetchMetadata();
-    } catch (err) {
-      toast.error("Tạo danh mục thất bại!");
+    showConfirm("Xác nhận lưu", "Bạn có chắc chắn muốn lưu danh mục này không?", async () => {
+      try {
+        const dataToSend = { ...catForm };
+        if (dataToSend.parentCategoryId) {
+          dataToSend.parentCategory = { categoryId: parseInt(dataToSend.parentCategoryId) };
+        } else {
+          dataToSend.parentCategory = null;
+        }
+        delete dataToSend.parentCategoryId;
+
+        await adminApi.saveCategory(dataToSend);
+        toast.success(`Đã thêm danh mục "${catForm.categoryName}" thành công!`);
+        setIsAddCategoryOpen(false);
+        fetchMetadata();
+      } catch {
+        toast.error("Tạo danh mục thất bại!");
+      }
+    });
+  };
+
+  const handleEditCoupon = (coupon) => {
+    setCouponForm({
+      couponId: coupon.couponId,
+      code: coupon.code || '',
+      discountPercentage: coupon.discountPercentage || 0,
+      maxDiscountAmount: coupon.maxDiscountAmount || 0,
+      expiryDate: coupon.expiryDate ? coupon.expiryDate.substring(0, 16) : '',
+      usageLimit: coupon.usageLimit || 0,
+      isActive: coupon.isActive !== false
+    });
+    setIsAddCouponOpen(true);
+  };
+
+  const handleAddCouponSubmit = async (e) => {
+    e.preventDefault();
+    if (!couponForm.code) {
+      toast.warning("Vui lòng nhập mã giảm giá!");
+      return;
     }
+    showConfirm("Xác nhận lưu", "Bạn có chắc chắn muốn lưu mã giảm giá này không?", async () => {
+      try {
+        await adminApi.saveCoupon({
+          ...couponForm,
+          expiryDate: couponForm.expiryDate ? new Date(couponForm.expiryDate).toISOString() : null
+        });
+        toast.success(`Đã lưu mã giảm giá "${couponForm.code}" thành công!`);
+        setIsAddCouponOpen(false);
+        fetchMetadata();
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Lưu mã giảm giá thất bại!");
+      }
+    });
+  };
+
+  const handleDisableCoupon = (c) => {
+    showConfirm("Vô hiệu hóa", `Bạn muốn vô hiệu hóa mã "${c.code}"?`, async () => {
+      try {
+        await adminApi.disableCoupon(c.couponId);
+        toast.success("Đã vô hiệu hóa thành công!");
+        fetchMetadata();
+      } catch {
+        toast.error("Vô hiệu hóa thất bại!");
+      }
+    });
   };
 
   const formatVND = (val) => {
@@ -210,14 +330,58 @@ export default function AdminProducts() {
         )}
 
         {activeTab === 'brands' && (
-          <button className="admin-btn admin-btn--primary" onClick={() => setIsAddBrandOpen(true)}>
+          <button className="admin-btn admin-btn--primary" onClick={() => {
+              setBrandForm({
+                brandId: null,
+                brandCode: '',
+                brandName: '',
+                description: '',
+                logoUrl: '',
+                website: '',
+                country: '',
+                status: 'Hoạt động',
+                isPopular: false,
+                displayOrder: 1
+              });
+              setIsAddBrandOpen(true);
+            }}>
             <Plus size={18} /> Thêm thương hiệu
           </button>
         )}
 
         {activeTab === 'categories' && (
-          <button className="admin-btn admin-btn--primary" onClick={() => setIsAddCategoryOpen(true)}>
+          <button className="admin-btn admin-btn--primary" onClick={() => {
+              setCatForm({
+                categoryCode: '',
+                categoryName: '',
+                description: '',
+                categoryType: 'Giày đá bóng',
+                slug: '',
+                imageUrl: '',
+                displayOrder: 1,
+                isActive: true,
+                parentCategoryId: ''
+              });
+              setIsAddCategoryOpen(true);
+            }}>
             <Plus size={18} /> Thêm danh mục
+          </button>
+        )}
+
+        {activeTab === 'coupons' && (
+          <button className="admin-btn admin-btn--primary" onClick={() => {
+              setCouponForm({
+                couponId: null,
+                code: '',
+                discountPercentage: 0,
+                maxDiscountAmount: 0,
+                expiryDate: '',
+                usageLimit: 0,
+                isActive: true
+              });
+              setIsAddCouponOpen(true);
+            }}>
+            <Plus size={18} /> Thêm mã giảm giá
           </button>
         )}
       </div>
@@ -276,6 +440,24 @@ export default function AdminProducts() {
           }}
         >
           Danh mục ({categories.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab('coupons')}
+          style={{
+            padding: '12px 4px',
+            fontSize: '15px',
+            fontWeight: 700,
+            color: activeTab === 'coupons' ? 'var(--admin-primary)' : 'var(--admin-text-muted)',
+            borderBottom: activeTab === 'coupons' ? '3px solid var(--admin-primary)' : '3px solid transparent',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            marginBottom: '-2px'
+          }}
+        >
+          Mã giảm giá ({coupons.length})
         </button>
       </div>
 
@@ -365,11 +547,14 @@ export default function AdminProducts() {
                       variants.map((v, idx) => {
                         const p = v.product || {};
                         const pName = p.productName || 'Chưa cập nhật tên';
-                        const pImg = v.imageUrl || p.imageUrl || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&auto=format&fit=crop&q=80';
+                        const pImg = v.imageUrl || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&auto=format&fit=crop&q=80';
                         const pCategory = p.category?.categoryName || 'Chưa phân loại';
                         const pBrand = p.brand?.brandName || 'Chưa cập nhật';
                         const vSku = v.skuVariant || p.sku || `SKU-VAR-${v.variantId || idx + 1}`;
-                        const vPrice = v.variantPrice || p.salePrice || p.basePrice || 0;
+                        let vPrice = v.price || v.variantPrice || p.price || p.salePrice || p.basePrice || 0;
+                        if (p.discountPercentage > 0) {
+                          vPrice = vPrice * (100 - p.discountPercentage) / 100;
+                        }
                         const vStock = v.variantStock !== undefined ? v.variantStock : (p.stockQuantity !== undefined ? p.stockQuantity : 0);
                         const active = v.isActive !== false && p.isActive !== false;
 
@@ -538,7 +723,7 @@ export default function AdminProducts() {
                           <img src={b.logoUrl || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&auto=format&fit=crop&q=80'} alt={b.brandName} style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'contain', border: '1px solid var(--admin-border)' }} />
                           <div>
                             <div style={{ fontWeight: 700, fontSize: '14px', color: '#1e293b' }}>{b.brandName}</div>
-                            <div style={{ fontSize: '11px', color: '#64748b' }}>{b.description}</div>
+                            <div style={{ fontSize: '11px', color: '#64748b', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '250px' }}>{b.description}</div>
                           </div>
                         </div>
                       </td>
@@ -549,7 +734,7 @@ export default function AdminProducts() {
                         </span>
                       </td>
                       <td>
-                        <button style={{ background: 'none', border: '1px solid var(--admin-border)', borderRadius: '6px', padding: '6px', cursor: 'pointer' }}><Edit3 size={15} /></button>
+                        <button onClick={() => handleEditBrand(b)} style={{ background: 'none', border: '1px solid var(--admin-border)', borderRadius: '6px', padding: '6px', cursor: 'pointer' }}><Edit3 size={15} /></button>
                       </td>
                     </tr>
                   ))
@@ -631,20 +816,83 @@ export default function AdminProducts() {
         </div>
       )}
 
+      {/* TAB 4: MÃ GIẢM GIÁ */}
+      {activeTab === 'coupons' && (
+        <div className="admin-table-card">
+          <div className="admin-table-wrapper">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Mã Code</th>
+                  <th>Giảm giá</th>
+                  <th>Giảm tối đa (VNĐ)</th>
+                  <th>Hạn sử dụng</th>
+                  <th>Đã dùng / Giới hạn</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {coupons.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" style={{ textAlign: 'center', padding: '30px', color: '#64748b' }}>
+                      Chưa có mã giảm giá nào trong database.
+                    </td>
+                  </tr>
+                ) : (
+                  coupons.map((c, idx) => (
+                    <tr key={c.couponId || idx}>
+                      <td style={{ fontWeight: 700, color: '#1e293b' }}>{c.code}</td>
+                      <td style={{ color: '#d97706', fontWeight: 600 }}>{c.discountPercentage}%</td>
+                      <td>{formatVND(c.maxDiscountAmount)}</td>
+                      <td style={{ fontSize: '13px', color: '#64748b' }}>
+                        {c.expiryDate ? new Date(c.expiryDate).toLocaleString('vi-VN') : 'Không thời hạn'}
+                      </td>
+                      <td>
+                        <span style={{ fontWeight: 600, color: c.usedCount >= c.usageLimit && c.usageLimit > 0 ? '#ef4444' : '#10b981' }}>
+                          {c.usedCount}
+                        </span> / {c.usageLimit > 0 ? c.usageLimit : '∞'}
+                      </td>
+                      <td>
+                        <span className={`admin-badge ${c.isActive !== false ? 'admin-badge--success' : 'admin-badge--danger'}`} style={{ fontSize: '11px' }}>
+                          {c.isActive !== false ? 'Kích hoạt' : 'Vô hiệu hóa'}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button style={{ background: 'none', border: '1px solid var(--admin-border)', borderRadius: '6px', padding: '6px', cursor: 'pointer' }} onClick={() => handleEditCoupon(c)}>
+                            <Edit3 size={15} />
+                          </button>
+                          {c.isActive !== false && (
+                            <button style={{ background: 'none', border: '1px solid var(--admin-border)', borderRadius: '6px', padding: '6px', cursor: 'pointer', color: '#ef4444' }} onClick={() => handleDisableCoupon(c)}>
+                              <Trash2 size={15} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* MODAL ADD BRAND */}
       {isAddBrandOpen && (
-        <div className="admin-modal-overlay" onClick={() => setIsAddBrandOpen(false)}>
+        <div className="admin-modal-overlay" onClick={() => showConfirm("Hủy bỏ", "Bạn có chắc chắn muốn hủy không?", () => setIsAddBrandOpen(false))}>
           <div className="admin-modal" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal__header">
               <h3 className="admin-modal__title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Plus size={20} style={{ color: 'var(--admin-accent)' }} /> Thêm thương hiệu mới
+                <Plus size={20} style={{ color: 'var(--admin-accent)' }} /> {brandForm.brandId ? 'Chỉnh sửa thương hiệu' : 'Thêm thương hiệu mới'}
               </h3>
-              <button className="admin-modal__close" onClick={() => setIsAddBrandOpen(false)}>
+              <button type="button" className="admin-modal__close" onClick={() => showConfirm("Hủy bỏ", "Bạn có chắc chắn muốn hủy không?", () => setIsAddBrandOpen(false))}>
                 <X size={20} />
               </button>
             </div>
             <form onSubmit={handleAddBrandSubmit}>
-              <div className="admin-modal__body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div className="admin-modal__body" style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '60vh', overflowY: 'auto' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Tên thương hiệu *</label>
@@ -667,10 +915,82 @@ export default function AdminProducts() {
                       style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none' }}
                     />
                   </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Logo URL</label>
+                    <input
+                      type="text"
+                      placeholder="https://..."
+                      value={brandForm.logoUrl}
+                      onChange={(e) => setBrandForm({ ...brandForm, logoUrl: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Website</label>
+                    <input
+                      type="text"
+                      placeholder="https://nike.com"
+                      value={brandForm.website}
+                      onChange={(e) => setBrandForm({ ...brandForm, website: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Quốc gia</label>
+                    <input
+                      type="text"
+                      placeholder="Mỹ, Đức..."
+                      value={brandForm.country}
+                      onChange={(e) => setBrandForm({ ...brandForm, country: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Trạng thái</label>
+                    <select
+                      value={brandForm.status}
+                      onChange={(e) => setBrandForm({ ...brandForm, status: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none', backgroundColor: '#fff' }}
+                    >
+                      <option value="Hoạt động">Hoạt động</option>
+                      <option value="Không hoạt động">Không hoạt động</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Thứ tự hiển thị</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={brandForm.displayOrder}
+                      onChange={(e) => setBrandForm({ ...brandForm, displayOrder: parseInt(e.target.value) || 1 })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none' }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', marginTop: '22px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={brandForm.isPopular}
+                        onChange={(e) => setBrandForm({ ...brandForm, isPopular: e.target.checked })}
+                        style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                      />
+                      Thương hiệu phổ biến
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Mô tả</label>
+                  <textarea
+                    rows="3"
+                    placeholder="Mô tả thương hiệu..."
+                    value={brandForm.description}
+                    onChange={(e) => setBrandForm({ ...brandForm, description: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none', resize: 'vertical' }}
+                  ></textarea>
                 </div>
               </div>
               <div className="admin-modal__footer">
-                <button type="button" className="admin-btn admin-btn--outline" onClick={() => setIsAddBrandOpen(false)}>Hủy</button>
+                <button type="button" className="admin-btn admin-btn--outline" onClick={() => showConfirm("Hủy bỏ", "Bạn có chắc chắn muốn hủy không?", () => setIsAddBrandOpen(false))}>Hủy</button>
                 <button type="submit" className="admin-btn admin-btn--primary">Lưu thương hiệu</button>
               </div>
             </form>
@@ -680,18 +1000,18 @@ export default function AdminProducts() {
 
       {/* MODAL ADD CATEGORY */}
       {isAddCategoryOpen && (
-        <div className="admin-modal-overlay" onClick={() => setIsAddCategoryOpen(false)}>
+        <div className="admin-modal-overlay" onClick={() => showConfirm("Hủy bỏ", "Bạn có chắc chắn muốn hủy không?", () => setIsAddCategoryOpen(false))}>
           <div className="admin-modal" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal__header">
               <h3 className="admin-modal__title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Plus size={20} style={{ color: 'var(--admin-accent)' }} /> Thêm danh mục mới
               </h3>
-              <button className="admin-modal__close" onClick={() => setIsAddCategoryOpen(false)}>
+              <button type="button" className="admin-modal__close" onClick={() => showConfirm("Hủy bỏ", "Bạn có chắc chắn muốn hủy không?", () => setIsAddCategoryOpen(false))}>
                 <X size={20} />
               </button>
             </div>
             <form onSubmit={handleAddCategorySubmit}>
-              <div className="admin-modal__body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div className="admin-modal__body" style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '60vh', overflowY: 'auto' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Tên danh mục *</label>
@@ -714,11 +1034,170 @@ export default function AdminProducts() {
                       style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none' }}
                     />
                   </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Đường dẫn (Slug)</label>
+                    <input
+                      type="text"
+                      placeholder="giay-da-bong"
+                      value={catForm.slug}
+                      onChange={(e) => setCatForm({ ...catForm, slug: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Loại danh mục</label>
+                    <select
+                      value={catForm.categoryType}
+                      onChange={(e) => setCatForm({ ...catForm, categoryType: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none', backgroundColor: '#fff' }}
+                    >
+                      <option value="Giày đá bóng">Giày đá bóng</option>
+                      <option value="Quần áo">Quần áo</option>
+                      <option value="Phụ kiện">Phụ kiện</option>
+                      <option value="Khác">Khác</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Danh mục cha</label>
+                    <select
+                      value={catForm.parentCategoryId || ''}
+                      onChange={(e) => setCatForm({ ...catForm, parentCategoryId: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none', backgroundColor: '#fff' }}
+                    >
+                      <option value="">-- Không có (Danh mục gốc) --</option>
+                      {categories.filter(c => !c.parentCategory).map(c => (
+                        <option key={c.categoryId} value={c.categoryId}>{c.categoryName}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Hình ảnh URL</label>
+                    <input
+                      type="text"
+                      placeholder="https://..."
+                      value={catForm.imageUrl}
+                      onChange={(e) => setCatForm({ ...catForm, imageUrl: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Thứ tự hiển thị</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={catForm.displayOrder}
+                      onChange={(e) => setCatForm({ ...catForm, displayOrder: parseInt(e.target.value) || 1 })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none' }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', marginTop: '22px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={catForm.isActive}
+                        onChange={(e) => setCatForm({ ...catForm, isActive: e.target.checked })}
+                        style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                      />
+                      Đang hoạt động
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Mô tả</label>
+                  <textarea
+                    rows="3"
+                    placeholder="Mô tả danh mục..."
+                    value={catForm.description}
+                    onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none', resize: 'vertical' }}
+                  ></textarea>
                 </div>
               </div>
               <div className="admin-modal__footer">
-                <button type="button" className="admin-btn admin-btn--outline" onClick={() => setIsAddCategoryOpen(false)}>Hủy</button>
+                <button type="button" className="admin-btn admin-btn--outline" onClick={() => showConfirm("Hủy bỏ", "Bạn có chắc chắn muốn hủy không?", () => setIsAddCategoryOpen(false))}>Hủy</button>
                 <button type="submit" className="admin-btn admin-btn--primary">Lưu danh mục</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM MODAL */}
+      {confirmDialog.isOpen && (
+        <div className="admin-modal-overlay" onClick={closeConfirm} style={{ zIndex: 9999 }}>
+          <div className="admin-modal" style={{ maxWidth: '400px', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+            <div className="admin-modal__header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+              <h3 className="admin-modal__title" style={{ width: '100%', textAlign: 'center', fontSize: '18px' }}>
+                {confirmDialog.title}
+              </h3>
+            </div>
+            <div className="admin-modal__body" style={{ padding: '16px 20px 24px' }}>
+              <p style={{ color: '#475569', fontSize: '14px', margin: 0 }}>{confirmDialog.message}</p>
+            </div>
+            <div className="admin-modal__footer" style={{ justifyContent: 'center', borderTop: 'none', paddingTop: 0, gap: '12px' }}>
+              <button type="button" className="admin-btn admin-btn--outline" onClick={closeConfirm}>
+                Hủy
+              </button>
+              <button type="button" className="admin-btn admin-btn--primary" onClick={() => {
+                if (confirmDialog.onConfirm) confirmDialog.onConfirm();
+                closeConfirm();
+              }}>
+                Đồng ý
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL ADD/EDIT COUPON */}
+      {isAddCouponOpen && (
+        <div className="admin-modal-overlay" onClick={() => showConfirm("Hủy bỏ", "Bạn có chắc chắn muốn hủy không?", () => setIsAddCouponOpen(false))}>
+          <div className="admin-modal" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal__header">
+              <h3 className="admin-modal__title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Plus size={20} style={{ color: 'var(--admin-accent)' }} /> {couponForm.couponId ? 'Chỉnh sửa mã giảm giá' : 'Thêm mã giảm giá mới'}
+              </h3>
+              <button type="button" className="admin-modal__close" onClick={() => showConfirm("Hủy bỏ", "Bạn có chắc chắn muốn hủy không?", () => setIsAddCouponOpen(false))}>
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleAddCouponSubmit}>
+              <div className="admin-modal__body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Mã giảm giá (Code) *</label>
+                    <input type="text" required placeholder="VD: SUMMER50" value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13.5px', outline: 'none' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Phần trăm giảm (%) *</label>
+                    <input type="number" required min="1" max="100" placeholder="VD: 10" value={couponForm.discountPercentage} onChange={(e) => setCouponForm({ ...couponForm, discountPercentage: parseInt(e.target.value) || 0 })} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13.5px', outline: 'none' }} />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Mức giảm tối đa (VNĐ)</label>
+                    <input type="number" min="0" placeholder="VD: 50000" value={couponForm.maxDiscountAmount} onChange={(e) => setCouponForm({ ...couponForm, maxDiscountAmount: parseFloat(e.target.value) || 0 })} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13.5px', outline: 'none' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Giới hạn số lần dùng (0 = vô hạn)</label>
+                    <input type="number" min="0" placeholder="VD: 100" value={couponForm.usageLimit} onChange={(e) => setCouponForm({ ...couponForm, usageLimit: parseInt(e.target.value) || 0 })} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13.5px', outline: 'none' }} />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, marginBottom: '4px' }}>Hạn sử dụng</label>
+                  <input type="datetime-local" value={couponForm.expiryDate} onChange={(e) => setCouponForm({ ...couponForm, expiryDate: e.target.value })} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13.5px', outline: 'none' }} />
+                </div>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                  <input type="checkbox" id="couponStatus" checked={couponForm.isActive} onChange={(e) => setCouponForm({ ...couponForm, isActive: e.target.checked })} />
+                  <label htmlFor="couponStatus" style={{ fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Mã đang kích hoạt</label>
+                </div>
+              </div>
+              <div className="admin-modal__footer">
+                <button type="button" className="admin-btn admin-btn--outline" onClick={() => showConfirm("Hủy bỏ", "Bạn có chắc chắn muốn hủy không?", () => setIsAddCouponOpen(false))}>Hủy</button>
+                <button type="submit" className="admin-btn admin-btn--primary">Lưu mã giảm giá</button>
               </div>
             </form>
           </div>

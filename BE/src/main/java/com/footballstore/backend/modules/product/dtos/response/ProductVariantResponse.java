@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
+
 
 @Data
 @Builder
@@ -18,7 +18,7 @@ public class ProductVariantResponse {
     private String surfaceType;
     private String material;
     private String skuVariant;
-    private BigDecimal variantPrice;
+
     private Integer variantStock;
     private String imageUrl;
 }

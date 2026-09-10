@@ -7,7 +7,7 @@ export default function ChatManagement() {
   const [sessions, setSessions]     = useState([]);
   const [detail, setDetail]         = useState(null);    // tin nhắn của phiên đang xem
   const [selectedId, setSelectedId] = useState(null);
-  const [loading, setLoading]       = useState(false);
+
 
   // Load thống kê
   useEffect(() => {

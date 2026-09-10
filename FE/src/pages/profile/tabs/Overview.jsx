@@ -167,7 +167,7 @@ export default function Overview({ user, orders = [], wishlist = [], onNavigate 
             <p style={{ color: '#888', padding: '15px 0', gridColumn: '1 / -1' }}>Chưa có sản phẩm yêu thích nào.</p>
           ) : (
             wishlist.slice(0, 4).map(item => (
-              <a key={item.id} href={`/san-pham/${item.id}`} className="profile-wishlist-item">
+              <a key={item.id} href={`/san-pham/${item.slug || item.id}`} className="profile-wishlist-item">
                 <div className="profile-wishlist-item__img-wrap">
                   <img src={item.image} alt={item.name} />
                   <button className="profile-wishlist-item__heart" aria-label="Bỏ yêu thích"

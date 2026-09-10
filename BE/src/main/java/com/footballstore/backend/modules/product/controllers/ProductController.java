@@ -40,8 +40,8 @@ public class ProductController {
         return ResponseEntity.ok(productService.getPromotionProducts(limit));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable Integer id) {
-        return ResponseEntity.ok(productService.getProductDetail(id));
+    @GetMapping("/{idOrSlug}")
+    public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable String idOrSlug) {
+        return ResponseEntity.ok(productService.getProductDetail(idOrSlug));
     }
 }

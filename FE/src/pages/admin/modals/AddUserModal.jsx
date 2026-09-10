@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, UserPlus, CheckCircle2, Loader2 } from 'lucide-react';
 import { adminApi } from '../../../api/adminApi';
 import { useToast } from '../../../context/ToastContext';

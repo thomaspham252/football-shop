@@ -104,10 +104,12 @@ export default function RegisterPage() {
     })
       .then(res => {
         setLoading(false);
-        localStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-        toast.success("Đăng ký tài khoản thành công!");
-        window.location.href = '/';
+        // localStorage.setItem('token', res.data.token);
+        // localStorage.setItem('user', JSON.stringify(res.data.user));
+        toast.success(res.data?.message || "Đăng ký thành công! Vui lòng kiểm tra email để xác thực.");
+        setTimeout(() => {
+            window.location.href = '/dang-nhap';
+        }, 2000);
       })
       .catch(err => {
         setLoading(false);

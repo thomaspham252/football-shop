@@ -25,17 +25,24 @@ public class GeminiService {
     @Value("${gemini.api.key:}")
     private String apiKey;
 
-    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent}")
+    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent}")
     private String apiUrl;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    public GeminiService() {
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10000);
+        factory.setReadTimeout(45000);
+        this.restTemplate = new RestTemplate(factory);
+    }
 
     private static final List<String> FALLBACK_MODEL_URLS = List.of(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent",
         "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent",
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent"
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
     );
 
     public String callGemini(String prompt) {
@@ -66,7 +73,10 @@ public class GeminiService {
         if (rawResponse == null) {
             return "";
         }
-        return rawResponse.replaceAll("(?im)^\\s*PRODUCTS\\s*:\\s*\\[.*?\\]\\s*$", "").trim();
+        return rawResponse
+                .replaceAll("(?im)^\\s*`*\\s*PRODUCTS\\s*:\\s*\\[.*?\\]\\s*`*\\s*$", "")
+                .replaceAll("(?im)PRODUCTS\\s*:\\s*\\[.*?\\]", "")
+                .trim();
     }
 
     public List<Integer> extractProductIds(String rawResponse) {
@@ -85,7 +95,7 @@ public class GeminiService {
             return Collections.emptyList();
         }
 
-        return Arrays.stream(ids.split(","))
+        return Arrays.stream(ids.split("[,;\\s]+"))
                 .map(String::trim)
                 .filter(s -> s.matches("\\d+"))
                 .map(Integer::parseInt)
@@ -127,6 +137,9 @@ public class GeminiService {
             }
         } catch (HttpStatusCodeException e) {
             log.error("Gemini API HTTP Error [{}]: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            if (e.getStatusCode().value() == 429) {
+                log.warn("Gemini API Rate limit (429) reached.");
+            }
         } catch (Exception e) {
             log.error("Gemini API connection error [{}]: {}", targetUrl, e.getMessage());
         }

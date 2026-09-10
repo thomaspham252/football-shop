@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Heart, ShoppingCart, Menu, X, ChevronDown, Truck, Star, Package, UserPlus, LogIn, User } from 'lucide-react';
+import { Search, Heart, ShoppingCart, Menu, X, ChevronDown, Truck, Star, UserPlus, LogIn, User, ShieldCheck } from 'lucide-react';
 import './Navbar.css';
 import { useCart } from '../../context/CartContext';
 import homeApi from '../../api/homeApi';
@@ -26,6 +26,9 @@ export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [dbBrands, setDbBrands] = useState([]);
   const [dbCategoryMap, setDbCategoryMap] = useState({});
+  const [allProducts, setAllProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const { cart } = useCart();
   const cartCount = cart.reduce((sum, item) => sum + (item.quantity ?? item.qty ?? 0), 0);
 
@@ -33,6 +36,7 @@ export default function Navbar() {
     homeApi.getAllProducts()
       .then(res => {
         if (Array.isArray(res.data)) {
+          setAllProducts(res.data);
           const brandMap = new Map();
           const catMap = {};
           res.data.forEach(p => {
@@ -116,6 +120,10 @@ export default function Navbar() {
     }
   };
 
+  const searchResults = searchQuery.trim() === '' ? [] : allProducts.filter(p => 
+    (p.productName || '').toLowerCase().includes(searchQuery.toLowerCase())
+  ).slice(0, 3);
+
   const [wishlistCount, setWishlistCount] = useState(0);
 
   useEffect(() => {
@@ -127,6 +135,7 @@ export default function Navbar() {
             if (Array.isArray(res.data)) {
               setWishlistCount(res.data.length);
               localStorage.setItem('wishlist_ids', JSON.stringify(res.data));
+              window.dispatchEvent(new Event('wishlist-ids-updated'));
             }
           })
           .catch(() => {
@@ -175,11 +184,19 @@ export default function Navbar() {
 
   const token = localStorage.getItem('token');
   const isLoggedIn = !!token;
+  const userRole = String(currentUser?.role || '').toUpperCase();
+  const isAdminOrStaff = userRole.includes('ADMIN') || userRole.includes('STAFF');
+
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = '/dang-nhap';
+    window.location.href = '/';
   };
 
   return (
@@ -198,10 +215,15 @@ export default function Navbar() {
           <div className="navbar__top-divider" />
           <div className="navbar__top-auth">
             {isLoggedIn ? (
-              <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <span className="navbar__top-auth-link" style={{ textTransform: 'uppercase', cursor: 'default' }}>
                   Xin chào, {currentUser.fullName || 'Tài khoản'}
                 </span>
+                {isAdminOrStaff && (
+                  <a href="/admin" className="navbar__top-auth-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#f59e0b', fontWeight: 700, textDecoration: 'none', backgroundColor: 'rgba(245, 158, 11, 0.15)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                    <ShieldCheck size={14} /> QUẢN TRỊ
+                  </a>
+                )}
                 <button onClick={handleLogout} className="navbar__top-auth-link" style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 'inherit', fontWeight: 'inherit', padding: 0 }}>
                   <LogIn size={13} style={{ transform: 'rotate(180deg)' }} /> ĐĂNG XUẤT
                 </button>
@@ -233,17 +255,51 @@ export default function Navbar() {
             <span className="navbar__logo-sport">SPORT</span>
           </a>
 
-          <form className="navbar__search"
+          <form className="navbar__search" style={{ position: 'relative' }}
             onSubmit={e => {
               e.preventDefault();
-              const q = e.target.querySelector('input').value.trim();
-              if (q) window.location.href = `/san-pham?search=${encodeURIComponent(q)}`;
+              if (searchQuery.trim()) {
+                window.location.href = `/san-pham?search=${encodeURIComponent(searchQuery.trim())}`;
+              }
             }}>
             <input type="text" placeholder="Tìm kiếm sản phẩm..."
-              className="navbar__search-input" aria-label="Tìm kiếm" />
+              className="navbar__search-input" aria-label="Tìm kiếm"
+              value={searchQuery}
+              onChange={e => {
+                setSearchQuery(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            />
             <button type="submit" className="navbar__search-btn" aria-label="Tìm kiếm">
               <Search size={17} />
             </button>
+
+            {/* Hiển thị 3 kết quả tìm kiếm gợi ý */}
+            {showSuggestions && searchResults.length > 0 && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0,
+                backgroundColor: 'white', borderRadius: '4px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 100,
+                marginTop: '4px', overflow: 'hidden'
+              }}>
+                {searchResults.map(p => (
+                  <a key={p.productId} href={`/san-pham/${p.slug}`} style={{
+                    display: 'flex', alignItems: 'center', padding: '10px',
+                    textDecoration: 'none', color: 'inherit', borderBottom: '1px solid #f3f4f6',
+                    cursor: 'pointer'
+                  }} onMouseDown={(e) => e.preventDefault()}
+                  >
+                    <img src={p.imageUrl} alt={p.productName} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', marginRight: '10px' }} />
+                    <div style={{ flex: 1, overflow: 'hidden', textAlign: 'left' }}>
+                      <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.productName}</p>
+                      <p style={{ margin: 0, fontSize: '13px', color: '#e11d48', fontWeight: 700 }}>{p.priceSell?.toLocaleString()}đ</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
           </form>
 
           <div className="navbar__actions">
@@ -326,6 +382,36 @@ export default function Navbar() {
           ))}
         </ul>
       </nav>
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{
+            background: 'white', padding: '24px', borderRadius: '8px',
+            width: '320px', textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+          }}>
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', color: '#111827' }}>Xác nhận đăng xuất</h3>
+            <p style={{ margin: '0 0 24px 0', color: '#4b5563', fontSize: '14px' }}>Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?</p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button 
+                onClick={() => setShowLogoutModal(false)}
+                style={{ flex: 1, padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: '4px', background: 'white', cursor: 'pointer', fontWeight: 500 }}
+              >
+                Hủy
+              </button>
+              <button 
+                onClick={confirmLogout}
+                style={{ flex: 1, padding: '8px 16px', border: 'none', borderRadius: '4px', background: '#ef4444', color: 'white', cursor: 'pointer', fontWeight: 500 }}
+              >
+                Đăng xuất
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

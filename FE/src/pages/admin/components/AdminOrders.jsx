@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   ShoppingBag, 
   Search, 
@@ -41,7 +41,7 @@ const formatDate = (dateStr) => {
       hour: '2-digit',
       minute: '2-digit'
     });
-  } catch (e) {
+  } catch {
     return String(dateStr);
   }
 };
@@ -60,7 +60,21 @@ const getStatusBadge = (statusStr) => {
   if (s === 'PROCESSING' || s.includes('XỬ LÝ')) {
     return { label: 'Đang xử lý', bg: '#e0f2fe', color: '#0284c7' };
   }
+  if (s === 'CONFIRMED' || s.includes('XÁC NHẬN')) {
+    return { label: 'Đã xác nhận', bg: '#fef08a', color: '#854d0e' };
+  }
+  if (s === 'PENDING') {
+    return { label: 'Chờ xử lý', bg: '#fef3c7', color: '#b45309' };
+  }
   return { label: statusStr || 'Mới tạo', bg: '#fef3c7', color: '#b45309' };
+};
+
+const getPaymentStatusLabel = (statusStr) => {
+  const s = String(statusStr || '').toUpperCase();
+  if (s === 'PAID') return 'Đã thanh toán';
+  if (s === 'FAILED') return 'Thất bại';
+  if (s === 'PENDING') return 'Chưa thanh toán';
+  return statusStr;
 };
 
 export default function AdminOrders({ onViewOrderDetails }) {
@@ -163,50 +177,21 @@ export default function AdminOrders({ onViewOrderDetails }) {
               />
             </div>
 
-            <select
-              value={paymentFilter}
-              onChange={(e) => {
-                setPaymentFilter(e.target.value);
-                setCurrentPage(0);
-              }}
-              style={{
-                padding: '8px 12px',
-                borderRadius: '8px',
-                border: '1px solid var(--admin-border)',
-                fontSize: '13.5px',
-                outline: 'none',
-                background: '#ffffff',
-                cursor: 'pointer'
-              }}
-            >
+            <select value={paymentFilter} onChange={(e) => { setPaymentFilter(e.target.value); setCurrentPage(0); }} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13.5px', backgroundColor: '#fff', outline: 'none' }}>
               <option value="ALL">Thanh toán: Tất cả</option>
-              <option value="PAID">Đã thanh toán (PAID)</option>
-              <option value="PENDING">Chờ thanh toán (PENDING)</option>
-              <option value="FAILED">Thất bại (FAILED)</option>
+              <option value="PAID">Đã thanh toán</option>
+              <option value="PENDING">Chưa thanh toán</option>
+              <option value="FAILED">Thất bại</option>
             </select>
 
-            <select
-              value={shippingFilter}
-              onChange={(e) => {
-                setShippingFilter(e.target.value);
-                setCurrentPage(0);
-              }}
-              style={{
-                padding: '8px 12px',
-                borderRadius: '8px',
-                border: '1px solid var(--admin-border)',
-                fontSize: '13.5px',
-                outline: 'none',
-                background: '#ffffff',
-                cursor: 'pointer'
-              }}
-            >
+            <select value={shippingFilter} onChange={(e) => { setShippingFilter(e.target.value); setCurrentPage(0); }} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '13.5px', backgroundColor: '#fff', outline: 'none' }}>
               <option value="ALL">Trạng thái đơn: Tất cả</option>
-              <option value="PENDING">Mới tạo (PENDING)</option>
-              <option value="PROCESSING">Đang xử lý (PROCESSING)</option>
-              <option value="SHIPPED">Đang giao (SHIPPED)</option>
-              <option value="DELIVERED">Đã giao (DELIVERED)</option>
-              <option value="CANCELLED">Đã hủy (CANCELLED)</option>
+              <option value="PENDING">Chờ xử lý</option>
+              <option value="CONFIRMED">Đã xác nhận</option>
+              <option value="PROCESSING">Đang xử lý</option>
+              <option value="SHIPPED">Đang giao hàng</option>
+              <option value="DELIVERED">Đã giao hàng</option>
+              <option value="CANCELLED">Đã hủy</option>
             </select>
           </div>
         </div>
@@ -293,7 +278,7 @@ export default function AdminOrders({ onViewOrderDetails }) {
                               fontWeight: 600
                             }}
                           >
-                            {payStatus}
+                            {getPaymentStatusLabel(payStatus)}
                           </span>
                         </td>
                         <td style={{ whiteSpace: 'nowrap' }}>

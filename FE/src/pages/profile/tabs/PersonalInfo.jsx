@@ -16,6 +16,7 @@ export default function PersonalInfo({ user, onUpdate }) {
 
   useEffect(() => {
     if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
         fullName: user.fullName || '',
         email: user.email || '',

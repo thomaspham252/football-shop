@@ -55,12 +55,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     /**
      * Tách lấy chuỗi Token từ Header "Authorization: Bearer <JWT>"
+     * Xử lý làm sạch dấu ngoặc kép hoặc khoảng trắng dư thừa
      */
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
-        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7);
+        if (!StringUtils.hasText(headerAuth)) {
+            return null;
         }
-        return null;
+
+        String token = headerAuth.trim();
+        while ((token.startsWith("\"") && token.endsWith("\"")) || (token.startsWith("'") && token.endsWith("'"))) {
+            if (token.length() <= 2) break;
+            token = token.substring(1, token.length() - 1).trim();
+        }
+        if (token.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            token = token.substring(7).trim();
+        }
+        while ((token.startsWith("\"") && token.endsWith("\"")) || (token.startsWith("'") && token.endsWith("'"))) {
+            if (token.length() <= 2) break;
+            token = token.substring(1, token.length() - 1).trim();
+        }
+
+        return StringUtils.hasText(token) ? token : null;
     }
 }

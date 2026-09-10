@@ -57,10 +57,7 @@ public class OrderService {
             if (variant.getVariantStock() < item.getQuantity()) {
                 errors.add("Sản phẩm " + variant.getProduct().getProductName() + " (Màu: " + variant.getColor() + ", Size: " + variant.getSize() + ") không đủ hàng trong kho (Còn lại: " + variant.getVariantStock() + ").");
             }
-            BigDecimal itemPrice = variant.getVariantPrice() != null ? variant.getVariantPrice() : variant.getProduct().getSalePrice();
-            if (itemPrice == null) {
-                itemPrice = variant.getProduct().getBasePrice();
-            }
+            BigDecimal itemPrice = variant.getProduct().getPriceSell();
             subtotal = subtotal.add(itemPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
         }
 
@@ -93,10 +90,7 @@ public class OrderService {
             variant.setSoldCount(variant.getSoldCount() + item.getQuantity());
             productVariantRepository.save(variant);
 
-            BigDecimal itemPrice = variant.getVariantPrice() != null ? variant.getVariantPrice() : variant.getProduct().getSalePrice();
-            if (itemPrice == null) {
-                itemPrice = variant.getProduct().getBasePrice();
-            }
+            BigDecimal itemPrice = variant.getProduct().getPriceSell();
 
             subtotal = subtotal.add(itemPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
 
@@ -133,9 +127,19 @@ public class OrderService {
 
         String orderCode = generateUniqueOrderCode();
 
+        String currentUserId = request.getUserId();
+        if (currentUserId == null || currentUserId.isBlank()) {
+            try {
+                org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof com.footballstore.backend.config.security.UserDetailsImpl userDetails) {
+                    currentUserId = userDetails.getId();
+                }
+            } catch (Exception ignored) {}
+        }
+
         Order order = Order.builder()
                 .orderCode(orderCode)
-                .userId(request.getUserId())
+                .userId(currentUserId)
                 .email(request.getEmail())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())

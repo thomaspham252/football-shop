@@ -1,12 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Boxes, 
-  AlertTriangle, 
-  CheckCircle2, 
   Search,
-  Plus,
   History,
-  Clock,
   Loader2,
   ChevronLeft,
   ChevronRight,
@@ -25,7 +21,7 @@ export default function AdminInventory() {
   const [loading, setLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [statusFilter] = useState('ALL');
 
   // Phân trang
   const [currentPage, setCurrentPage] = useState(0);
@@ -135,7 +131,7 @@ export default function AdminInventory() {
       toast.success("Đã cập nhật tồn kho & định mức cảnh báo thành công!");
       setEditingItem(null);
       fetchInventory();
-    } catch (err) {
+    } catch {
       toast.error("Cập nhật tồn kho thất bại!");
     } finally {
       setSubmitting(false);
@@ -163,7 +159,7 @@ export default function AdminInventory() {
       setImportRefCode('');
       setImportNotes('');
       fetchInventory();
-    } catch (err) {
+    } catch {
       toast.error("Không thể hoàn tất đơn nhập kho!");
     } finally {
       setSubmitting(false);
@@ -175,7 +171,7 @@ export default function AdminInventory() {
     try {
       const d = new Date(str);
       return d.toLocaleString('vi-VN');
-    } catch (e) {
+    } catch {
       return str;
     }
   };
@@ -465,7 +461,7 @@ export default function AdminInventory() {
                     <th>Loại giao dịch</th>
                     <th>Sản phẩm / SKU</th>
                     <th>Thay đổi</th>
-                    <th>Tồn trước $\rightarrow$ Sau</th>
+                    <th>Tồn trước → Sau</th>
                     <th>Mã chứng từ</th>
                     <th>Ghi chú</th>
                     <th>Thời gian</th>
@@ -510,7 +506,7 @@ export default function AdminInventory() {
                             {h.quantityChange > 0 ? `+${h.quantityChange}` : h.quantityChange}
                           </td>
                           <td style={{ fontSize: '12.5px', color: '#334155' }}>
-                            {h.previousQuantity} $\rightarrow$ <strong>{h.newQuantity}</strong>
+                            {h.previousQuantity} → <strong>{h.newQuantity}</strong>
                           </td>
                           <td>
                             <code style={{ background: '#f1f5f9', padding: '3px 8px', borderRadius: '4px', fontSize: '11.5px', fontWeight: 700 }}>

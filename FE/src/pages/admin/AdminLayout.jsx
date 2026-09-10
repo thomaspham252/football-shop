@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   Boxes, 
@@ -6,15 +6,12 @@ import {
   ShoppingCart, 
   Users, 
   Settings, 
-  HelpCircle, 
   Search, 
   Bell, 
   Mail, 
-  ChevronDown, 
   Menu, 
   LogOut,
-  Bot,
-  MessageSquare
+  Bot
 } from 'lucide-react';
 import './AdminLayout.css';
 
@@ -42,6 +39,9 @@ export default function AdminLayout() {
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [isAdjustStockOpen, setIsAdjustStockOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  const userRole = String(currentUser?.role || '').toUpperCase();
+  const isAdmin = userRole.includes('ADMIN');
 
   useEffect(() => {
     const userStr = localStorage.getItem('user');
@@ -178,13 +178,15 @@ export default function AdminLayout() {
             <span>Quản lý đơn hàng</span>
           </button>
 
-          <button
-            className={`admin-sidebar__nav-item ${activeTab === 'nguoi-dung' ? 'active' : ''}`}
-            onClick={() => setActiveTab('nguoi-dung')}
-          >
-            <span className="admin-sidebar__nav-icon"><Users size={19} /></span>
-            <span>Quản lý người dùng</span>
-          </button>
+          {isAdmin && (
+            <button
+              className={`admin-sidebar__nav-item ${activeTab === 'nguoi-dung' ? 'active' : ''}`}
+              onClick={() => setActiveTab('nguoi-dung')}
+            >
+              <span className="admin-sidebar__nav-icon"><Users size={19} /></span>
+              <span>Quản lý người dùng</span>
+            </button>
+          )}
 
           <div className="admin-sidebar__section-label" style={{ marginTop: '16px' }}>BOTADMIN AI</div>
 
@@ -196,15 +198,19 @@ export default function AdminLayout() {
             <span>Quản lý Chatbot</span>
           </button>
 
-          <div className="admin-sidebar__section-label" style={{ marginTop: '16px' }}>HỆ THỐNG</div>
+          {isAdmin && (
+            <>
+              <div className="admin-sidebar__section-label" style={{ marginTop: '16px' }}>HỆ THỐNG</div>
 
-          <button
-            className={`admin-sidebar__nav-item ${activeTab === 'cai-dat' ? 'active' : ''}`}
-            onClick={() => setActiveTab('cai-dat')}
-          >
-            <span className="admin-sidebar__nav-icon"><Settings size={19} /></span>
-            <span>Cài đặt</span>
-          </button>
+              <button
+                className={`admin-sidebar__nav-item ${activeTab === 'cai-dat' ? 'active' : ''}`}
+                onClick={() => setActiveTab('cai-dat')}
+              >
+                <span className="admin-sidebar__nav-icon"><Settings size={19} /></span>
+                <span>Cài đặt</span>
+              </button>
+            </>
+          )}
 
           <button
             className="admin-sidebar__nav-item"
@@ -219,12 +225,14 @@ export default function AdminLayout() {
         {/* User profile bottom item */}
         <div className="admin-sidebar__footer">
           <div className="admin-sidebar__user">
-            <div className="admin-sidebar__user-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--admin-accent)', color: '#fff', fontWeight: 700, borderRadius: '50%', width: '36px', height: '36px' }}>
+            <div className="admin-sidebar__user-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: isAdmin ? 'var(--admin-accent)' : '#3b82f6', color: '#fff', fontWeight: 700, borderRadius: '50%', width: '36px', height: '36px' }}>
               {(currentUser?.fullName || currentUser?.email || 'A').charAt(0).toUpperCase()}
             </div>
             <div className="admin-sidebar__user-info">
               <span className="admin-sidebar__user-name">{currentUser?.fullName || currentUser?.email || 'Admin'}</span>
-              <span className="admin-sidebar__user-role">{currentUser?.role || 'ROLE_ADMIN'}</span>
+              <span className="admin-sidebar__user-role">
+                {isAdmin ? 'Quản trị viên (ADMIN)' : 'Nhân viên (STAFF)'}
+              </span>
             </div>
           </div>
         </div>

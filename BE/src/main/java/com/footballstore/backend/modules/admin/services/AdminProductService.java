@@ -17,8 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+
 import java.util.*;
 
 @Service
@@ -112,28 +111,22 @@ public class AdminProductService {
         }
 
         // Generate Slug
-        product.setSlug(generateSlug(request.getProductName()));
+        if (request.getSlug() != null && !request.getSlug().trim().isEmpty()) {
+            product.setSlug(request.getSlug().trim());
+        } else if (product.getSlug() == null || product.getSlug().isBlank()) {
+            product.setSlug(generateSlug(request.getProductName()));
+        }
+
+        product.setProductName(request.getProductName());
         product.setDescription(request.getDescription());
         product.setDetailedDescription(request.getDetailedDescription());
         product.setCategory(category);
         product.setBrand(brand);
-        product.setBasePrice(request.getBasePrice());
-        product.setCostPrice(request.getCostPrice());
-
-        int discount = request.getDiscountPercentage() != null ? request.getDiscountPercentage() : 0;
-        product.setDiscountPercentage(discount);
-
-        // Tính Sale Price
-        if (discount > 0) {
-            BigDecimal discountFactor = BigDecimal.valueOf(100 - discount).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-            product.setSalePrice(request.getBasePrice().multiply(discountFactor));
-        } else {
-            product.setSalePrice(request.getBasePrice());
-        }
-
         product.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
-        product.setImageUrl(request.getImageUrl());
-        product.setGalleryImages(request.getGalleryImages());
+
+        product.setPriceCost(request.getPriceCost());
+        product.setPrice(request.getPrice());
+        product.setDiscountPercentage(request.getDiscountPercentage());
 
         Product savedProduct = productRepository.save(product);
 
@@ -160,14 +153,11 @@ public class AdminProductService {
                 }
                 variant.setSkuVariant(skuVar);
 
-                BigDecimal varPrice = vReq.getVariantPrice() != null ? vReq.getVariantPrice() : savedProduct.getSalePrice();
-                variant.setVariantPrice(varPrice);
-
                 int stock = vReq.getVariantStock() != null ? vReq.getVariantStock() : 10;
                 variant.setVariantStock(stock);
                 totalStock += stock;
 
-                variant.setImageUrl(vReq.getImageUrl() != null ? vReq.getImageUrl() : savedProduct.getImageUrl());
+                variant.setImageUrl(vReq.getImageUrl());
                 variant.setIsActive(true);
 
                 productVariantRepository.save(variant);

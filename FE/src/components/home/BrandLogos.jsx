@@ -17,14 +17,21 @@ export default function BrandLogos() {
       <div className="brands__container">
         <div className="brands__track">
           {[...brands, ...brands].map((brand, i) => (
-            <a key={i} href={`/thuong-hieu/${brand.name.toLowerCase().replace(' ', '-')}`} className="brands__item">
+            <a 
+              key={i} 
+              href={`/san-pham?brand=${encodeURIComponent(brand.name)}`} 
+              className="brands__item"
+              title={`Xem các sản phẩm thương hiệu ${brand.name}`}
+            >
               <img
                 src={brand.logo}
                 alt={brand.name}
                 className="brands__logo"
                 onError={(e) => {
                   e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'block';
+                  if (e.target.nextSibling) {
+                    e.target.nextSibling.style.display = 'block';
+                  }
                 }}
               />
               <span className="brands__fallback" style={{ display: 'none' }}>

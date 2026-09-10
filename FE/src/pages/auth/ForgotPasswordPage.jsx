@@ -3,20 +3,32 @@ import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import './ForgotPasswordPage.css';
+import authApi from '../../api/authApi';
+import { useToast } from '../../context/ToastContext';
 
 export default function ForgotPasswordPage() {
   const [email,   setEmail]   = useState('');
   const [sent,    setSent]    = useState(false);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
+  const { toast } = useToast();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) { setError('Vui lòng nhập email'); return; }
     if (!/\S+@\S+\.\S+/.test(email)) { setError('Email không hợp lệ'); return; }
     setError('');
     setLoading(true);
-    setTimeout(() => { setLoading(false); setSent(true); }, 1500);
+    
+    try {
+      await authApi.forgotPassword({ email });
+      setSent(true);
+      toast.success('Đã gửi link đặt lại mật khẩu thành công');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

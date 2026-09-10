@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, RefreshCw, Boxes, CheckCircle2 } from 'lucide-react';
+import { useState } from 'react';
+import { X, RefreshCw, CheckCircle2 } from 'lucide-react';
 
 export default function AdjustStockModal({ isOpen, onClose }) {
   const [skuVariant, setSkuVariant] = useState('NK-MS9-GRN-42');

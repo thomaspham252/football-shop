@@ -14,10 +14,6 @@ const PAYMENT_METHODS = [
   {
     id: 'transfer',
     label: 'Chuyển khoản ngân hàng',
-  },
-  {
-    id: 'momo',
-    label: 'Ví MoMo',
   }
 ];
 
@@ -45,15 +41,6 @@ const styles = {
     border: '1px solid #fce8bd',
     padding: '10px 14px',
     borderRadius: '6px'
-  },
-  momoBadge: {
-    background: '#a50064',
-    color: '#fff',
-    padding: '2px 6px',
-    borderRadius: '4px',
-    fontSize: '10px',
-    fontWeight: 'bold',
-    marginLeft: '8px'
   },
   bankDetails: {
     background: '#f8f9fa',
@@ -104,6 +91,7 @@ export default function PaymentPage() {
       try {
         const u = JSON.parse(userJson);
         if (u) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           if (u.email) setEmail(u.email);
           if (u.fullName) {
             const parts = u.fullName.trim().split(/\s+/);
@@ -192,18 +180,9 @@ export default function PaymentPage() {
       }));
       localStorage.setItem('latestOrderId', createdOrder.orderId);
 
-      const paymentRes = await orderApi.initiatePayment(createdOrder.orderId);
+      await orderApi.initiatePayment(createdOrder.orderId);
 
-      if (payment === 'momo') {
-        if (paymentRes.data && paymentRes.data.payUrl) {
-          window.location.href = paymentRes.data.payUrl;
-        } else {
-          toast.warning("Không thể khởi tạo cổng thanh toán MoMo. Đang chuyển hướng về trang đơn hàng thành công.");
-          window.location.href = `/dat-hang-thanh-cong?orderId=${createdOrder.orderId}`;
-        }
-      } else {
-        window.location.href = `/dat-hang-thanh-cong?orderId=${createdOrder.orderId}`;
-      }
+      window.location.href = `/dat-hang-thanh-cong?orderId=${createdOrder.orderId}`;
     } catch (err) {
       console.error("Lỗi khi xử lý thanh toán:", err);
       const errMsg = err.response && err.response.data && err.response.data.error
@@ -239,7 +218,7 @@ export default function PaymentPage() {
     }
   };
 
-  const OrderSummary = () => (
+  const renderOrderSummary = () => (
     <div className="pay-summary">
       <div className="pay-summary__items">
         {checkoutItems.map(item => (
@@ -351,7 +330,7 @@ export default function PaymentPage() {
 
       {showOrderMobile && (
         <div className="pay-mobile-order">
-          <OrderSummary />
+          {renderOrderSummary()}
         </div>
       )}
 
@@ -482,11 +461,6 @@ export default function PaymentPage() {
                     />
                     <span className="pay-option__label" style={{ display: 'flex', alignItems: 'center' }}>
                       {m.label}
-                      {m.id === 'momo' && (
-                        <span style={styles.momoBadge}>
-                          MoMo
-                        </span>
-                      )}
                     </span>
                   </label>
                 );
@@ -495,7 +469,7 @@ export default function PaymentPage() {
 
             {payment === 'cod' && total > 5000000 && (
               <p className="pay-payment-desc" style={{ color: 'var(--red)', fontWeight: '600', marginTop: '10px' }}>
-                ⚠️ Đơn hàng trên 5.000.000đ không áp dụng hình thức COD. Vui lòng chọn phương thức thanh toán trả trước (Chuyển khoản hoặc MoMo).
+                ⚠️ Đơn hàng trên 5.000.000đ không áp dụng hình thức COD. Vui lòng chọn phương thức thanh toán trả trước (Chuyển khoản).
               </p>
             )}
 
@@ -504,21 +478,15 @@ export default function PaymentPage() {
                 <p style={{ fontWeight: '700', color: '#1a1a2e', marginBottom: '8px', fontSize: '14px' }}>
                   Thông tin chuyển khoản ngân hàng:
                 </p>
-                <p>Ngân hàng: <strong>MB Bank (Ngân hàng Quân Đội)</strong></p>
-                <p>Số tài khoản: <strong>0999888777666</strong></p>
-                <p>Chủ tài khoản: <strong>CONG TY TNHH ULTRASPORT</strong></p>
+                <p>Ngân hàng: <strong>BIDV</strong></p>
+                <p>Số tài khoản: <strong>0000000001</strong></p>
+                <p>Chủ tài khoản: <strong>PHAM VAN LINH</strong></p>
                 <p>Số tiền: <strong>{total.toLocaleString('vi-VN')}đ</strong></p>
                 <p>Cú pháp chuyển khoản: <strong>[Mã đơn hàng của bạn]</strong></p>
                 <p style={{ fontSize: '11px', color: '#666', marginTop: '8px', fontStyle: 'italic' }}>
                   * Mã đơn hàng chính thức và mã QR quét nhanh chuyển khoản sẽ được cung cấp ở trang tiếp theo sau khi đặt hàng thành công.
                 </p>
               </div>
-            )}
-
-            {payment === 'momo' && (
-              <p className="pay-payment-desc" style={{ color: '#a50064', fontWeight: '600', marginTop: '10px' }}>
-                ✓ Bạn sẽ được chuyển hướng đến cổng thanh toán MoMo để quét mã QR hoàn tất đơn hàng.
-              </p>
             )}
           </section>
 
@@ -529,7 +497,7 @@ export default function PaymentPage() {
         </div>
 
         <div className="pay-summary-col">
-          <OrderSummary />
+          {renderOrderSummary()}
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Fragment } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   MessageCircle, 
@@ -219,7 +219,7 @@ export default function ChatWidget() {
               /* HIỂN THỊ HỘI THOẠI KHI ĐÃ ĐĂNG NHẬP */
               <>
                 {messages.map((msg) => (
-                  <React.Fragment key={msg.id}>
+                  <Fragment key={msg.id}>
                     <div className={`chat-widget-msg ${msg.sender === 'user' ? 'chat-widget-msg--user' : 'chat-widget-msg--bot'}`}>
                       {msg.sender === 'bot' && (
                         <div className="chat-widget-msg__avatar">
@@ -239,7 +239,7 @@ export default function ChatWidget() {
                             key={p.productId} 
                             className="chat-widget-product-card"
                             onClick={() => {
-                              navigate(`/san-pham/${p.productId}`);
+                              navigate(`/san-pham/${p.slug || p.productId}`);
                               setIsOpen(false);
                             }}
                             title={`Xem chi tiết sản phẩm ${p.productName}`}
@@ -261,7 +261,7 @@ export default function ChatWidget() {
                         ))}
                       </div>
                     )}
-                  </React.Fragment>
+                  </Fragment>
                 ))}
 
                 {/* Typing Indicator */}

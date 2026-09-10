@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -48,14 +47,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
-
-    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
@@ -72,16 +63,15 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/error", "/api/webhooks/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/products", "/api/product/**", "/api/product", "/api/categories/**", "/api/categories", "/api/brands/**", "/api/brands").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/admin/users/**", "/api/admin/system/**").hasRole("ADMIN")
-                        .requestMatchers("/api/admin/**", "/api/staff/**").hasAnyRole("ADMIN", "STAFF")
-                        .requestMatchers("/api/customer/**", "/api/cart/**", "/api/orders/**", "/api/chat/**").hasAnyRole("ADMIN", "STAFF", "CUSTOMER")
+                        .requestMatchers("/api/admin/users/**", "/api/admin/system/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
+                        .requestMatchers("/api/admin/**", "/api/staff/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF", "ADMIN", "STAFF")
+                        .requestMatchers("/api/customer/**", "/api/cart/**", "/api/orders/**", "/api/chat/**", "/api/coupons/**", "/api/wishlist/**", "/api/wishlist").authenticated()
                         .anyRequest().authenticated()
                 );
 
-        http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

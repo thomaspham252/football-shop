@@ -23,11 +23,11 @@ public class ProductDetailResponse {
     private String brandName;
     private String categoryName;
     private BigDecimal basePrice;
+    private BigDecimal priceCost;
     private BigDecimal salePrice;
-    private Integer discountPercentage;
+    private BigDecimal discountPercentage;
     private Boolean isActive;
-    private String imageUrl;
-    private List<String> galleryImages;
+
     private BigDecimal rating;
     private Integer totalReviews;
     private Integer stockQuantity;

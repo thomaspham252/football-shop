@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Printer, User, MapPin, Truck, CheckCircle2, AlertCircle } from 'lucide-react';
 import { adminApi } from '../../../api/adminApi';
 
@@ -11,6 +11,8 @@ const formatVND = (amount) => {
 export default function OrderDetailsModal({ isOpen, order, onClose, onOrderUpdated }) {
   const [updating, setUpdating] = useState(false);
   const [statusMsg, setStatusMsg] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmModalContent, setConfirmModalContent] = useState('');
 
   if (!isOpen || !order) return null;
 
@@ -20,6 +22,8 @@ export default function OrderDetailsModal({ isOpen, order, onClose, onOrderUpdat
       setStatusMsg(null);
       await adminApi.updateOrderStatus(order.orderId, newOrderStatus);
       setStatusMsg({ type: 'success', text: `Đã cập nhật trạng thái đơn hàng thành: ${newOrderStatus}` });
+      // Cập nhật local state order để UI reflect liền
+      order.orderStatus = newOrderStatus;
       if (onOrderUpdated) onOrderUpdated();
     } catch (err) {
       console.error(err);
@@ -29,12 +33,47 @@ export default function OrderDetailsModal({ isOpen, order, onClose, onOrderUpdat
     }
   };
 
+  const handleUpdateStatusClick = (newOrderStatus) => {
+    const current = order.orderStatus;
+    
+    // Quy tắc: Không được thoát khỏi trạng thái ĐÃ HỦY
+    if (current === 'CANCELLED') {
+      setConfirmModalContent("Đơn hàng ĐÃ HỦY thì không thể thay đổi sang trạng thái khác được nữa!");
+      setShowConfirmModal(true);
+      return;
+    }
+    
+    // Quy tắc: Không được quay ngược hoặc Hủy từ ĐÃ GIAO THÀNH CÔNG
+    if (current === 'DELIVERED') {
+      setConfirmModalContent("Đơn hàng ĐÃ GIAO THÀNH CÔNG, không thể thay đổi trạng thái hoặc Hủy đơn được nữa!");
+      setShowConfirmModal(true);
+      return;
+    }
+
+    // Quy tắc: Không được lùi từ ĐANG GIAO HÀNG về ĐANG XỬ LÝ hoặc các trạng thái trước đó
+    if (current === 'SHIPPED' && (newOrderStatus === 'PROCESSING' || newOrderStatus === 'CONFIRMED' || newOrderStatus === 'PENDING')) {
+      setConfirmModalContent("Đơn hàng ĐANG GIAO HÀNG, không thể quay lùi về trạng thái Đang xử lý hoặc Chờ xác nhận!");
+      setShowConfirmModal(true);
+      return;
+    }
+
+    // Quy tắc: Không được lùi từ ĐANG XỬ LÝ về PENDING hay CONFIRMED
+    if (current === 'PROCESSING' && (newOrderStatus === 'CONFIRMED' || newOrderStatus === 'PENDING')) {
+      setConfirmModalContent("Đơn hàng ĐANG XỬ LÝ, không thể quay lùi về trạng thái ban đầu!");
+      setShowConfirmModal(true);
+      return;
+    }
+
+    handleUpdateStatus(newOrderStatus);
+  };
+
   const handleUpdatePayment = async (newPaymentStatus) => {
     try {
       setUpdating(true);
       setStatusMsg(null);
       await adminApi.updatePaymentStatus(order.orderId, newPaymentStatus);
       setStatusMsg({ type: 'success', text: `Đã cập nhật trạng thái thanh toán thành: ${newPaymentStatus}` });
+      order.paymentStatus = newPaymentStatus;
       if (onOrderUpdated) onOrderUpdated();
     } catch (err) {
       console.error(err);
@@ -42,6 +81,15 @@ export default function OrderDetailsModal({ isOpen, order, onClose, onOrderUpdat
     } finally {
       setUpdating(false);
     }
+  };
+
+  const handleUpdatePaymentClick = (newPaymentStatus) => {
+    if (order.paymentStatus === 'PAID') {
+      setConfirmModalContent("Đơn hàng ĐÃ THANH TOÁN, không thể chuyển ngược lại thành chưa thanh toán!");
+      setShowConfirmModal(true);
+      return;
+    }
+    handleUpdatePayment(newPaymentStatus);
   };
 
   return (
@@ -92,7 +140,7 @@ export default function OrderDetailsModal({ isOpen, order, onClose, onOrderUpdat
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               <button 
                 disabled={updating || order.orderStatus === 'PROCESSING'} 
-                onClick={() => handleUpdateStatus('PROCESSING')}
+                onClick={() => handleUpdateStatusClick('PROCESSING')}
                 className="admin-btn admin-btn--outline"
                 style={{ fontSize: '12px', padding: '4px 10px', backgroundColor: order.orderStatus === 'PROCESSING' ? '#e0f2fe' : '#fff' }}
               >
@@ -101,7 +149,7 @@ export default function OrderDetailsModal({ isOpen, order, onClose, onOrderUpdat
 
               <button 
                 disabled={updating || order.orderStatus === 'SHIPPED'} 
-                onClick={() => handleUpdateStatus('SHIPPED')}
+                onClick={() => handleUpdateStatusClick('SHIPPED')}
                 className="admin-btn admin-btn--outline"
                 style={{ fontSize: '12px', padding: '4px 10px', backgroundColor: order.orderStatus === 'SHIPPED' ? '#e0f2fe' : '#fff' }}
               >
@@ -110,7 +158,7 @@ export default function OrderDetailsModal({ isOpen, order, onClose, onOrderUpdat
 
               <button 
                 disabled={updating || order.orderStatus === 'DELIVERED'} 
-                onClick={() => handleUpdateStatus('DELIVERED')}
+                onClick={() => handleUpdateStatusClick('DELIVERED')}
                 className="admin-btn admin-btn--outline"
                 style={{ fontSize: '12px', padding: '4px 10px', backgroundColor: order.orderStatus === 'DELIVERED' ? '#dcfce7' : '#fff', color: order.orderStatus === 'DELIVERED' ? '#15803d' : 'inherit' }}
               >
@@ -119,7 +167,7 @@ export default function OrderDetailsModal({ isOpen, order, onClose, onOrderUpdat
 
               <button 
                 disabled={updating || order.paymentStatus === 'PAID'} 
-                onClick={() => handleUpdatePayment('PAID')}
+                onClick={() => handleUpdatePaymentClick('PAID')}
                 className="admin-btn admin-btn--outline"
                 style={{ fontSize: '12px', padding: '4px 10px', backgroundColor: order.paymentStatus === 'PAID' ? '#dcfce7' : '#fff', color: order.paymentStatus === 'PAID' ? '#15803d' : 'inherit' }}
               >
@@ -128,7 +176,7 @@ export default function OrderDetailsModal({ isOpen, order, onClose, onOrderUpdat
 
               <button 
                 disabled={updating || order.orderStatus === 'CANCELLED'} 
-                onClick={() => handleUpdateStatus('CANCELLED')}
+                onClick={() => handleUpdateStatusClick('CANCELLED')}
                 className="admin-btn admin-btn--outline"
                 style={{ fontSize: '12px', padding: '4px 10px', color: '#b91c1c' }}
               >
@@ -229,6 +277,34 @@ export default function OrderDetailsModal({ isOpen, order, onClose, onOrderUpdat
           </button>
         </div>
       </div>
+
+      {/* Warning Modal */}
+      {showConfirmModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)', zIndex: 10000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }} onClick={(e) => { e.stopPropagation(); setShowConfirmModal(false); }}>
+          <div style={{
+            background: 'white', padding: '24px', borderRadius: '12px',
+            width: '360px', textAlign: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ color: '#ef4444', marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+              <AlertCircle size={48} strokeWidth={1.5} />
+            </div>
+            <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', color: '#111827', fontWeight: 700 }}>Thao tác không hợp lệ</h3>
+            <p style={{ margin: '0 0 24px 0', color: '#4b5563', fontSize: '14.5px', lineHeight: '1.5' }}>
+              {confirmModalContent}
+            </p>
+            <button 
+              onClick={() => setShowConfirmModal(false)}
+              style={{ width: '100%', padding: '10px 16px', border: 'none', borderRadius: '8px', background: '#3b82f6', color: 'white', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}
+            >
+              Đã hiểu
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import Footer from '../../components/layout/Footer';
 import ProductCard from '../../components/common/ProductCard';
 import productApi from '../../api/productApi';
 import homeApi from '../../api/homeApi';
+import wishlistApi from '../../api/wishlistApi';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 import {
@@ -77,9 +78,9 @@ function getColorHex(name) {
 }
 
 export default function ProductDetail() {
-  const { toast } = useToast();
+  const { slug } = useParams();
   const { addToCart } = useCart();
-  const { id } = useParams();
+  const { toast } = useToast();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -94,43 +95,57 @@ export default function ProductDetail() {
   const [relatedProducts, setRelatedProducts] = useState([]);
 
   useEffect(() => {
-    if (product) {
-      const stored = localStorage.getItem('wishlist');
-      const list = stored ? JSON.parse(stored) : [];
+    const checkWish = () => {
+      if (!product) return;
       const prodId = product.productId ?? product.id;
-      setWishlisted(list.some(item => String(item.id) === String(prodId)));
-    }
+      const storedIds = localStorage.getItem('wishlist_ids');
+      if (storedIds) {
+        const ids = JSON.parse(storedIds);
+        if (Array.isArray(ids) && ids.length > 0) {
+          setWishlisted(ids.some(id => String(id) === String(prodId)));
+          return;
+        }
+      }
+      setWishlisted(false);
+    };
+    checkWish();
+    window.addEventListener('wishlist-ids-updated', checkWish);
+    return () => window.removeEventListener('wishlist-ids-updated', checkWish);
   }, [product]);
 
-  const handleToggleWishlist = () => {
+  const handleToggleWishlist = async () => {
     if (!product) return;
-    const stored = localStorage.getItem('wishlist');
-    let list = stored ? JSON.parse(stored) : [];
-    const prodId = product.productId ?? product.id;
-    const exists = list.some(item => String(item.id) === String(prodId));
-    if (exists) {
-      list = list.filter(item => String(item.id) !== String(prodId));
-      setWishlisted(false);
-      toast.info("Đã xóa khỏi sản phẩm yêu thích");
-    } else {
-      list.push({
-        id: prodId,
-        name: product.productName ?? product.name,
-        price: product.salePrice ?? product.price,
-        image: product.imageUrl ?? product.image
-      });
-      setWishlisted(true);
-      toast.success("Đã thêm vào sản phẩm yêu thích");
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error("Vui lòng đăng nhập để thêm vào sản phẩm yêu thích");
+      return;
     }
-    localStorage.setItem('wishlist', JSON.stringify(list));
-    window.dispatchEvent(new Event('wishlist-updated'));
+
+    try {
+      const prodId = product.productId ?? product.id;
+      const res = await wishlistApi.toggleWishlist(prodId);
+      const added = res.data.added;
+      setWishlisted(added);
+      if (added) {
+        toast.success("Đã thêm vào sản phẩm yêu thích");
+      } else {
+        toast.info("Đã xóa khỏi sản phẩm yêu thích");
+      }
+      window.dispatchEvent(new Event('wishlist-updated'));
+    } catch (err) {
+      console.error("Lỗi toggle wishlist:", err);
+      toast.error("Có lỗi xảy ra, vui lòng thử lại sau.");
+    }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
-    productApi.getProductDetail(id)
-      .then(res => {
+    const fetchProductAndRelated = async () => {
+      try {
+        const res = await productApi.getProductDetail(slug);
         const prodData = res.data;
         setProduct(prodData);
         setLoading(false);
@@ -144,35 +159,30 @@ export default function ProductDetail() {
           setSelectedSize(null);
         }
         setQty(1);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error("Lỗi lấy chi tiết sản phẩm:", err);
         setError("Không thể tải thông tin sản phẩm. Vui lòng thử lại sau.");
         setLoading(false);
-      });
-  }, [id]);
+      }
+    };
+    fetchProductAndRelated();
+  }, [slug]);
 
   useEffect(() => {
-    homeApi.getNewProducts(8)
-      .then(res => {
-        const list = res.data.filter(p => p.productId !== Number(id)).slice(0, 5);
-        setRelatedProducts(list);
-      })
-      .catch(err => {
-        console.error("Lỗi lấy sản phẩm liên quan:", err);
-      });
-  }, [id]);
+    if (product) {
+        homeApi.getNewProducts(8)
+          .then(res => {
+            const list = res.data.filter(p => p.productId !== Number(product.productId)).slice(0, 5);
+            setRelatedProducts(list);
+          })
+          .catch(err => {
+            console.error("Lỗi lấy sản phẩm liên quan:", err);
+          });
+    }
+  }, [product]);
 
   const images = [];
   if (product) {
-    if (product.imageUrl) images.push(product.imageUrl);
-    if (product.galleryImages && Array.isArray(product.galleryImages)) {
-      product.galleryImages.forEach(img => {
-        if (img && img !== product.imageUrl) {
-          images.push(img);
-        }
-      });
-    }
     if (product.variants) {
       product.variants.forEach(v => {
         if (v.imageUrl && !images.includes(v.imageUrl)) {
@@ -211,6 +221,7 @@ export default function ProductDetail() {
       if (vWithImg) {
         const idx = images.indexOf(vWithImg.imageUrl);
         if (idx !== -1) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setActiveImg(idx);
         }
       }
@@ -273,8 +284,7 @@ export default function ProductDetail() {
       label: sz,
       available: match ? (match.variantStock > 0) : false,
       variantId: match?.variantId,
-      variantStock: match?.variantStock ?? 0,
-      price: match?.variantPrice
+      variantStock: match?.variantStock ?? 0
     };
   }).filter(s => s.available);
 
@@ -282,11 +292,11 @@ export default function ProductDetail() {
     v => v.color === selectedColorName && v.size === selectedSize
   );
 
-  const displayPrice = currentVariant?.variantPrice || product.salePrice || product.basePrice || 0;
-  const displayOriginalPrice = product.basePrice || 0;
-  const discount = displayOriginalPrice > displayPrice
-    ? Math.round(((displayOriginalPrice - displayPrice) / displayOriginalPrice) * 100)
-    : 0;
+  const displayPrice = product.salePrice || product.basePrice || 0;
+
+  const displayOriginalPrice = product.basePrice || product.salePrice || 0;
+
+  const discount = product.discountPercentage || 0;
 
   const currentStock = currentVariant
     ? currentVariant.variantStock
@@ -379,7 +389,24 @@ export default function ProductDetail() {
 
             <div className="pd-info">
               <p className="pd-info__brand">{product.brandName || 'ULTRASPORT'}</p>
-              <h1 className="pd-info__name">{product.productName}</h1>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <h1 className="pd-info__name" style={{ flex: 1, margin: 0 }}>{product.productName}</h1>
+                <button 
+                  onClick={handleToggleWishlist}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: wishlisted ? '#e11d48' : '#9ca3af',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    marginLeft: '15px', padding: '5px'
+                  }}
+                  title="Thêm vào yêu thích"
+                >
+                  <Heart size={28} fill={wishlisted ? '#e11d48' : 'none'} strokeWidth={1.5} />
+                  <span style={{ fontSize: '12px', marginTop: '4px', fontWeight: 500 }}>
+                    {wishlisted ? 'Đã lưu' : 'Yêu thích'}
+                  </span>
+                </button>
+              </div>
 
               <div className="pd-info__meta">
                 <StarRating rating={product.rating || 5.0} />
@@ -490,14 +517,7 @@ export default function ProductDetail() {
                 </button>
               </div>
 
-              <div className="pd-info__secondary-actions">
-                <button
-                  className={`pd-info__wishlist ${wishlisted ? 'pd-info__wishlist--active' : ''}`}
-                  onClick={handleToggleWishlist}
-                >
-                  <Heart size={16} />
-                  {wishlisted ? 'Đã yêu thích' : 'Yêu thích'}
-                </button>
+              <div className="pd-info__secondary-actions" style={{ justifyContent: 'flex-end' }}>
                 <button className="pd-info__share">
                   <Share2 size={16} />
                   Chia sẻ

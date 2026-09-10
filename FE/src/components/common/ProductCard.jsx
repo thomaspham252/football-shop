@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, Heart, Zap } from 'lucide-react';
 import './ProductCard.css';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
@@ -42,18 +42,21 @@ export default function ProductCard({ product }) {
   const { addToCart } = useCart();
   const [adding, setAdding] = useState(false);
   const productId = product.productId ?? product.id;
+  const slug = product.slug;
   const productName = product.productName ?? product.name;
   const brandName = product.brandName ?? product.brand;
   const salePrice = product.salePrice ?? product.price ?? 0;
   const basePrice = product.basePrice ?? product.originalPrice ?? 0;
-  const imageUrl = product.imageUrl ?? product.image;
+  const firstVariantImage = product.variants && product.variants.length > 0 ? product.variants[0]?.imageUrl : null;
+  const imageUrl = firstVariantImage || product.imageUrl || product.image;
 
   const [activeImageUrl, setActiveImageUrl] = useState(imageUrl);
   const [detailedProduct, setDetailedProduct] = useState(null);
   const [isWish, setIsWish] = useState(false);
 
   useEffect(() => {
-    setActiveImageUrl(product.imageUrl ?? product.image);
+    const firstVarImg = product.variants && product.variants.length > 0 ? product.variants[0]?.imageUrl : null;
+    setActiveImageUrl(firstVarImg || product.imageUrl || product.image);
     setDetailedProduct(null);
   }, [product]);
 
@@ -67,13 +70,11 @@ export default function ProductCard({ product }) {
           return;
         }
       }
-      const stored = localStorage.getItem('wishlist');
-      const list = stored ? JSON.parse(stored) : [];
-      setIsWish(list.some(item => String(item.id) === String(productId)));
+      setIsWish(false);
     };
     checkWish();
-    window.addEventListener('wishlist-updated', checkWish);
-    return () => window.removeEventListener('wishlist-updated', checkWish);
+    window.addEventListener('wishlist-ids-updated', checkWish);
+    return () => window.removeEventListener('wishlist-ids-updated', checkWish);
   }, [productId]);
 
   const handleToggleWish = async (e) => {
@@ -81,40 +82,25 @@ export default function ProductCard({ product }) {
     e.stopPropagation();
 
     const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const res = await wishlistApi.toggleWishlist(productId);
-        const added = res.data.added;
-        setIsWish(added);
-        if (added) {
-          toast.success("Đã thêm vào sản phẩm yêu thích");
-        } else {
-          toast.info("Đã xóa khỏi sản phẩm yêu thích");
-        }
-        window.dispatchEvent(new Event('wishlist-updated'));
-        return;
-      } catch (err) {
-        console.error("Lỗi khi toggle wishlist:", err);
-      }
+    if (!token) {
+      toast.error("Vui lòng đăng nhập để thêm vào sản phẩm yêu thích");
+      return;
     }
 
-    const stored = localStorage.getItem('wishlist');
-    let list = stored ? JSON.parse(stored) : [];
-    const exists = list.some(item => String(item.id) === String(productId));
-    if (exists) {
-      list = list.filter(item => String(item.id) !== String(productId));
-      toast.info("Đã xóa khỏi sản phẩm yêu thích");
-    } else {
-      list.push({
-        id: productId,
-        name: productName,
-        price: salePrice,
-        image: imageUrl
-      });
-      toast.success("Đã thêm vào sản phẩm yêu thích");
+    try {
+      const res = await wishlistApi.toggleWishlist(productId);
+      const added = res.data.added;
+      setIsWish(added);
+      if (added) {
+        toast.success("Đã thêm vào sản phẩm yêu thích");
+      } else {
+        toast.info("Đã xóa khỏi sản phẩm yêu thích");
+      }
+      window.dispatchEvent(new Event('wishlist-updated'));
+    } catch (err) {
+      console.error("Lỗi khi toggle wishlist:", err);
+      toast.error("Có lỗi xảy ra, vui lòng thử lại sau.");
     }
-    localStorage.setItem('wishlist', JSON.stringify(list));
-    window.dispatchEvent(new Event('wishlist-updated'));
   };
 
   const handleColorInteraction = async (colorName) => {
@@ -164,9 +150,32 @@ export default function ProductCard({ product }) {
     }
   };
 
+  const handleBuyNow = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (adding) return;
+    setAdding(true);
+    try {
+      const res = await productApi.getProductDetail(productId);
+      const prodData = res.data;
+      const firstVariant = prodData?.variants?.[0];
+      if (firstVariant) {
+        addToCart(prodData, firstVariant, 1);
+        window.location.href = '/gio-hang';
+      } else {
+        toast.warning("Sản phẩm hiện tại không có phiên bản (variant) nào khả dụng.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi mua ngay:", error);
+      toast.error("Không thể xử lý yêu cầu. Vui lòng thử lại sau.");
+    } finally {
+      setAdding(false);
+    }
+  };
+
   return (
       <div className="product-card">
-        <a href={`/san-pham/${productId}`} className="product-card__image-wrap">
+        <a href={`/san-pham/${slug || productId}`} className="product-card__image-wrap">
 
           {discountPercentage > 0 && (
               <span className="product-card__badge product-card__badge--sale">
@@ -231,9 +240,10 @@ export default function ProductCard({ product }) {
               </div>
           )}
 
-          <a href={`/san-pham/${productId}`} className="product-card__btn">
-            Mua ngay
-          </a>
+          <button className="product-card__btn" onClick={handleBuyNow} disabled={adding} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', border: 'none', cursor: 'pointer', width: '100%' }}>
+            <Zap size={14} />
+            MUA NGAY
+          </button>
         </div>
       </div>
   );

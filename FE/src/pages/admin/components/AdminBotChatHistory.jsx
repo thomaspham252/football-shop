@@ -1,16 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Search, 
-  Filter, 
-  FileText, 
-  Wrench, 
   Paperclip, 
   Send, 
-  Bot, 
-  User, 
-  CheckCircle, 
-  AlertCircle,
-  Sparkles
+  Bot
 } from 'lucide-react';
 import adminApi from '../../../api/adminApi';
 import './AdminBotChatHistory.css';
@@ -19,11 +12,10 @@ export default function AdminBotChatHistory() {
   const [sessions, setSessions] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [filter, setFilter] = useState('all'); // 'all', 'resolved', 'need_support'
+  const [filter] = useState('all'); // 'all', 'resolved', 'need_support'
   const [searchKw, setSearchKw] = useState('');
   const [inputMessage, setInputMessage] = useState('');
   const [isIntervened, setIsIntervened] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const messagesEndRef = useRef(null);
 
@@ -64,7 +56,7 @@ export default function AdminBotChatHistory() {
       return;
     }
 
-    setLoading(true);
+
     try {
       const data = await adminApi.getBotSessionMessages(sid);
       if (data) {
@@ -72,23 +64,7 @@ export default function AdminBotChatHistory() {
       }
     } catch (e) {
       console.error("Lỗi khi tải lịch sử tin nhắn phiên:", e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleToggleIntervention = async () => {
-    if (!activeSessionId) return;
-
-    try {
-      const data = await adminApi.toggleBotIntervention(activeSessionId);
-      if (data) {
-        setIsIntervened(data.intervened);
-        alert(data.message);
-        fetchSessions();
-      }
-    } catch (e) {
-      console.error("Lỗi khi bật Can thiệp:", e);
+      // setLoading(false);
     }
   };
 
@@ -106,18 +82,6 @@ export default function AdminBotChatHistory() {
     } catch (e) {
       console.error("Lỗi khi gửi phản hồi nhân viên:", e);
     }
-  };
-
-  const handleExportLog = () => {
-    if (!activeSessionId || messages.length === 0) return;
-
-    const logContent = messages.map(m => `[${m.createdAt || 'TIME'}] ${m.role.toUpperCase()}: ${m.content}`).join('\n');
-    const blob = new Blob([logContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `chat-log-${activeSessionId}.txt`;
-    link.click();
   };
 
   const activeSessionObj = sessions.find(s => s.sessionId === activeSessionId) || {

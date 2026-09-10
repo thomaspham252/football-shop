@@ -1,7 +1,7 @@
 package com.footballstore.backend.modules.wishlist.services;
 
 import com.footballstore.backend.modules.product.dtos.response.ProductCardResponse;
-import com.footballstore.backend.modules.product.models.Product;
+
 import com.footballstore.backend.modules.product.repositories.ProductRepository;
 import com.footballstore.backend.modules.wishlist.models.Wishlist;
 import com.footballstore.backend.modules.wishlist.repositories.WishlistRepository;
@@ -13,11 +13,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.footballstore.backend.modules.product.services.ProductService;
+
 @Service
 @RequiredArgsConstructor
 public class WishlistService {
     private final WishlistRepository wishlistRepository;
     private final ProductRepository productRepository;
+    private final ProductService productService;
 
     public List<ProductCardResponse> getWishlistProducts(String userId) {
         List<Wishlist> wishlists = wishlistRepository.findByUserIdOrderByCreatedAtDesc(userId);
@@ -29,14 +32,7 @@ public class WishlistService {
                 .map(productRepository::findById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(p -> ProductCardResponse.builder()
-                        .productId(p.getProductId())
-                        .productName(p.getProductName())
-                        .imageUrl(p.getImageUrl())
-                        .basePrice(p.getBasePrice())
-                        .salePrice(p.getSalePrice())
-                        .discountPercentage(p.getDiscountPercentage())
-                        .build())
+                .map(productService::toProductCardResponse)
                 .collect(Collectors.toList());
     }
 

@@ -3,11 +3,9 @@ package com.footballstore.backend.modules.order.controllers;
 import com.footballstore.backend.modules.auth.models.User;
 import com.footballstore.backend.modules.auth.services.AuthService;
 import com.footballstore.backend.modules.order.dtos.CreateOrderRequest;
-import com.footballstore.backend.modules.order.dtos.MomoPaymentResponse;
 import com.footballstore.backend.modules.order.dtos.ValidateCartRequest;
 import com.footballstore.backend.modules.order.dtos.ValidateCartResponse;
 import com.footballstore.backend.modules.order.models.Order;
-import com.footballstore.backend.modules.order.services.MomoService;
 import com.footballstore.backend.modules.order.services.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +23,6 @@ import java.util.Map;
 public class OrderController {
 
     private final OrderService orderService;
-    private final MomoService momoService;
     private final AuthService authService;
 
     @PostMapping("/cart/validate")
@@ -34,8 +31,16 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createOrder(@Valid @RequestBody CreateOrderRequest request) {
+    public ResponseEntity<?> createOrder(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @Valid @RequestBody CreateOrderRequest request) {
+        String userId = authService.extractUserIdFromToken(authHeader);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Yêu cầu đăng nhập để thanh toán!"));
+        }
+
         try {
+            request.setUserId(userId);
             Order order = orderService.createOrder(request);
             return ResponseEntity.ok(order);
         } catch (IllegalArgumentException e) {
@@ -74,19 +79,12 @@ public class OrderController {
     public ResponseEntity<?> initiatePayment(@PathVariable Integer id) {
         try {
             Order order = orderService.getOrderById(id);
-            if ("MOMO".equalsIgnoreCase(order.getPaymentMethod())) {
-                MomoPaymentResponse momoResponse = momoService.createPayment(
-                        order.getOrderCode(),
-                        order.getTotalAmount().longValue(),
-                        "Thanh toan don hang " + order.getOrderCode() + " tai ULTRASPORT"
-                );
-                return ResponseEntity.ok(momoResponse);
-            } else if ("TRANSFER".equalsIgnoreCase(order.getPaymentMethod())) {
+            if ("TRANSFER".equalsIgnoreCase(order.getPaymentMethod())) {
                 Map<String, Object> bankInfo = new HashMap<>();
                 bankInfo.put("paymentMethod", "TRANSFER");
-                bankInfo.put("bankName", "MB Bank (Ngân hàng Quân Đội)");
-                bankInfo.put("accountNumber", "0999888777666");
-                bankInfo.put("accountHolder", "CONG TY TNHH ULTRASPORT");
+                bankInfo.put("bankName", "BIDV");
+                bankInfo.put("accountNumber", "0000000001");
+                bankInfo.put("accountHolder", "PHAM VAN LINH");
                 bankInfo.put("amount", order.getTotalAmount());
                 bankInfo.put("orderCode", order.getOrderCode());
                 return ResponseEntity.ok(bankInfo);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Wallet, 
   ShoppingBag, 
@@ -40,7 +40,7 @@ const formatDate = (dateStr) => {
       month: '2-digit',
       year: 'numeric'
     });
-  } catch (e) {
+  } catch {
     return String(dateStr);
   }
 };

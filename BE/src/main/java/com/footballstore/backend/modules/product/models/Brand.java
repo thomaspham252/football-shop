@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class Brand {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer brandId;
 
     @Column(name = "brand_code", length = 50, nullable = false, unique = true)

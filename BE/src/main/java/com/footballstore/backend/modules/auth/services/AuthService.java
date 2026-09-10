@@ -31,10 +31,11 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
+    private final AuthEmailService authEmailService;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public void register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email đã được đăng ký sử dụng bởi tài khoản khác");
         }
@@ -46,18 +47,73 @@ public class AuthService {
                 .phone(request.getPhone())
                 .provider(AuthProvider.LOCAL)
                 .role(Role.ROLE_CUSTOMER)
-                .enabled(true)
+                .enabled(false) // Không kích hoạt ngay lập tức
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        userRepository.save(user);
+        user = userRepository.save(user);
 
-        return generateAuthResponse(user);
+        // Gửi email xác thực
+        String token = jwtUtils.generateEmailVerificationToken(user.getEmail(), user.getId());
+        authEmailService.sendVerificationEmail(user.getEmail(), token);
+    }
+
+    @Transactional
+    public void verifyEmail(String token) {
+        if (!jwtUtils.validateJwtToken(token)) {
+            throw new RuntimeException("Link xác thực không hợp lệ hoặc đã hết hạn");
+        }
+        
+        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                
+        if (user.isEnabled()) {
+            return; // Tránh lỗi do React StrictMode gọi API 2 lần
+        }
+        
+        user.setEnabled(true);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void forgotPassword(String email) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            // Để bảo mật, không ném lỗi nếu không tìm thấy email, chỉ return (tránh hacker dò email)
+            // Hoặc ném lỗi nếu muốn UX rõ ràng. Theo yêu cầu, ta cứ ném lỗi cho thân thiện.
+            throw new RuntimeException("Không tìm thấy tài khoản nào đăng ký với email này");
+        }
+        
+        if (user.getProvider() != AuthProvider.LOCAL) {
+            throw new RuntimeException("Tài khoản này được đăng nhập qua Google, không thể đổi mật khẩu.");
+        }
+
+        String token = jwtUtils.generatePasswordResetToken(user.getEmail(), user.getId());
+        authEmailService.sendPasswordResetEmail(user.getEmail(), token);
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        if (!jwtUtils.validateJwtToken(token)) {
+            throw new RuntimeException("Link đổi mật khẩu không hợp lệ hoặc đã hết hạn");
+        }
+
+        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Email hoặc mật khẩu không chính xác"));
+
+        if (!user.isEnabled()) {
+            throw new RuntimeException("Tài khoản của bạn chưa được xác thực. Vui lòng kiểm tra email để xác thực.");
+        }
 
         if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
             throw new RuntimeException("Tài khoản này được đăng ký qua Google. Vui lòng đăng nhập bằng Google!");
@@ -146,10 +202,16 @@ public class AuthService {
     }
 
     public String extractUserIdFromToken(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || authHeader.trim().isEmpty()) {
             return null;
         }
-        String token = authHeader.substring(7).trim();
+        String token = authHeader.trim();
+        while (token.startsWith("\"") && token.endsWith("\"") && token.length() > 1) {
+            token = token.substring(1, token.length() - 1).trim();
+        }
+        while (token.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            token = token.substring(7).trim();
+        }
         if (jwtUtils.validateJwtToken(token)) {
             return jwtUtils.getUserIdFromJwtToken(token);
         }

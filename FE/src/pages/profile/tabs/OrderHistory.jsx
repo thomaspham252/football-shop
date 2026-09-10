@@ -63,6 +63,7 @@ export default function OrderHistory({ orders = [], onRefresh }) {
   const ITEMS_PER_PAGE = 5;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [tab, search]);
 
@@ -151,8 +152,7 @@ export default function OrderHistory({ orders = [], onRefresh }) {
           const qty = mainItem?.quantity || 1;
           const extraCount = (o.items?.length || 0) - 1;
           
-          let paymentNote = o.paymentMethod === 'MOMO' ? 'Thanh toán qua Momo'
-                          : o.paymentMethod === 'TRANSFER' ? 'Thanh toán Chuyển khoản'
+          let paymentNote = o.paymentMethod === 'TRANSFER' ? 'Thanh toán Chuyển khoản'
                           : 'Thanh toán COD (Nhận hàng thanh toán)';
           
           if (o.paymentStatus === 'PAID') {

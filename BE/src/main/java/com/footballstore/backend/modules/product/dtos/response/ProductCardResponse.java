@@ -16,8 +16,8 @@ import java.util.List;
 public class ProductCardResponse {
 
     private Integer productId;
-
     private String productName;
+    private String slug;
 
     private String imageUrl;
 
@@ -25,7 +25,7 @@ public class ProductCardResponse {
 
     private BigDecimal salePrice;
 
-    private Integer discountPercentage;
+    private BigDecimal discountPercentage;
 
     private List<String> colors;
     private String size;

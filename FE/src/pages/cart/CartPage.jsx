@@ -173,12 +173,12 @@ export default function CartPage() {
                         onChange={() => handleToggleItem(item.id)}
                         style={styles.checkboxItem}
                       />
-                      <a href={`/san-pham/${item.productId}`} className="cart-item__img-wrap">
+                      <a href={`/san-pham/${item.slug || item.productId}`} className="cart-item__img-wrap">
                         <img src={item.image} alt={item.name} className="cart-item__img" />
                       </a>
                       <div className="cart-item__info">
                         <p className="cart-item__brand">{item.brand}</p>
-                        <a href={`/san-pham/${item.productId}`} className="cart-item__name">{item.name}</a>
+                        <a href={`/san-pham/${item.slug || item.productId}`} className="cart-item__name">{item.name}</a>
                         <div className="cart-item__meta">
                           <span>{item.color} / {item.size}</span>
                         </div>

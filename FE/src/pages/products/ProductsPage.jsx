@@ -57,12 +57,15 @@ function FilterGroup({ title, children, defaultOpen = true }) {
 export default function ProductsPage() {
   const [searchParams] = useSearchParams();
   const typeParam = searchParams.get('type') || '';
+  const brandParam = searchParams.get('brand') || '';
+  const categoryParam = searchParams.get('category') || '';
+  const searchParam = searchParams.get('search') || '';
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [selectedBrand,     setSelectedBrand]     = useState('');
-  const [selectedCategory,  setSelectedCategory]  = useState('');
+  const [selectedBrand,     setSelectedBrand]     = useState(brandParam);
+  const [selectedCategory,  setSelectedCategory]  = useState(categoryParam);
   const [selectedPrice,     setSelectedPrice]     = useState('');
   const [selectedSizes,     setSelectedSizes]     = useState([]);
   const [selectedColors,    setSelectedColors]    = useState([]);
@@ -94,17 +97,7 @@ export default function ProductsPage() {
     fetchProducts();
   }, [typeParam]);
 
-  const brandParam = searchParams.get('brand') || '';
-  const categoryParam = searchParams.get('category') || '';
 
-  useEffect(() => {
-    if (brandParam) {
-      setSelectedBrand(brandParam);
-    }
-    if (categoryParam) {
-      setSelectedCategory(categoryParam);
-    }
-  }, [brandParam, categoryParam]);
 
   const categoriesList = useMemo(() => {
     const activeCategories = new Set();
@@ -128,6 +121,9 @@ export default function ProductsPage() {
 
   const filtered = useMemo(() => {
     let list = [...products];
+    if (searchParam) {
+      list = list.filter(p => (p.productName || p.name || '').toLowerCase().includes(searchParam.toLowerCase()));
+    }
     if (selectedBrand) {
       list = list.filter(p => (p.brandName || p.brand?.brandName || p.brand) === selectedBrand);
     }
@@ -158,7 +154,7 @@ export default function ProductsPage() {
       default: break;
     }
     return list;
-  }, [products, selectedBrand, selectedCategory, selectedPrice, selectedSizes, selectedColors, sort]);
+  }, [products, searchParam, selectedBrand, selectedCategory, selectedPrice, selectedSizes, selectedColors, sort]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -178,118 +174,7 @@ export default function ProductsPage() {
 
   const handleFilterChange = (fn) => { fn(); setPage(1); };
 
-  const Sidebar = () => (
-    <aside className={`products-sidebar ${mobileSidebarOpen ? 'products-sidebar--open' : ''}`}>
-      <div className="products-sidebar__inner">
-        <div className="products-sidebar__head">
-          <span className="products-sidebar__title">
-            <SlidersHorizontal size={15} /> BỘ LỌC
-          </span>
-          {activeFilterCount > 0 && (
-            <button className="products-sidebar__clear" onClick={clearAll}>
-              Xóa tất cả ({activeFilterCount})
-            </button>
-          )}
-          <button className="products-sidebar__close" onClick={() => setMobileSidebarOpen(false)}>
-            <X size={18} />
-          </button>
-        </div>
 
-        {activeFilterCount > 0 && (
-          <div className="filter-tags">
-            {[
-              ...(selectedBrand ? [selectedBrand] : []),
-              ...(selectedCategory ? [selectedCategory] : []),
-              ...(selectedPrice ? [selectedPrice] : []),
-              ...selectedSizes
-            ].map(tag => (
-              <span key={tag} className="filter-tag">
-                {tag}
-                <button onClick={() => {
-                  if (tag === selectedBrand) handleFilterChange(() => setSelectedBrand(''));
-                  else if (tag === selectedCategory) handleFilterChange(() => setSelectedCategory(''));
-                  else if (tag === selectedPrice) handleFilterChange(() => setSelectedPrice(''));
-                  else handleFilterChange(() => setSelectedSizes(selectedSizes.filter(v => v !== tag)));
-                }}>
-                  <X size={10} />
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-
-        <FilterGroup title="DANH MỤC">
-          <label className="filter-radio">
-            <input
-              type="radio"
-              name="category-range"
-              checked={selectedCategory === ''}
-              onChange={() => handleFilterChange(() => setSelectedCategory(''))}
-            />
-            <span>Tất cả danh mục</span>
-          </label>
-          {categoriesList.map(cat => (
-            <label key={cat} className="filter-radio">
-              <input
-                type="radio"
-                name="category-range"
-                checked={selectedCategory === cat}
-                onChange={() => handleFilterChange(() => setSelectedCategory(selectedCategory === cat ? '' : cat))}
-              />
-              <span>{cat}</span>
-            </label>
-          ))}
-        </FilterGroup>
-
-        <FilterGroup title="THƯƠNG HIỆU">
-          <label className="filter-radio">
-            <input
-              type="radio"
-              name="brand-range"
-              checked={selectedBrand === ''}
-              onChange={() => handleFilterChange(() => setSelectedBrand(''))}
-            />
-            <span>Tất cả thương hiệu</span>
-          </label>
-          {brandsList.map(b => (
-            <label key={b} className="filter-radio">
-              <input
-                type="radio"
-                name="brand-range"
-                checked={selectedBrand === b}
-                onChange={() => handleFilterChange(() => setSelectedBrand(selectedBrand === b ? '' : b))}
-              />
-              <span>{b}</span>
-            </label>
-          ))}
-        </FilterGroup>
-
-        <FilterGroup title="GIÁ">
-          <label className="filter-radio">
-            <input
-              type="radio"
-              name="price-range"
-              checked={selectedPrice === ''}
-              onChange={() => handleFilterChange(() => setSelectedPrice(''))}
-            />
-            <span>Tất cả mức giá</span>
-          </label>
-          {PRICE_RANGES.map(r => (
-            <label key={r.label} className="filter-radio">
-              <input
-                type="radio"
-                name="price-range"
-                checked={selectedPrice === r.label}
-                onChange={() => handleFilterChange(() => setSelectedPrice(selectedPrice === r.label ? '' : r.label))}
-              />
-              <span>{r.label}</span>
-            </label>
-          ))}
-        </FilterGroup>
-
-      </div>
-    </aside>
-  );
 
   return (
     <div className="products-page">
@@ -309,12 +194,123 @@ export default function ProductsPage() {
             <div className="products-sidebar__overlay" onClick={() => setMobileSidebarOpen(false)} />
           )}
 
-          <Sidebar />
+          <aside className={`products-sidebar ${mobileSidebarOpen ? 'products-sidebar--open' : ''}`}>
+            <div className="products-sidebar__inner">
+              <div className="products-sidebar__head">
+                <span className="products-sidebar__title">
+                  <SlidersHorizontal size={15} /> BỘ LỌC
+                </span>
+                {activeFilterCount > 0 && (
+                  <button className="products-sidebar__clear" onClick={clearAll}>
+                    Xóa tất cả ({activeFilterCount})
+                  </button>
+                )}
+                <button className="products-sidebar__close" onClick={() => setMobileSidebarOpen(false)}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              {activeFilterCount > 0 && (
+                <div className="filter-tags">
+                  {[
+                    ...(selectedBrand ? [selectedBrand] : []),
+                    ...(selectedCategory ? [selectedCategory] : []),
+                    ...(selectedPrice ? [selectedPrice] : []),
+                    ...selectedSizes
+                  ].map(tag => (
+                    <span key={tag} className="filter-tag">
+                      {tag}
+                      <button onClick={() => {
+                        if (tag === selectedBrand) handleFilterChange(() => setSelectedBrand(''));
+                        else if (tag === selectedCategory) handleFilterChange(() => setSelectedCategory(''));
+                        else if (tag === selectedPrice) handleFilterChange(() => setSelectedPrice(''));
+                        else handleFilterChange(() => setSelectedSizes(selectedSizes.filter(v => v !== tag)));
+                      }}>
+                        <X size={10} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <FilterGroup title="DANH MỤC">
+                <label className="filter-radio">
+                  <input
+                    type="radio"
+                    name="category-range"
+                    checked={selectedCategory === ''}
+                    onChange={() => handleFilterChange(() => setSelectedCategory(''))}
+                  />
+                  <span>Tất cả danh mục</span>
+                </label>
+                {categoriesList.map(cat => (
+                  <label key={cat} className="filter-radio">
+                    <input
+                      type="radio"
+                      name="category-range"
+                      checked={selectedCategory === cat}
+                      onChange={() => handleFilterChange(() => setSelectedCategory(selectedCategory === cat ? '' : cat))}
+                    />
+                    <span>{cat}</span>
+                  </label>
+                ))}
+              </FilterGroup>
+
+              <FilterGroup title="THƯƠNG HIỆU">
+                <label className="filter-radio">
+                  <input
+                    type="radio"
+                    name="brand-range"
+                    checked={selectedBrand === ''}
+                    onChange={() => handleFilterChange(() => setSelectedBrand(''))}
+                  />
+                  <span>Tất cả thương hiệu</span>
+                </label>
+                {brandsList.map(b => (
+                  <label key={b} className="filter-radio">
+                    <input
+                      type="radio"
+                      name="brand-range"
+                      checked={selectedBrand === b}
+                      onChange={() => handleFilterChange(() => setSelectedBrand(selectedBrand === b ? '' : b))}
+                    />
+                    <span>{b}</span>
+                  </label>
+                ))}
+              </FilterGroup>
+
+              <FilterGroup title="GIÁ">
+                <label className="filter-radio">
+                  <input
+                    type="radio"
+                    name="price-range"
+                    checked={selectedPrice === ''}
+                    onChange={() => handleFilterChange(() => setSelectedPrice(''))}
+                  />
+                  <span>Tất cả mức giá</span>
+                </label>
+                {PRICE_RANGES.map(r => (
+                  <label key={r.label} className="filter-radio">
+                    <input
+                      type="radio"
+                      name="price-range"
+                      checked={selectedPrice === r.label}
+                      onChange={() => handleFilterChange(() => setSelectedPrice(selectedPrice === r.label ? '' : r.label))}
+                    />
+                    <span>{r.label}</span>
+                  </label>
+                ))}
+              </FilterGroup>
+
+            </div>
+          </aside>
 
           <div className="products-content">
             <div className="products-toolbar">
               <div className="products-toolbar__left">
-                <h1 className="products-toolbar__title">GIÀY BÓNG ĐÁ</h1>
+                <h1 className="products-toolbar__title">
+                  {searchParam ? `KẾT QUẢ TÌM KIẾM: "${searchParam.toUpperCase()}"` : 'GIÀY BÓNG ĐÁ'}
+                </h1>
                 <span className="products-toolbar__count">{filtered.length} sản phẩm</span>
               </div>
               <div className="products-toolbar__right">

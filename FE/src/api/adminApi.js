@@ -7,6 +7,20 @@ export const adminApi = {
     return response.data;
   },
 
+  // 1.1 Quản lý Mã giảm giá (Coupons)
+  getCoupons: async () => {
+    const response = await axiosInstance.get("/admin/coupons");
+    return response.data;
+  },
+  saveCoupon: async (data) => {
+    const response = await axiosInstance.post("/admin/coupons", data);
+    return response.data;
+  },
+  disableCoupon: async (id) => {
+    const response = await axiosInstance.put(`/admin/coupons/${id}/disable`);
+    return response.data;
+  },
+
   // 2. Quản lý Đơn hàng
   getOrders: async (params = {}) => {
     const response = await axiosInstance.get("/admin/orders", { params });

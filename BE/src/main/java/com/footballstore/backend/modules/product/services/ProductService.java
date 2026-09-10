@@ -1,6 +1,6 @@
 package com.footballstore.backend.modules.product.services;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.footballstore.backend.modules.product.dtos.response.ProductCardResponse;
 import com.footballstore.backend.modules.product.dtos.response.ProductDetailResponse;
@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 
 import java.util.List;
 
@@ -72,9 +74,9 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<ProductCardResponse> getPromotionProducts(int limit) {
         int effectiveLimit = limit > 0 ? limit : DEFAULT_LIMIT;
-        Pageable pageable = PageRequest.of(0, effectiveLimit, Sort.by("discountPercentage").descending());
+        Pageable pageable = PageRequest.of(0, effectiveLimit);
 
-        return productRepository.findPromotionProductsPaged(discountThreshold, pageable)
+        return productRepository.findPromotionProductsPaged(BigDecimal.valueOf(discountThreshold), pageable)
                 .getContent()
                 .stream()
                 .map(this::toProductCardResponse)
@@ -89,14 +91,26 @@ public class ProductService {
                 .toList();
     }
 
-    private ProductCardResponse toProductCardResponse(Product product) {
+    public ProductCardResponse toProductCardResponse(Product product) {
+        List<ProductVariant> activeVariants = productVariantRepository.findByProductProductIdAndIsActiveTrue(product.getProductId());
+
+        String displayImageUrl = null;
+
+        if (activeVariants != null && !activeVariants.isEmpty()) {
+            ProductVariant firstVariant = activeVariants.get(0);
+            if (firstVariant.getImageUrl() != null && !firstVariant.getImageUrl().isBlank()) {
+                displayImageUrl = firstVariant.getImageUrl();
+            }
+        }
+
         return ProductCardResponse.builder()
                 .productId(product.getProductId())
                 .productName(product.getProductName())
-                .imageUrl(product.getImageUrl())
-                .basePrice(product.getBasePrice())
-                .salePrice(product.getSalePrice())
-                .discountPercentage(product.getDiscountPercentage())
+                .slug(product.getSlug())
+                .imageUrl(displayImageUrl)
+                .basePrice(product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO)
+                .salePrice(product.getPriceSell() != null ? product.getPriceSell() : BigDecimal.ZERO)
+                .discountPercentage(product.getDiscountPercentage() != null ? product.getDiscountPercentage() : BigDecimal.ZERO)
                 .colors(productVariantRepository.findDistinctColorsByProductId(product.getProductId()))
                 .brandName(product.getBrand() != null ? product.getBrand().getBrandName() : null)
                 .brandLogoUrl(product.getBrand() != null ? product.getBrand().getLogoUrl() : null)
@@ -106,11 +120,18 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public ProductDetailResponse getProductDetail(Integer productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm với mã: " + productId));
+    public ProductDetailResponse getProductDetail(String idOrSlug) {
+        Product product;
+        try {
+            Integer id = Integer.parseInt(idOrSlug);
+            product = productRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm với mã: " + id));
+        } catch (NumberFormatException e) {
+            product = productRepository.findBySlug(idOrSlug)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm với slug: " + idOrSlug));
+        }
 
-        List<ProductVariant> variants = productVariantRepository.findByProductProductIdAndIsActiveTrue(productId);
+        List<ProductVariant> variants = productVariantRepository.findByProductProductIdAndIsActiveTrue(product.getProductId());
 
         return toProductDetailResponse(product, variants);
     }
@@ -124,13 +145,10 @@ public class ProductService {
                         .surfaceType(v.getSurfaceType())
                         .material(v.getMaterial())
                         .skuVariant(v.getSkuVariant())
-                        .variantPrice(v.getVariantPrice())
                         .variantStock(v.getVariantStock())
                         .imageUrl(v.getImageUrl())
                         .build())
                 .toList();
-
-        List<String> galleryList = parseGalleryImages(product.getGalleryImages());
 
         return ProductDetailResponse.builder()
                 .productId(product.getProductId())
@@ -142,29 +160,16 @@ public class ProductService {
                 .detailedDescription(product.getDetailedDescription())
                 .brandName(product.getBrand() != null ? product.getBrand().getBrandName() : null)
                 .categoryName(product.getCategory() != null ? product.getCategory().getCategoryName() : null)
-                .basePrice(product.getBasePrice())
-                .salePrice(product.getSalePrice())
-                .discountPercentage(product.getDiscountPercentage())
+                .basePrice(product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO)
+                .priceCost(product.getPriceCost() != null ? product.getPriceCost() : BigDecimal.ZERO)
+                .salePrice(product.getPriceSell() != null ? product.getPriceSell() : BigDecimal.ZERO)
+                .discountPercentage(product.getDiscountPercentage() != null ? product.getDiscountPercentage() : BigDecimal.ZERO)
                 .isActive(product.getIsActive())
-                .imageUrl(product.getImageUrl())
-                .galleryImages(galleryList)
                 .rating(product.getRating())
                 .totalReviews(product.getTotalReviews())
                 .stockQuantity(product.getStockQuantity())
                 .soldCount(product.getSoldCount())
                 .variants(variantResponses)
                 .build();
-    }
-
-    private List<String> parseGalleryImages(String galleryJson) {
-        if (galleryJson == null || galleryJson.isBlank()) {
-            return List.of();
-        }
-        try {
-            return objectMapper.readValue(galleryJson, new TypeReference<List<String>>() {});
-        } catch (Exception e) {
-            log.warn("Lỗi khi giải mã galleryImages JSON: {}", e.getMessage());
-            return List.of();
-        }
     }
 }

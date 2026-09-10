@@ -18,12 +18,12 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
-    public static final long DEFAULT_EXPIRATION_MS = 86400000L; // 24 giờ
+    public static final long DEFAULT_EXPIRATION_MS = 604800000L; // 7 ngày (7 * 24 * 60 * 60 * 1000)
 
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration-ms:86400000}")
+    @Value("${jwt.expiration-ms:604800000}")
     private long jwtExpirationMs;
 
     private SecretKey getSigningKey() {
@@ -68,6 +68,32 @@ public class JwtUtils {
                 .subject(email)
                 .claim("userId", userId)
                 .claim("role", role)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public String generateEmailVerificationToken(String email, String userId) {
+        long expirationTime = 86400000L; // 24 hours
+
+        return Jwts.builder()
+                .subject(email)
+                .claim("userId", userId)
+                .claim("purpose", "email_verification")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public String generatePasswordResetToken(String email, String userId) {
+        long expirationTime = 3600000L; // 1 hour
+
+        return Jwts.builder()
+                .subject(email)
+                .claim("userId", userId)
+                .claim("purpose", "password_reset")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey())

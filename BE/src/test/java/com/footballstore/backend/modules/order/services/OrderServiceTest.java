@@ -3,6 +3,7 @@ package com.footballstore.backend.modules.order.services;
 import com.footballstore.backend.modules.order.dtos.CartItemDto;
 import com.footballstore.backend.modules.order.dtos.ValidateCartRequest;
 import com.footballstore.backend.modules.order.dtos.ValidateCartResponse;
+import com.footballstore.backend.modules.order.services.OrderService;
 import com.footballstore.backend.modules.product.models.Product;
 import com.footballstore.backend.modules.product.models.ProductVariant;
 import com.footballstore.backend.modules.product.repositories.ProductVariantRepository;
@@ -33,11 +34,13 @@ class OrderServiceTest {
 
     @Test
     void testValidateCart_UnderFreeShippingThreshold() {
-        Product product = Product.builder().basePrice(BigDecimal.valueOf(200000)).productName("Test Shoe").build();
+        Product product = Product.builder()
+                .productName("Test Shoe")
+                .priceSell(BigDecimal.valueOf(200000))
+                .build();
         ProductVariant variant = ProductVariant.builder()
                 .variantId(1)
                 .product(product)
-                .variantPrice(BigDecimal.valueOf(200000))
                 .variantStock(10)
                 .color("Red")
                 .size("40")
@@ -60,11 +63,13 @@ class OrderServiceTest {
 
     @Test
     void testValidateCart_AtFreeShippingThreshold() {
-        Product product = Product.builder().basePrice(BigDecimal.valueOf(250000)).productName("Test Shoe").build();
+        Product product = Product.builder()
+                .productName("Test Shoe")
+                .priceSell(BigDecimal.valueOf(250000))
+                .build();
         ProductVariant variant = ProductVariant.builder()
                 .variantId(1)
                 .product(product)
-                .variantPrice(BigDecimal.valueOf(250000))
                 .variantStock(10)
                 .color("Blue")
                 .size("41")
@@ -87,11 +92,13 @@ class OrderServiceTest {
 
     @Test
     void testValidateCart_OverFreeShippingThreshold() {
-        Product product = Product.builder().basePrice(BigDecimal.valueOf(300000)).productName("Test Shoe").build();
+        Product product = Product.builder()
+                .productName("Test Shoe")
+                .priceSell(BigDecimal.valueOf(300000))
+                .build();
         ProductVariant variant = ProductVariant.builder()
                 .variantId(1)
                 .product(product)
-                .variantPrice(BigDecimal.valueOf(300000))
                 .variantStock(10)
                 .color("Green")
                 .size("42")

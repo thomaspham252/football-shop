@@ -13,6 +13,8 @@ public class SaveProductRequest {
     @NotBlank(message = "Tên sản phẩm không được để trống!")
     private String productName;
 
+    private String slug;
+
     private String sku;
 
     private String productCode;
@@ -26,18 +28,14 @@ public class SaveProductRequest {
 
     private Integer brandId;
 
-    @NotNull(message = "Giá gốc không được để trống!")
-    private BigDecimal basePrice;
+    private BigDecimal price;
 
-    private BigDecimal costPrice;
+    private BigDecimal priceCost;
 
-    private Integer discountPercentage = 0;
+    private BigDecimal discountPercentage;
 
     private Boolean isActive = true;
 
-    private String imageUrl;
-
-    private String galleryImages;
 
     private List<ProductVariantItemRequest> variants;
 
@@ -49,7 +47,6 @@ public class SaveProductRequest {
         private String surfaceType;
         private String material;
         private String skuVariant;
-        private BigDecimal variantPrice;
         private Integer variantStock = 0;
         private String imageUrl;
     }

@@ -9,7 +9,9 @@ import com.footballstore.backend.modules.chatbot.services.PromptBuilderService;
 import com.footballstore.backend.modules.product.dtos.response.ProductCardResponse;
 import com.footballstore.backend.modules.product.models.Product;
 import com.footballstore.backend.modules.product.repositories.ProductRepository;
+import com.footballstore.backend.modules.product.services.ProductService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
@@ -29,6 +32,7 @@ public class ChatController {
     private final GeminiService geminiService;
     private final ChatMessageRepository chatMessageRepository;
     private final ProductRepository productRepository;
+    private final ProductService productService;
     private final AuthService authService;
 
     @GetMapping("/history")
@@ -52,73 +56,89 @@ public class ChatController {
     public ResponseEntity<?> chat(
             @RequestBody Map<String, String> request,
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        
-        String userId = authService.extractUserIdFromToken(authHeader);
-        if (userId == null) {
-            return ResponseEntity.status(401).body(Map.of("message", "Vui lòng đăng nhập để sử dụng Trợ lý tư vấn AI!"));
-        }
-        User user = authService.getUserById(userId);
-        if (user == null) {
-            return ResponseEntity.status(401).body(Map.of("message", "Tài khoản không hợp lệ. Vui lòng đăng nhập lại!"));
-        }
+        try {
+            String userId = authService.extractUserIdFromToken(authHeader);
+            if (userId == null) {
+                return ResponseEntity.status(401).body(Map.of("message", "Vui lòng đăng nhập để sử dụng Trợ lý tư vấn AI!"));
+            }
+            User user = authService.getUserById(userId);
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of("message", "Tài khoản không hợp lệ. Vui lòng đăng nhập lại!"));
+            }
 
-        String sessionId = request.get("sessionId");
-        if (sessionId == null || sessionId.trim().isEmpty()) {
-            sessionId = UUID.randomUUID().toString();
-        }
+            String sessionId = request.get("sessionId");
+            if (sessionId == null || sessionId.trim().isEmpty()) {
+                sessionId = UUID.randomUUID().toString();
+            }
 
-        String userMessage = request.get("message");
-        if (userMessage == null || userMessage.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "reply", "Vui lòng nhập nội dung tin nhắn!",
+            String userMessage = request.get("message");
+            if (userMessage == null || userMessage.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "reply", "Vui lòng nhập nội dung tin nhắn!",
+                        "sessionId", sessionId,
+                        "products", List.of()
+                ));
+            }
+
+            String cleanMessage = userMessage.trim();
+            saveMessage(sessionId, user.getId(), "user", cleanMessage);
+
+            String prompt = promptBuilderService.buildPrompt(sessionId, user.getId(), cleanMessage);
+            String rawResponse = geminiService.callGemini(prompt);
+            String reply = geminiService.extractReply(rawResponse);
+            List<Integer> productIds = geminiService.extractProductIds(rawResponse);
+
+            List<ProductCardResponse> products = loadProductCards(productIds);
+            saveMessage(
+                    sessionId,
+                    user.getId(),
+                    "assistant",
+                    reply,
+                    serializeProductIds(products.stream().map(ProductCardResponse::getProductId).toList())
+            );
+
+            return ResponseEntity.ok(Map.of(
+                    "reply", reply,
                     "sessionId", sessionId,
+                    "products", products
+            ));
+        } catch (Exception e) {
+            log.error("Lỗi khi xử lý hội thoại Chatbot AI: {}", e.getMessage(), e);
+            return ResponseEntity.ok(Map.of(
+                    "reply", "Xin lỗi bạn, hệ thống đang bận xử lý dữ liệu. Bạn vui lòng gửi lại câu hỏi nha!",
+                    "sessionId", request.getOrDefault("sessionId", UUID.randomUUID().toString()),
                     "products", List.of()
             ));
         }
-
-        String cleanMessage = userMessage.trim();
-        saveMessage(sessionId, user.getId(), "user", cleanMessage);
-
-        String prompt = promptBuilderService.buildPrompt(sessionId, user.getId(), cleanMessage);
-        String rawResponse = geminiService.callGemini(prompt);
-        String reply = geminiService.extractReply(rawResponse);
-        List<Integer> productIds = geminiService.extractProductIds(rawResponse);
-
-        List<ProductCardResponse> products = loadProductCards(productIds);
-        saveMessage(
-                sessionId,
-                user.getId(),
-                "assistant",
-                reply,
-                serializeProductIds(products.stream().map(ProductCardResponse::getProductId).toList())
-        );
-
-        return ResponseEntity.ok(Map.of(
-                "reply", reply,
-                "sessionId", sessionId,
-                "products", products
-        ));
     }
 
     private void saveMessage(String sessionId, String userId, String role, String content) {
-        ChatMessage m = ChatMessage.builder()
-                .sessionId(sessionId)
-                .userId(userId)
-                .role(role)
-                .content(content)
-                .build();
-        chatMessageRepository.save(m);
+        try {
+            ChatMessage m = ChatMessage.builder()
+                    .sessionId(sessionId)
+                    .userId(userId)
+                    .role(role)
+                    .content(content)
+                    .build();
+            chatMessageRepository.save(m);
+        } catch (Exception e) {
+            log.warn("Không thể lưu tin nhắn vào CSDL: {}", e.getMessage());
+        }
     }
 
     private void saveMessage(String sessionId, String userId, String role, String content, String productIds) {
-        ChatMessage m = ChatMessage.builder()
-                .sessionId(sessionId)
-                .userId(userId)
-                .role(role)
-                .content(content)
-                .productIds(productIds)
-                .build();
-        chatMessageRepository.save(m);
+        try {
+            ChatMessage m = ChatMessage.builder()
+                    .sessionId(sessionId)
+                    .userId(userId)
+                    .role(role)
+                    .content(content)
+                    .productIds(productIds)
+                    .build();
+            chatMessageRepository.save(m);
+        } catch (Exception e) {
+            log.warn("Không thể lưu tin nhắn kèm product_ids vào CSDL: {}", e.getMessage());
+        }
     }
 
     private ChatHistoryMessageResponse toChatHistoryMessageResponse(ChatMessage message) {
@@ -140,14 +160,20 @@ public class ChatController {
             return List.of();
         }
 
-        Map<Integer, Product> productsById = productRepository.findAllById(productIds).stream()
-                .collect(java.util.stream.Collectors.toMap(Product::getProductId, product -> product));
+        try {
+            List<Integer> distinctIds = productIds.stream().distinct().toList();
+            Map<Integer, Product> productsById = productRepository.findAllById(distinctIds).stream()
+                    .collect(java.util.stream.Collectors.toMap(Product::getProductId, product -> product, (existing, replacement) -> existing));
 
-        return productIds.stream()
-                .map(productsById::get)
-                .filter(java.util.Objects::nonNull)
-                .map(this::toProductCardResponse)
-                .toList();
+            return distinctIds.stream()
+                    .map(productsById::get)
+                    .filter(java.util.Objects::nonNull)
+                    .map(this::toProductCardResponse)
+                    .toList();
+        } catch (Exception e) {
+            log.warn("Lỗi khi load ProductCardResponse: {}", e.getMessage());
+            return List.of();
+        }
     }
 
     private String serializeProductIds(List<Integer> productIds) {
@@ -172,18 +198,7 @@ public class ChatController {
     }
 
     private ProductCardResponse toProductCardResponse(Product product) {
-        return ProductCardResponse.builder()
-                .productId(product.getProductId())
-                .productName(product.getProductName())
-                .imageUrl(product.getImageUrl())
-                .basePrice(product.getBasePrice())
-                .salePrice(product.getSalePrice())
-                .discountPercentage(product.getDiscountPercentage())
-                .brandName(product.getBrand() != null ? product.getBrand().getBrandName() : "ULTRASPORT")
-                .brandLogoUrl(product.getBrand() != null ? product.getBrand().getLogoUrl() : null)
-                .categoryName(product.getCategory() != null ? product.getCategory().getCategoryName() : "Đồ thể thao")
-                .categoryImageUrl(product.getCategory() != null ? product.getCategory().getImageUrl() : null)
-                .build();
+        return productService.toProductCardResponse(product);
     }
 
     private record ChatHistoryMessageResponse(

@@ -49,6 +49,7 @@ export default function OrderDetailPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
     orderApi.getOrder(id)
@@ -112,8 +113,7 @@ export default function OrderDetailPage() {
   const shippingName = `${order.firstName || ''} ${order.lastName || ''}`.trim() || 'Người nhận';
   const shippingAddress = [order.street, order.ward, order.district, order.province].filter(Boolean).join(', ');
 
-  const paymentMethodLabel = order.paymentMethod === 'MOMO' ? 'Momo'
-                           : order.paymentMethod === 'TRANSFER' ? 'Chuyển khoản ngân hàng'
+  const paymentMethodLabel = order.paymentMethod === 'TRANSFER' ? 'Chuyển khoản ngân hàng'
                            : 'Thanh toán khi nhận hàng (COD)';
                            
   const paymentStatusLabel = order.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán';

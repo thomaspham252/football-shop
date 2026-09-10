@@ -54,6 +54,7 @@ export default function OrderSuccess() {
     }
 
     if (!activeId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       return;
     }
@@ -69,6 +70,23 @@ export default function OrderSuccess() {
         setLoading(false);
       });
   }, [orderId]);
+
+  useEffect(() => {
+    if (!order || order.paymentStatus === 'PAID' || order.paymentMethod !== 'TRANSFER') return;
+
+    const interval = setInterval(() => {
+      orderApi.getOrder(order.orderId)
+        .then(res => {
+          if (res.data.paymentStatus === 'PAID') {
+            setOrder(res.data);
+            clearInterval(interval);
+          }
+        })
+        .catch(err => console.error("Lỗi khi cập nhật trạng thái đơn hàng:", err));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [order]);
 
   if (loading) {
     return (
@@ -102,9 +120,9 @@ export default function OrderSuccess() {
     })) : [],
     shipping: Number(order.shippingFee),
     tax: Math.round(Number(order.totalAmount) * 0.1),
-    paymentMethod: order.paymentMethod === 'COD' ? 'Thanh toán khi nhận hàng (COD)' : 
-                   order.paymentMethod === 'TRANSFER' ? 'Chuyển khoản ngân hàng' : 'Ví MoMo',
+    paymentMethod: order.paymentMethod === 'COD' ? 'Thanh toán khi nhận hàng (COD)' : 'Chuyển khoản ngân hàng',
     rawPaymentMethod: order.paymentMethod,
+    paymentStatus: order.paymentStatus,
     totalAmount: Number(order.totalAmount)
   } : ORDER;
 
@@ -135,7 +153,9 @@ export default function OrderSuccess() {
           <div className="os-hero__icon">
             <Check size={32} strokeWidth={3} />
           </div>
-          <h1 className="os-hero__title">Cảm ơn bạn đã mua hàng!</h1>
+          <h1 className="os-hero__title">
+            {activeOrder.paymentStatus === 'PAID' ? 'Thanh toán thành công!' : 'Cảm ơn bạn đã mua hàng!'}
+          </h1>
           <p className="os-hero__sub">
             Đơn hàng <strong>#{activeOrder.code}</strong> đang được xử lý và sẽ sớm đến tay bạn.
           </p>
@@ -177,9 +197,15 @@ export default function OrderSuccess() {
                   <CreditCard size={18} className="os-card__icon" />
                   <span style={{ fontWeight: '700' }}>Thông Tin Chuyển Khoản</span>
                 </div>
-                <div style={{ marginTop: '12px', fontSize: '13px', lineHeight: '1.6', color: '#333' }}>
-                  <p>Ngân hàng: <strong>MB Bank (Ngân hàng Quân Đội)</strong></p>
-                  <p>Số tài khoản: <strong>25022004042000</strong></p>
+                {activeOrder.paymentStatus === 'PAID' ? (
+                  <div style={{ marginTop: '16px', padding: '12px', background: '#d4edda', color: '#155724', borderRadius: '6px', border: '1px solid #c3e6cb', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Check size={20} />
+                    <strong>Hệ thống đã ghi nhận thanh toán thành công. Đơn hàng của bạn đang được chuẩn bị!</strong>
+                  </div>
+                ) : (
+                  <div style={{ marginTop: '12px', fontSize: '13px', lineHeight: '1.6', color: '#333' }}>
+                    <p>Ngân hàng: <strong>BIDV</strong></p>
+                  <p>Số tài khoản: <strong>0000000001</strong></p>
                   <p>Chủ tài khoản: <strong>PHAM VAN LINH</strong></p>
                   <p>Số tiền: <strong>{total.toLocaleString('vi-VN')}đ</strong></p>
                   <p>Nội dung chuyển khoản: <strong>{activeOrder.code}</strong></p>
@@ -196,7 +222,7 @@ export default function OrderSuccess() {
                     border: '1px solid #e2e8f0'
                   }}>
                     <img 
-                      src={`https://img.vietqr.io/image/MB-25022004042000-compact2.png?amount=${Math.round(total)}&addInfo=${activeOrder.code}&accountName=PHAM%20VAN%20LINH`} 
+                      src={`https://img.vietqr.io/image/BIDV-0000000001-compact2.png?amount=${Math.round(total)}&addInfo=${activeOrder.code}&accountName=PHAM%20VAN%20LINH`} 
                       alt="Mã QR Chuyển Khoản VietQR" 
                       style={{ maxWidth: '220px', display: 'block', borderRadius: '4px' }}
                     />
@@ -204,7 +230,12 @@ export default function OrderSuccess() {
                       Quét mã QR bằng ứng dụng ngân hàng để tự động điền Số tài khoản, Số tiền và Nội dung.
                     </p>
                   </div>
+                  <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#856404', fontSize: '13px' }}>
+                    <span className="spinner-pulse" style={{ width: 10, height: 10, background: '#856404', borderRadius: '50%', display: 'inline-block' }}></span>
+                    <em>Hệ thống đang tự động chờ nhận thanh toán... Không cần tải lại trang.</em>
+                  </div>
                 </div>
+                )}
               </div>
             )}
 

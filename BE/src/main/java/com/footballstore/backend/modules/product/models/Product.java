@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -49,26 +50,14 @@ public class Product {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Brand brand;
 
-    @Column(name = "base_price", nullable = false, precision = 10, scale = 2)
-    private BigDecimal basePrice;
-
-    @Column(name = "cost_price", precision = 10, scale = 2)
-    private BigDecimal costPrice;
-
-    @Column(name = "discount_percentage")
-    private Integer discountPercentage;
-
-    @Column(name = "sale_price", precision = 10, scale = 2, insertable = false, updatable = false)
-    private BigDecimal salePrice;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({"product", "hibernateLazyInitializer", "handler"})
+    private List<ProductVariant> variants;
 
     @Column(name = "is_active")
     private Boolean isActive;
 
-    @Column(name = "image_url", length = 255)
-    private String imageUrl;
 
-    @Column(name = "gallery_images", columnDefinition = "jsonb")
-    private String galleryImages;
 
     @Column(name = "rating", precision = 3, scale = 2)
     private BigDecimal rating;
@@ -82,14 +71,7 @@ public class Product {
     @Column(name = "view_count")
     private Integer viewCount;
 
-    @Column(name = "seo_title", length = 255)
-    private String seoTitle;
 
-    @Column(name = "seo_description", columnDefinition = "TEXT")
-    private String seoDescription;
-
-    @Column(name = "seo_keywords", length = 255)
-    private String seoKeywords;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -100,4 +82,31 @@ public class Product {
     @Column(name = "sold_count", nullable = false)
     @Builder.Default
     private Integer soldCount = 0;
+
+    @Column(name = "price_cost", precision = 10, scale = 2)
+    private BigDecimal priceCost;
+
+    @Column(name = "price", precision = 10, scale = 2)
+    private BigDecimal price;
+
+    @Column(name = "price_sell", precision = 10, scale = 2)
+    private BigDecimal priceSell;
+
+    @Column(name = "discount_percentage", precision = 5, scale = 2)
+    private BigDecimal discountPercentage;
+
+    @PrePersist
+    @PreUpdate
+    protected void calculatePriceSell() {
+        if (price != null) {
+            if (discountPercentage != null && discountPercentage.compareTo(BigDecimal.ZERO) > 0) {
+                java.math.BigDecimal discountFactor = java.math.BigDecimal.ONE.subtract(
+                        discountPercentage.divide(java.math.BigDecimal.valueOf(100), 4, java.math.RoundingMode.HALF_UP)
+                );
+                this.priceSell = price.multiply(discountFactor).setScale(2, java.math.RoundingMode.HALF_UP);
+            } else {
+                this.priceSell = price;
+            }
+        }
+    }
 }

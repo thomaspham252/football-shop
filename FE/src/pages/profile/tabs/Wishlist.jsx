@@ -9,6 +9,7 @@ export default function Wishlist({ wishlist = [] }) {
   const ITEMS_PER_PAGE = 8;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [wishlist.length]);
 
@@ -49,7 +50,7 @@ export default function Wishlist({ wishlist = [] }) {
           <p style={{ color: '#888', padding: '15px 0', gridColumn: '1 / -1' }}>Chưa có sản phẩm yêu thích nào.</p>
         ) : (
           paginatedWishlist.map(item => (
-            <a key={item.id} href={`/san-pham/${item.id}`} className="profile-wishlist-item">
+            <a key={item.id} href={`/san-pham/${item.slug || item.id}`} className="profile-wishlist-item">
               <div className="profile-wishlist-item__img-wrap">
                 <img src={item.image} alt={item.name} />
                 <button

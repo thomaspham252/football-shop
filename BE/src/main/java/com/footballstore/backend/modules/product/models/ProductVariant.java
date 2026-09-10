@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -41,12 +41,6 @@ public class ProductVariant {
     @Column(name = "sku_variant", length = 100, nullable = false, unique = true)
     private String skuVariant;
 
-    @Column(name = "variant_price", precision = 10, scale = 2)
-    private BigDecimal variantPrice;
-
-    @Column(name = "variant_cost", precision = 10, scale = 2)
-    private BigDecimal variantCost;
-
     @Column(name = "variant_stock")
     private Integer variantStock;
 
@@ -62,11 +56,24 @@ public class ProductVariant {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", insertable = false, updatable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
     @Column(name = "sold_count", nullable = false)
     @Builder.Default

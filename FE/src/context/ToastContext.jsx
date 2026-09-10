@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react';
 import './ToastContext.css';
 
@@ -28,12 +28,12 @@ export const ToastProvider = ({ children }) => {
     }, 3000);
   }, [removeToast]);
 
-  const toast = {
+  const toast = useMemo(() => ({
     success: (msg) => addToast(msg, 'success'),
     error: (msg) => addToast(msg, 'error'),
     info: (msg) => addToast(msg, 'info'),
     warning: (msg) => addToast(msg, 'warning'),
-  };
+  }), [addToast]);
 
   const icons = {
     success: <CheckCircle2 className="toast-icon toast-icon--success" size={20} />,

@@ -1,4 +1,5 @@
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 // Simple SVG social icons (brand icons removed from lucide-react v1+)
@@ -20,11 +21,7 @@ const YoutubeIcon = () => (
     <polygon fill="#fff" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/>
   </svg>
 );
-const TwitterIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-  </svg>
-);
+
 
 export default function Footer() {
   return (
@@ -43,15 +40,15 @@ export default function Footer() {
             <div className="footer__contact-list">
               <div className="footer__contact-item">
                 <MapPin size={14} />
-                <span>123 Nguyễn Huệ, Q.1, TP.HCM</span>
+                <span>47A Đường số 9, Linh Xuân, TP.HCM</span>
               </div>
               <div className="footer__contact-item">
                 <Phone size={14} />
-                <span>1800 1234 (Miễn phí)</span>
+                <span>0393373094</span>
               </div>
               <div className="footer__contact-item">
                 <Mail size={14} />
-                <span>support@footballshop.vn</span>
+                <span>pvlinh25.2@gmail.com</span>
               </div>
               <div className="footer__contact-item">
                 <Clock size={14} />
@@ -64,12 +61,12 @@ export default function Footer() {
           <div className="footer__col">
             <h4 className="footer__heading">CHÍNH SÁCH</h4>
             <ul className="footer__links">
-              <li><a href="/chinh-sach/van-chuyen">Chính sách vận chuyển</a></li>
-              <li><a href="/chinh-sach/doi-tra">Chính sách đổi trả</a></li>
-              <li><a href="/chinh-sach/bao-mat">Chính sách bảo mật</a></li>
-              <li><a href="/chinh-sach/thanh-toan">Phương thức thanh toán</a></li>
-              <li><a href="/chinh-sach/bao-hanh">Chính sách bảo hành</a></li>
-              <li><a href="/dieu-khoan">Điều khoản sử dụng</a></li>
+              <li><Link to="/chinh-sach/van-chuyen">Chính sách vận chuyển</Link></li>
+              <li><Link to="/chinh-sach/doi-tra">Chính sách đổi trả</Link></li>
+              <li><Link to="/chinh-sach/bao-mat">Chính sách bảo mật</Link></li>
+              <li><Link to="/chinh-sach/thanh-toan">Phương thức thanh toán</Link></li>
+              <li><Link to="/chinh-sach/bao-hanh">Chính sách bảo hành</Link></li>
+              <li><Link to="/dieu-khoan">Điều khoản sử dụng</Link></li>
             </ul>
           </div>
 
@@ -77,12 +74,10 @@ export default function Footer() {
           <div className="footer__col">
             <h4 className="footer__heading">HỖ TRỢ KHÁCH HÀNG</h4>
             <ul className="footer__links">
-              <li><a href="/huong-dan/mua-hang">Hướng dẫn mua hàng</a></li>
-              <li><a href="/huong-dan/chon-size">Hướng dẫn chọn size</a></li>
-              <li><a href="/tra-cuu-don-hang">Tra cứu đơn hàng</a></li>
-              <li><a href="/faq">Câu hỏi thường gặp</a></li>
-              <li><a href="/lien-he">Liên hệ chúng tôi</a></li>
-              <li><a href="/he-thong-cua-hang">Hệ thống cửa hàng</a></li>
+              <li><Link to="/huong-dan-chon-size">Hướng dẫn chọn size</Link></li>
+              <li><Link to="/tra-cuu-don-hang">Tra cứu đơn hàng</Link></li>
+              <li><Link to="/faq">Câu hỏi thường gặp</Link></li>
+              <li><Link to="/lien-he">Liên hệ chúng tôi</Link></li>
             </ul>
           </div>
 
@@ -90,17 +85,17 @@ export default function Footer() {
           <div className="footer__col">
             <h4 className="footer__heading">KẾT NỐI VỚI CHÚNG TÔI</h4>
             <div className="footer__social">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="footer__social-btn footer__social-btn--fb" aria-label="Facebook">
+              <a href="https://www.facebook.com/Thomas.Pham.25" target="_blank" rel="noopener noreferrer" className="footer__social-btn footer__social-btn--fb" aria-label="Facebook">
                 <FacebookIcon />
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="footer__social-btn footer__social-btn--ig" aria-label="Instagram">
+              <a href="https://www.instagram.com/thomas_pham.25/" target="_blank" rel="noopener noreferrer" className="footer__social-btn footer__social-btn--ig" aria-label="Instagram">
                 <InstagramIcon />
               </a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="footer__social-btn footer__social-btn--yt" aria-label="YouTube">
+              <a href="https://www.youtube.com/@phamvanlinh2318" target="_blank" rel="noopener noreferrer" className="footer__social-btn footer__social-btn--yt" aria-label="YouTube">
                 <YoutubeIcon />
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="footer__social-btn footer__social-btn--tw" aria-label="Twitter">
-                <TwitterIcon />
+              <a href="https://zalo.me/0393373094" target="_blank" rel="noopener noreferrer" className="footer__social-btn footer__social-btn--tw" aria-label="Zalo">
+                <span style={{ fontSize: '10px', fontWeight: 'bold' }}>Zalo</span>
               </a>
             </div>
 
